@@ -86,6 +86,7 @@ def rebuild_dataframe():
         "Expenses": []
     }
 
+    # Process salary entries
     for entry in st.session_state.salary_entries:
         monthly_gross = entry["gross_income"] / 12
         pension_contribution = (entry["pension_contribution_percent"] / 100) * monthly_gross
@@ -109,7 +110,7 @@ def rebuild_dataframe():
 
         start_month += entry["num_months"]
 
-    start_month = 1
+    # Process expense entries
     for entry in st.session_state.expense_entries:
         for month in range(start_month, start_month + entry["num_months"]):
             if month in data["Month"]:
@@ -130,6 +131,20 @@ def rebuild_dataframe():
     # Add housing data to the DataFrame
     for entry in sorted(st.session_state.housing_entries, key=lambda x: x["month_acquisition"]):
         house_column = f"{entry['house_name']}"
+
+        # Ensure the "Month" list has at least the acquisition month
+        if not data["Month"]:
+            data["Month"].append(entry["month_acquisition"])
+            data["Years"].append(f"{entry['month_acquisition'] // 12} years, {entry['month_acquisition'] % 12} months")
+            data["Salary"].append(0)
+            data["Pension Deductions"].append(0)
+            data["Tax"].append(0)
+            data["National Insurance"].append(0)
+            data["Combined Pension Contribution"].append(0)
+            data["Take Home Pay"].append(0)
+            data["Expenses"].append(0)
+
+        # Initialize the house column with zeros to match the length of the "Month" list
         data[house_column] = [0] * len(data["Month"])
 
         mortgage_payments = None
@@ -156,6 +171,18 @@ def rebuild_dataframe():
                 if mortgage_payments and not (entry.get("sale", False) and month >= entry["month_sale"]):
                     data["Expenses"][index] += mortgage_payments[
                         min(month - entry["month_acquisition"], len(mortgage_payments) - 1)]
+            else:
+                # Append missing months with initial zero values for the house column
+                data["Month"].append(month)
+                data["Years"].append(f"{month // 12} years, {month % 12} months")
+                data[house_column].append(0)
+                data["Salary"].append(0)
+                data["Pension Deductions"].append(0)
+                data["Tax"].append(0)
+                data["National Insurance"].append(0)
+                data["Combined Pension Contribution"].append(0)
+                data["Take Home Pay"].append(0)
+                data["Expenses"].append(0)
 
     return pd.DataFrame(data)
 
