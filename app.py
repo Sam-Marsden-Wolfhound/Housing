@@ -45,6 +45,32 @@ def calculate_ni(gross_income):
     return gross_income * NI_RATE
 
 
+# Function to calculate mortgage payments
+def calculate_mortgage_payments(house_value, deposit, term_years, discounted_rate, discounted_period_months,
+                                standard_rate):
+    mortgage_amount = house_value - deposit
+    monthly_payments = []
+
+    # Calculate payments for discounted rate period
+    monthly_discounted_rate = discounted_rate / 100 / 12
+    discounted_payments = (mortgage_amount * monthly_discounted_rate) / (
+                1 - (1 + monthly_discounted_rate) ** -discounted_period_months)
+
+    for _ in range(discounted_period_months):
+        monthly_payments.append(discounted_payments)
+
+    # Calculate payments for the remaining period with the standard variable rate
+    remaining_months = term_years * 12 - discounted_period_months
+    monthly_standard_rate = standard_rate / 100 / 12
+    standard_payments = (mortgage_amount * monthly_standard_rate) / (
+                1 - (1 + monthly_standard_rate) ** -remaining_months)
+
+    for _ in range(remaining_months):
+        monthly_payments.append(standard_payments)
+
+    return monthly_payments
+
+
 # Function to rebuild the entire DataFrame
 def rebuild_dataframe():
     start_month = 1
@@ -106,6 +132,17 @@ def rebuild_dataframe():
         house_column = f"{entry['house_name']}"
         data[house_column] = [0] * len(data["Month"])
 
+        mortgage_payments = None
+        if entry.get("mortgage", False):
+            mortgage_payments = calculate_mortgage_payments(
+                entry["house_value"],
+                entry["deposit"],
+                entry["mortgage_term"],
+                entry["discounted_rate"],
+                entry["discounted_period"],
+                entry["standard_rate"]
+            )
+
         for month in range(entry["month_acquisition"], max(data["Month"]) + 1):
             if month in data["Month"]:
                 index = data["Month"].index(month)
@@ -114,6 +151,11 @@ def rebuild_dataframe():
                 if entry.get("sale", False) and month >= entry["month_sale"]:
                     appreciated_value = 0
                 data[house_column][index] = appreciated_value
+
+                # Apply mortgage payments
+                if mortgage_payments and not (entry.get("sale", False) and month >= entry["month_sale"]):
+                    data["Expenses"][index] += mortgage_payments[
+                        min(month - entry["month_acquisition"], len(mortgage_payments) - 1)]
 
     return pd.DataFrame(data)
 
@@ -224,6 +266,19 @@ elif selected_section == "Housing":
         new_month_sale = st.sidebar.number_input("Month of Sale", min_value=new_month_acquisition + 1,
                                                  value=new_month_acquisition + 12, key="month_sale")
 
+    mortgage = st.sidebar.checkbox("Mortgage", key="house_mortgage")
+    if mortgage:
+        deposit = st.sidebar.number_input("Deposit (£)", min_value=0, max_value=new_house_value, value=30000,
+                                          key="deposit")
+        mortgage_term = st.sidebar.number_input("Mortgage Term (Years)", min_value=1, max_value=40, value=25,
+                                                key="mortgage_term")
+        discounted_rate = st.sidebar.number_input("Discounted Interest Rate (%)", min_value=0.0, max_value=10.0,
+                                                  value=2.5, step=0.1, key="discounted_rate")
+        discounted_period = st.sidebar.number_input("Discounted Rate Period (Months)", min_value=1, max_value=60,
+                                                    value=24, key="discounted_period")
+        standard_rate = st.sidebar.number_input("Standard Variable Rate (%)", min_value=0.0, max_value=10.0, value=4.0,
+                                                step=0.1, key="standard_rate")
+
     if st.sidebar.button("Add House"):
         st.session_state.housing_entries.append({
             "house_name": new_house_name,
@@ -231,7 +286,13 @@ elif selected_section == "Housing":
             "month_acquisition": new_month_acquisition,
             "appreciation_rate": new_appreciation_rate,
             "sale": sale,
-            "month_sale": new_month_sale
+            "month_sale": new_month_sale,
+            "mortgage": mortgage,
+            "deposit": deposit if mortgage else 0,
+            "mortgage_term": mortgage_term if mortgage else 0,
+            "discounted_rate": discounted_rate if mortgage else 0,
+            "discounted_period": discounted_period if mortgage else 0,
+            "standard_rate": standard_rate if mortgage else 0
         })
         st.session_state.house_counter += 1
         st.session_state.df = rebuild_dataframe()
@@ -255,6 +316,22 @@ elif selected_section == "Housing":
                                                          "month_sale"] else updated_month_acquisition + 12,
                                                      key=f"month_sale_{i}")
 
+            updated_mortgage = st.checkbox("Mortgage", value=entry.get("mortgage", False), key=f"mortgage_{i}")
+            if updated_mortgage:
+                updated_deposit = st.number_input("Deposit (£)", min_value=0, max_value=updated_house_value,
+                                                  value=entry.get("deposit", 0), key=f"deposit_{i}")
+                updated_mortgage_term = st.number_input("Mortgage Term (Years)", min_value=1, max_value=40,
+                                                        value=entry.get("mortgage_term", 25), key=f"mortgage_term_{i}")
+                updated_discounted_rate = st.number_input("Discounted Interest Rate (%)", min_value=0.0, max_value=10.0,
+                                                          value=entry.get("discounted_rate", 2.5), step=0.1,
+                                                          key=f"discounted_rate_{i}")
+                updated_discounted_period = st.number_input("Discounted Rate Period (Months)", min_value=1,
+                                                            max_value=60, value=entry.get("discounted_period", 24),
+                                                            key=f"discounted_period_{i}")
+                updated_standard_rate = st.number_input("Standard Variable Rate (%)", min_value=0.0, max_value=10.0,
+                                                        value=entry.get("standard_rate", 4.0), step=0.1,
+                                                        key=f"standard_rate_{i}")
+
             if st.button(f"Save Changes for {entry['house_name']}"):
                 st.session_state.housing_entries[i] = {
                     "house_name": updated_house_name,
@@ -262,7 +339,13 @@ elif selected_section == "Housing":
                     "month_acquisition": updated_month_acquisition,
                     "appreciation_rate": updated_appreciation_rate,
                     "sale": updated_sale,
-                    "month_sale": updated_month_sale
+                    "month_sale": updated_month_sale,
+                    "mortgage": updated_mortgage,
+                    "deposit": updated_deposit if updated_mortgage else 0,
+                    "mortgage_term": updated_mortgage_term if updated_mortgage else 0,
+                    "discounted_rate": updated_discounted_rate if updated_mortgage else 0,
+                    "discounted_period": updated_discounted_period if updated_mortgage else 0,
+                    "standard_rate": updated_standard_rate if updated_mortgage else 0
                 }
                 st.session_state.df = rebuild_dataframe()
                 st.success(f"Updated data for {updated_house_name}.")
