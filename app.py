@@ -16,6 +16,8 @@ if "salary_entries" not in st.session_state:
     st.session_state.salary_entries = []
 if "expense_entries" not in st.session_state:
     st.session_state.expense_entries = []
+if "housing_entries" not in st.session_state:
+    st.session_state.housing_entries = []
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(columns=[
         "Month", "Years", "Salary", "Pension Deductions", "Tax", "National Insurance",
@@ -97,11 +99,25 @@ def rebuild_dataframe():
 
         start_month += entry["num_months"]
 
+    # Add housing data to the DataFrame
+    for entry in sorted(st.session_state.housing_entries, key=lambda x: x["month_acquisition"]):
+        house_column = f"House {entry['month_acquisition']}"
+        data[house_column] = [0] * len(data["Month"])
+
+        for month in range(entry["month_acquisition"], max(data["Month"]) + 1):
+            if month in data["Month"]:
+                index = data["Month"].index(month)
+                years_owned = (month - entry["month_acquisition"]) / 12
+                appreciated_value = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** years_owned
+                if entry.get("sale", False) and month >= entry["month_sale"]:
+                    appreciated_value = 0
+                data[house_column][index] = appreciated_value
+
     return pd.DataFrame(data)
 
 
-# Sidebar for salary and expenses with toggle capability
-selected_section = st.sidebar.radio("Select Section", ("Salary", "Expenses"))
+# Sidebar for salary, expenses, and housing with toggle capability
+selected_section = st.sidebar.radio("Select Section", ("Salary", "Expenses", "Housing"))
 
 if selected_section == "Salary":
     st.sidebar.header("Add New Salary Entry")
@@ -190,6 +206,43 @@ elif selected_section == "Expenses":
                 st.success(f"Deleted data for Expense Entry {i + 1}.")
                 break
 
+elif selected_section == "Housing":
+    st.sidebar.header("Add New Housing Entry")
+    new_house_value = st.sidebar.number_input("House Value (£)", min_value=50000, max_value=2000000, value=300000,
+                                              key="house_value")
+    new_month_acquisition = st.sidebar.number_input("Month of Acquisition", min_value=1, value=1,
+                                                    key="month_acquisition")
+    new_appreciation_rate = st.sidebar.number_input("Yearly Property Appreciation (%)", min_value=0.0, max_value=20.0,
+                                                    value=5.0, step=0.1, key="appreciation_rate")
+    sale = st.sidebar.checkbox("Sale", key="house_sale")
+    new_month_sale = None
+    if sale:
+        new_month_sale = st.sidebar.number_input("Month of Sale", min_value=new_month_acquisition + 1,
+                                                 value=new_month_acquisition + 12, key="month_sale")
+
+    if st.sidebar.button("Add House"):
+        st.session_state.housing_entries.append({
+            "house_value": new_house_value,
+            "month_acquisition": new_month_acquisition,
+            "appreciation_rate": new_appreciation_rate,
+            "sale": sale,
+            "month_sale": new_month_sale
+        })
+        st.session_state.df = rebuild_dataframe()
+
+    # Housing entries in an ordered list
+    for i, entry in enumerate(sorted(st.session_state.housing_entries, key=lambda x: x["month_acquisition"])):
+        with st.sidebar.expander(f"House Acquired Month {entry['month_acquisition']}: £{entry['house_value']}"):
+            st.write(f"Acquisition Month: {entry['month_acquisition']}")
+            st.write(f"Appreciation Rate: {entry['appreciation_rate']}% per year")
+            if entry["sale"]:
+                st.write(f"Month of Sale: {entry['month_sale']}")
+            if st.button(f"Delete House Entry {i + 1}"):
+                st.session_state.housing_entries.pop(i)
+                st.session_state.df = rebuild_dataframe()
+                st.success(f"Deleted house entry for acquisition month {entry['month_acquisition']}.")
+                break
+
 # Displaying the DataFrame
 st.write("### Monthly Financial Overview")
 st.write(st.session_state.df)
@@ -197,8 +250,7 @@ st.write(st.session_state.df)
 # Selecting columns to display on the graph
 columns_to_display = st.multiselect(
     "Select columns to display on the graph",
-    options=["Salary", "Pension Deductions", "Tax", "National Insurance", "Combined Pension Contribution",
-             "Take Home Pay", "Expenses"],
+    options=st.session_state.df.columns,
     default=["Salary", "Take Home Pay", "Expenses"]
 )
 
