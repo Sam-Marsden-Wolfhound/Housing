@@ -18,6 +18,8 @@ if "expense_entries" not in st.session_state:
     st.session_state.expense_entries = []
 if "housing_entries" not in st.session_state:
     st.session_state.housing_entries = []
+if "house_counter" not in st.session_state:
+    st.session_state.house_counter = 1
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(columns=[
         "Month", "Years", "Salary", "Pension Deductions", "Tax", "National Insurance",
@@ -101,7 +103,7 @@ def rebuild_dataframe():
 
     # Add housing data to the DataFrame
     for entry in sorted(st.session_state.housing_entries, key=lambda x: x["month_acquisition"]):
-        house_column = f"House {entry['month_acquisition']}"
+        house_column = f"{entry['house_name']}"
         data[house_column] = [0] * len(data["Month"])
 
         for month in range(entry["month_acquisition"], max(data["Month"]) + 1):
@@ -208,6 +210,8 @@ elif selected_section == "Expenses":
 
 elif selected_section == "Housing":
     st.sidebar.header("Add New Housing Entry")
+    new_house_name = st.sidebar.text_input("House Name", value=f"House {st.session_state.house_counter}",
+                                           key="house_name")
     new_house_value = st.sidebar.number_input("House Value (£)", min_value=50000, max_value=2000000, value=300000,
                                               key="house_value")
     new_month_acquisition = st.sidebar.number_input("Month of Acquisition", min_value=1, value=1,
@@ -222,25 +226,51 @@ elif selected_section == "Housing":
 
     if st.sidebar.button("Add House"):
         st.session_state.housing_entries.append({
+            "house_name": new_house_name,
             "house_value": new_house_value,
             "month_acquisition": new_month_acquisition,
             "appreciation_rate": new_appreciation_rate,
             "sale": sale,
             "month_sale": new_month_sale
         })
+        st.session_state.house_counter += 1
         st.session_state.df = rebuild_dataframe()
 
     # Housing entries in an ordered list
     for i, entry in enumerate(sorted(st.session_state.housing_entries, key=lambda x: x["month_acquisition"])):
-        with st.sidebar.expander(f"House Acquired Month {entry['month_acquisition']}: £{entry['house_value']}"):
-            st.write(f"Acquisition Month: {entry['month_acquisition']}")
-            st.write(f"Appreciation Rate: {entry['appreciation_rate']}% per year")
-            if entry["sale"]:
-                st.write(f"Month of Sale: {entry['month_sale']}")
-            if st.button(f"Delete House Entry {i + 1}"):
+        with st.sidebar.expander(f"{entry['house_name']} (Acquired Month {entry['month_acquisition']})"):
+            updated_house_name = st.text_input("House Name", value=entry['house_name'], key=f"house_name_{i}")
+            updated_house_value = st.number_input("House Value (£)", min_value=50000, max_value=2000000,
+                                                  value=entry['house_value'], key=f"house_value_{i}")
+            updated_month_acquisition = st.number_input("Month of Acquisition", min_value=1,
+                                                        value=entry['month_acquisition'], key=f"month_acquisition_{i}")
+            updated_appreciation_rate = st.number_input("Yearly Property Appreciation (%)", min_value=0.0,
+                                                        max_value=20.0, value=entry['appreciation_rate'], step=0.1,
+                                                        key=f"appreciation_rate_{i}")
+            updated_sale = st.checkbox("Sale", value=entry["sale"], key=f"sale_{i}")
+            updated_month_sale = entry["month_sale"]
+            if updated_sale:
+                updated_month_sale = st.number_input("Month of Sale", min_value=updated_month_acquisition + 1,
+                                                     value=entry["month_sale"] if entry[
+                                                         "month_sale"] else updated_month_acquisition + 12,
+                                                     key=f"month_sale_{i}")
+
+            if st.button(f"Save Changes for {entry['house_name']}"):
+                st.session_state.housing_entries[i] = {
+                    "house_name": updated_house_name,
+                    "house_value": updated_house_value,
+                    "month_acquisition": updated_month_acquisition,
+                    "appreciation_rate": updated_appreciation_rate,
+                    "sale": updated_sale,
+                    "month_sale": updated_month_sale
+                }
+                st.session_state.df = rebuild_dataframe()
+                st.success(f"Updated data for {updated_house_name}.")
+
+            if st.button(f"Delete {entry['house_name']}"):
                 st.session_state.housing_entries.pop(i)
                 st.session_state.df = rebuild_dataframe()
-                st.success(f"Deleted house entry for acquisition month {entry['month_acquisition']}.")
+                st.success(f"Deleted {entry['house_name']}.")
                 break
 
 # Displaying the DataFrame
