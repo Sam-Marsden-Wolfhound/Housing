@@ -18,7 +18,7 @@ if "expense_entries" not in st.session_state:
     st.session_state.expense_entries = []
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(columns=[
-        "Month", "Salary", "Pension Deductions", "Tax", "National Insurance",
+        "Month", "Years", "Salary", "Pension Deductions", "Tax", "National Insurance",
         "Combined Pension Contribution", "Take Home Pay", "Expenses"
     ])
 
@@ -46,6 +46,7 @@ def rebuild_dataframe():
     start_month = 1
     data = {
         "Month": [],
+        "Years": [],
         "Salary": [],
         "Pension Deductions": [],
         "Tax": [],
@@ -67,6 +68,7 @@ def rebuild_dataframe():
             take_home_pay = monthly_gross - pension_contribution - tax - ni
 
             data["Month"].append(month)
+            data["Years"].append(f"{month // 12} years, {month % 12} months")
             data["Salary"].append(monthly_gross)
             data["Pension Deductions"].append(pension_contribution)
             data["Tax"].append(tax)
@@ -84,6 +86,7 @@ def rebuild_dataframe():
                 data["Expenses"][data["Month"].index(month)] += entry["monthly_expense"]
             else:
                 data["Month"].append(month)
+                data["Years"].append(f"{month // 12} years, {month % 12} months")
                 data["Salary"].append(0)
                 data["Pension Deductions"].append(0)
                 data["Tax"].append(0)
