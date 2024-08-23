@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 
 # Constants for UK 2024 tax and NI rates
@@ -45,11 +46,14 @@ def calculate_ni(gross_income):
     return gross_income * NI_RATE
 
 
-# Function to calculate mortgage payments
+# Function to calculate mortgage payments and other mortgage-related data
 def calculate_mortgage_payments(house_value, deposit, term_years, discounted_rate, discounted_period_months,
                                 standard_rate):
     mortgage_amount = house_value - deposit
     monthly_payments = []
+    monthly_interest_paid = []
+    remaining_debt = mortgage_amount
+    equity = deposit
 
     # Calculate payments for discounted rate period
     monthly_discounted_rate = discounted_rate / 100 / 12
@@ -57,18 +61,28 @@ def calculate_mortgage_payments(house_value, deposit, term_years, discounted_rat
                 1 - (1 + monthly_discounted_rate) ** -discounted_period_months)
 
     for _ in range(discounted_period_months):
+        interest_payment = remaining_debt * monthly_discounted_rate
+        principal_payment = discounted_payments - interest_payment
+        remaining_debt -= principal_payment
+        equity += principal_payment
         monthly_payments.append(discounted_payments)
+        monthly_interest_paid.append(interest_payment)
 
     # Calculate payments for the remaining period with the standard variable rate
     remaining_months = term_years * 12 - discounted_period_months
     monthly_standard_rate = standard_rate / 100 / 12
-    standard_payments = (mortgage_amount * monthly_standard_rate) / (
+    standard_payments = (remaining_debt * monthly_standard_rate) / (
                 1 - (1 + monthly_standard_rate) ** -remaining_months)
 
     for _ in range(remaining_months):
+        interest_payment = remaining_debt * monthly_standard_rate
+        principal_payment = standard_payments - interest_payment
+        remaining_debt -= principal_payment
+        equity += principal_payment
         monthly_payments.append(standard_payments)
+        monthly_interest_paid.append(interest_payment)
 
-    return monthly_payments
+    return monthly_payments, monthly_interest_paid, equity, remaining_debt
 
 
 # Function to rebuild the entire DataFrame
@@ -144,12 +158,20 @@ def rebuild_dataframe():
             data["Take Home Pay"].append(0)
             data["Expenses"].append(0)
 
-        # Initialize the house column with zeros to match the length of the "Month" list
+        # Initialize the columns for this house
         data[house_column] = [0] * len(data["Month"])
+        data[f"Monthly payments for {house_column}"] = [0] * len(data["Month"])
+        data[f"Monthly interest paid for {house_column}"] = [0] * len(data["Month"])
+        data[f"Equity for {house_column}"] = [0] * len(data["Month"])
+        data[f"Remaining debt for {house_column}"] = [0] * len(data["Month"])
 
         mortgage_payments = None
+        monthly_interest_paid = None
+        equity = 0
+        remaining_debt = entry["house_value"] - entry.get("deposit", 0)
+
         if entry.get("mortgage", False):
-            mortgage_payments = calculate_mortgage_payments(
+            mortgage_payments, monthly_interest_paid, equity, remaining_debt = calculate_mortgage_payments(
                 entry["house_value"],
                 entry["deposit"],
                 entry["mortgage_term"],
@@ -167,15 +189,24 @@ def rebuild_dataframe():
                     appreciated_value = 0
                 data[house_column][index] = appreciated_value
 
-                # Apply mortgage payments
+                # Apply mortgage payments and update related columns
                 if mortgage_payments and not (entry.get("sale", False) and month >= entry["month_sale"]):
-                    data["Expenses"][index] += mortgage_payments[
+                    data[f"Monthly payments for {house_column}"][index] = mortgage_payments[
                         min(month - entry["month_acquisition"], len(mortgage_payments) - 1)]
+                    data[f"Monthly interest paid for {house_column}"][index] = monthly_interest_paid[
+                        min(month - entry["month_acquisition"], len(monthly_interest_paid) - 1)]
+                    data[f"Equity for {house_column}"][index] = equity
+                    data[f"Remaining debt for {house_column}"][index] = remaining_debt
+                    data["Expenses"][index] += data[f"Monthly payments for {house_column}"][index]
             else:
                 # Append missing months with initial zero values for the house column
                 data["Month"].append(month)
                 data["Years"].append(f"{month // 12} years, {month % 12} months")
                 data[house_column].append(0)
+                data[f"Monthly payments for {house_column}"].append(0)
+                data[f"Monthly interest paid for {house_column}"].append(0)
+                data[f"Equity for {house_column}"].append(equity)
+                data[f"Remaining debt for {house_column}"].append(remaining_debt)
                 data["Salary"].append(0)
                 data["Pension Deductions"].append(0)
                 data["Tax"].append(0)
