@@ -97,93 +97,95 @@ def rebuild_dataframe():
     return pd.DataFrame(data)
 
 
-# Sidebar inputs for adding a new salary entry
-st.sidebar.header("Add New Salary Entry")
-new_gross_income = st.sidebar.number_input("Gross Annual Income (£)", min_value=10000, max_value=500000, value=40000,
-                                           key="salary_income")
-new_pension_contribution_percent = st.sidebar.slider("Your Pension Contribution (%)", min_value=0, max_value=100,
-                                                     value=5, key="salary_pension")
-new_company_match_percent = st.sidebar.slider("Company Pension Match (%)", min_value=0, max_value=100, value=5,
-                                              key="salary_match")
-new_num_months = st.sidebar.number_input("Number of Months", min_value=1, value=12, key="salary_months")
+# Sidebar for salary and expenses with toggle capability
+selected_section = st.sidebar.radio("Select Section", ("Salary", "Expenses"))
 
-if st.sidebar.button("Add Salary"):
-    st.session_state.salary_entries.append({
-        "gross_income": new_gross_income,
-        "pension_contribution_percent": new_pension_contribution_percent,
-        "company_match_percent": new_company_match_percent,
-        "num_months": new_num_months
-    })
-    st.session_state.df = rebuild_dataframe()
+if selected_section == "Salary":
+    st.sidebar.header("Add New Salary Entry")
+    new_gross_income = st.sidebar.number_input("Gross Annual Income (£)", min_value=10000, max_value=500000,
+                                               value=40000, key="salary_income")
+    new_pension_contribution_percent = st.sidebar.slider("Your Pension Contribution (%)", min_value=0, max_value=100,
+                                                         value=5, key="salary_pension")
+    new_company_match_percent = st.sidebar.slider("Company Pension Match (%)", min_value=0, max_value=100, value=5,
+                                                  key="salary_match")
+    new_num_months = st.sidebar.number_input("Number of Months", min_value=1, value=12, key="salary_months")
+    if st.sidebar.button("Add Salary"):
+        st.session_state.salary_entries.append({
+            "gross_income": new_gross_income,
+            "pension_contribution_percent": new_pension_contribution_percent,
+            "company_match_percent": new_company_match_percent,
+            "num_months": new_num_months
+        })
+        st.session_state.df = rebuild_dataframe()
 
-# Sidebar salary entries in collapsible sections
-for i, entry in enumerate(st.session_state.salary_entries):
-    with st.sidebar.expander(f"Salary Entry {i + 1}: £{entry['gross_income']} for {entry['num_months']} months"):
-        updated_gross_income = st.number_input(f"Gross Annual Income (£) for Entry {i + 1}",
-                                               min_value=10000, max_value=500000, value=entry['gross_income'],
-                                               key=f"gross_income_{i}")
-        updated_pension_contribution_percent = st.slider(f"Your Pension Contribution (%) for Entry {i + 1}",
-                                                         min_value=0, max_value=100,
-                                                         value=entry['pension_contribution_percent'],
-                                                         key=f"pension_{i}")
-        updated_company_match_percent = st.slider(f"Company Pension Match (%) for Entry {i + 1}",
-                                                  min_value=0, max_value=100, value=entry['company_match_percent'],
-                                                  key=f"company_{i}")
-        updated_num_months = st.number_input(f"Number of Months for Entry {i + 1}",
-                                             min_value=1, value=entry['num_months'], key=f"num_months_{i}")
+    # Salary entries in collapsible sections
+    for i, entry in enumerate(st.session_state.salary_entries):
+        with st.sidebar.expander(f"Salary Entry {i + 1}: £{entry['gross_income']} for {entry['num_months']} months"):
+            updated_gross_income = st.number_input(f"Gross Annual Income (£) for Entry {i + 1}",
+                                                   min_value=10000, max_value=500000, value=entry['gross_income'],
+                                                   key=f"gross_income_{i}")
+            updated_pension_contribution_percent = st.slider(f"Your Pension Contribution (%) for Entry {i + 1}",
+                                                             min_value=0, max_value=100,
+                                                             value=entry['pension_contribution_percent'],
+                                                             key=f"pension_{i}")
+            updated_company_match_percent = st.slider(f"Company Pension Match (%) for Entry {i + 1}",
+                                                      min_value=0, max_value=100, value=entry['company_match_percent'],
+                                                      key=f"company_{i}")
+            updated_num_months = st.number_input(f"Number of Months for Entry {i + 1}",
+                                                 min_value=1, value=entry['num_months'], key=f"num_months_{i}")
 
-        if st.button(f"Save Changes for Entry {i + 1}"):
-            st.session_state.salary_entries[i] = {
-                "gross_income": updated_gross_income,
-                "pension_contribution_percent": updated_pension_contribution_percent,
-                "company_match_percent": updated_company_match_percent,
-                "num_months": updated_num_months
-            }
-            st.session_state.df = rebuild_dataframe()
-            st.success(f"Updated data for Entry {i + 1}.")
+            if st.button(f"Save Changes for Entry {i + 1}"):
+                st.session_state.salary_entries[i] = {
+                    "gross_income": updated_gross_income,
+                    "pension_contribution_percent": updated_pension_contribution_percent,
+                    "company_match_percent": updated_company_match_percent,
+                    "num_months": updated_num_months
+                }
+                st.session_state.df = rebuild_dataframe()
+                st.success(f"Updated data for Entry {i + 1}.")
 
-        if st.button(f"Delete Salary Entry {i + 1}"):
-            st.session_state.salary_entries.pop(i)
-            st.session_state.df = rebuild_dataframe()
-            st.success(f"Deleted data for Entry {i + 1}.")
-            break
+            if st.button(f"Delete Salary Entry {i + 1}"):
+                st.session_state.salary_entries.pop(i)
+                st.session_state.df = rebuild_dataframe()
+                st.success(f"Deleted data for Entry {i + 1}.")
+                break
 
-# Sidebar inputs for adding a new expense entry
-st.sidebar.header("Add New Expense Entry")
-new_monthly_expense = st.sidebar.number_input("Monthly Expense (£)", min_value=0, max_value=20000, value=1000,
-                                              key="expense_amount")
-new_expense_num_months = st.sidebar.number_input("Number of Months", min_value=1, value=12, key="expense_months")
+elif selected_section == "Expenses":
+    st.sidebar.header("Add New Expense Entry")
+    new_monthly_expense = st.sidebar.number_input("Monthly Expense (£)", min_value=0, max_value=20000, value=1000,
+                                                  key="expense_amount")
+    new_expense_num_months = st.sidebar.number_input("Number of Months", min_value=1, value=12, key="expense_months")
+    if st.sidebar.button("Add Expense"):
+        st.session_state.expense_entries.append({
+            "monthly_expense": new_monthly_expense,
+            "num_months": new_expense_num_months
+        })
+        st.session_state.df = rebuild_dataframe()
 
-if st.sidebar.button("Add Expense"):
-    st.session_state.expense_entries.append({
-        "monthly_expense": new_monthly_expense,
-        "num_months": new_expense_num_months
-    })
-    st.session_state.df = rebuild_dataframe()
+    # Expense entries in collapsible sections
+    for i, entry in enumerate(st.session_state.expense_entries):
+        with st.sidebar.expander(
+                f"Expense Entry {i + 1}: £{entry['monthly_expense']} for {entry['num_months']} months"):
+            updated_monthly_expense = st.number_input(f"Monthly Expense (£) for Entry {i + 1}",
+                                                      min_value=0, max_value=20000, value=entry['monthly_expense'],
+                                                      key=f"monthly_expense_{i}")
+            updated_expense_num_months = st.number_input(f"Number of Months for Entry {i + 1}",
+                                                         min_value=1, value=entry['num_months'],
+                                                         key=f"expense_num_months_{i}")
 
-# Sidebar expense entries in collapsible sections
-for i, entry in enumerate(st.session_state.expense_entries):
-    with st.sidebar.expander(f"Expense Entry {i + 1}: £{entry['monthly_expense']} for {entry['num_months']} months"):
-        updated_monthly_expense = st.number_input(f"Monthly Expense (£) for Entry {i + 1}",
-                                                  min_value=0, max_value=20000, value=entry['monthly_expense'],
-                                                  key=f"monthly_expense_{i}")
-        updated_expense_num_months = st.number_input(f"Number of Months for Entry {i + 1}",
-                                                     min_value=1, value=entry['num_months'],
-                                                     key=f"expense_num_months_{i}")
+            if st.button(f"Save Changes for Expense Entry {i + 1}"):
+                st.session_state.expense_entries[i] = {
+                    "monthly_expense": updated_monthly_expense,
+                    "num_months": updated_expense_num_months
+                }
+                st.session_state.df = rebuild_dataframe()
+                st.success(f"Updated data for Expense Entry {i + 1}.")
 
-        if st.button(f"Save Changes for Expense Entry {i + 1}"):
-            st.session_state.expense_entries[i] = {
-                "monthly_expense": updated_monthly_expense,
-                "num_months": updated_expense_num_months
-            }
-            st.session_state.df = rebuild_dataframe()
-            st.success(f"Updated data for Expense Entry {i + 1}.")
-
-        if st.button(f"Delete Expense Entry {i + 1}"):
-            st.session_state.expense_entries.pop(i)
-            st.session_state.df = rebuild_dataframe()
-            st.success(f"Deleted data for Expense Entry {i + 1}.")
-            break
+            if st.button(f"Delete Expense Entry {i + 1}"):
+                st.session_state.expense_entries.pop(i)
+                st.session_state.df = rebuild_dataframe()
+                st.success(f"Deleted data for Expense Entry {i + 1}.")
+                break
 
 # Displaying the DataFrame
 st.write("### Monthly Financial Overview")
