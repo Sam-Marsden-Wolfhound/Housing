@@ -1,55 +1,70 @@
 import streamlit as st
-import pandas as pd
-import logging
+from dataframe_builder import DataFrameBuilder
+
 
 class SalaryUI:
     def display(self, df_builder):
-        logging.info("Displaying Salary UI...")
-        st.header("Salary Input")
-        gross_income = st.number_input("Gross Annual Income", min_value=0, step=1000)
-        pension_contribution_percent = st.number_input("Pension Contribution (%)", min_value=0.0, max_value=100.0, step=0.5)
-        company_match_percent = st.number_input("Company Match (%)", min_value=0.0, max_value=100.0, step=0.5)
-        num_months = st.number_input("Number of Months", min_value=1, step=1)
+        st.header("Salary Inputs")
+        gross_income = st.number_input("Gross Income", min_value=0, step=1000, key="salary_gross_income")
+        pension_contribution_percent = st.number_input("Pension Contribution (%)", min_value=0, max_value=100, step=1,
+                                                       key="pension_contribution_percent")
+        company_match_percent = st.number_input("Company Match (%)", min_value=0, max_value=100, step=1,
+                                                key="company_match_percent")
+        num_months = st.number_input("Number of Months", min_value=1, step=1, key="salary_num_months")
 
-        if st.button("Add Salary"):
-            df_builder.financial_entry.add_salary_entry(gross_income, pension_contribution_percent,
-                                                        company_match_percent, num_months)
-            st.session_state.df = df_builder.rebuild_dataframe()
-            st.write(st.session_state.df)
+        if st.button("Add Salary", key="add_salary"):
+            st.session_state.df = df_builder.add_salary_entry(
+                gross_income,
+                pension_contribution_percent,
+                company_match_percent,
+                num_months
+            )
+            st.success("Salary added successfully")
+
 
 class ExpensesUI:
     def display(self, df_builder):
-        logging.info("Displaying Expenses UI...")
-        st.header("Expenses Input")
-        monthly_expense = st.number_input("Monthly Expense", min_value=0, step=100)
-        start_month = st.number_input("Start Month", min_value=1, step=1)
-        num_months = st.number_input("Number of Months", min_value=1, step=1)
+        st.header("Expenses Inputs")
+        monthly_expense = st.number_input("Monthly Expense", min_value=0, step=100, key="monthly_expense")
+        num_months = st.number_input("Number of Months", min_value=1, step=1, key="expenses_num_months")
 
-        if st.button("Add Expense"):
-            df_builder.financial_entry.add_expense_entry(monthly_expense, start_month, num_months)
-            st.session_state.df = df_builder.rebuild_dataframe()
-            st.write(st.session_state.df)
+        if st.button("Add Expense", key="add_expense"):
+            st.session_state.df = df_builder.add_expense_entry(monthly_expense, num_months)
+            st.success("Expense added successfully")
+
 
 class HousingUI:
     def display(self, df_builder):
-        logging.info("Displaying Housing UI...")
-        st.header("Housing Input")
+        st.header("Housing Inputs")
 
-        if "house_counter" not in st.session_state:
+        if 'house_counter' not in st.session_state:
             st.session_state.house_counter = 1
 
         new_house_name = st.sidebar.text_input("House Name", value=f"House {st.session_state.house_counter}")
-        house_value = st.number_input("House Value", min_value=0, step=1000)
-        deposit = st.number_input("Deposit", min_value=0, step=1000)
-        mortgage_term = st.number_input("Mortgage Term (years)", min_value=1, step=1)
-        standard_rate = st.number_input("Standard Rate (%)", min_value=0.0, max_value=100.0, step=0.5)
-        appreciation_rate = st.number_input("Appreciation Rate (%)", min_value=0.0, max_value=100.0, step=0.5)
-        month_acquisition = st.number_input("Month of Acquisition", min_value=1, step=1)
-        mortgage = st.checkbox("Mortgage", value=True)
+        house_value = st.number_input("House Value", min_value=0, step=1000,
+                                      key=f"house_value_{st.session_state.house_counter}")
+        deposit = st.number_input("Deposit", min_value=0, step=1000, key=f"deposit_{st.session_state.house_counter}")
+        mortgage_term = st.number_input("Mortgage Term (years)", min_value=0, step=1,
+                                        key=f"mortgage_term_{st.session_state.house_counter}")
+        interest_rate = st.number_input("Interest Rate (%)", min_value=0.0, step=0.1,
+                                        key=f"interest_rate_{st.session_state.house_counter}")
+        appreciation_rate = st.number_input("Appreciation Rate (%)", min_value=0.0, step=0.1,
+                                            key=f"appreciation_rate_{st.session_state.house_counter}")
+        month_acquisition = st.number_input("Month of Acquisition", min_value=0, step=1,
+                                            key=f"month_acquisition_{st.session_state.house_counter}")
+        mortgage = st.checkbox("Mortgage", key=f"mortgage_{st.session_state.house_counter}")
 
-        if st.button("Add House"):
-            df_builder.financial_entry.add_housing_entry(new_house_name, house_value, deposit, mortgage_term,
-                                                         standard_rate, appreciation_rate, month_acquisition, mortgage)
-            st.session_state.df = df_builder.rebuild_dataframe()
-            st.write(st.session_state.df)
+        if st.button("Add House", key=f"add_house_{st.session_state.house_counter}"):
+            st.session_state.df = df_builder.add_house_entry(
+                new_house_name,
+                house_value,
+                deposit,
+                mortgage_term,
+                interest_rate,
+                appreciation_rate,
+                month_acquisition,
+                mortgage
+            )
             st.session_state.house_counter += 1
+            st.success("House added successfully")
+
