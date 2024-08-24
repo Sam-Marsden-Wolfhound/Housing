@@ -4,8 +4,8 @@ from financial_entry import FinancialEntry
 from mortgage_calculator import MortgageCalculator
 
 class DataFrameBuilder:
-    def __init__(self):
-        self.financial_entry = FinancialEntry()
+    def __init__(self, financial_entry):
+        self.financial_entry = financial_entry
 
     def rebuild_dataframe(self):
         logging.info("Starting to rebuild DataFrame...")
