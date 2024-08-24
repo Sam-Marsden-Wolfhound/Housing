@@ -4,11 +4,11 @@ from financial_entry import FinancialEntry
 from mortgage_calculator import MortgageCalculator
 
 class DataFrameBuilder:
-    def __init__(self, financial_entry):
+    def __init__(self, financial_entry: FinancialEntry):
         self.financial_entry = financial_entry
 
-    def rebuild_dataframe(self):
-        logging.info("Starting to rebuild DataFrame...")
+    def build_empty_dataframe(self):
+        logging.info("Building an empty DataFrame...")
         data = {
             "Month": [],
             "Years": [],
@@ -20,9 +20,14 @@ class DataFrameBuilder:
             "Take Home Pay": [],
             "Expenses": []
         }
+        return pd.DataFrame(data)
+
+    def rebuild_dataframe(self):
+        logging.info("Starting to rebuild DataFrame...")
+        data = self.build_empty_dataframe()
 
         def extend_existing_columns_to_length(target_length):
-            for key in data.keys():
+            for key in data.columns:
                 if len(data[key]) < target_length:
                     difference = target_length - len(data[key])
                     data[key].extend([0] * difference)

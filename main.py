@@ -1,20 +1,22 @@
 import streamlit as st
-from ui import SalaryUI, ExpensesUI, HousingUI
 from dataframe_builder import DataFrameBuilder
 from financial_entry import FinancialEntry
+from ui import SalaryUI, ExpensesUI, HousingUI
+
 
 def main():
-    # Initialize session state
+    st.set_page_config(page_title="Personal Finance App", layout="wide")
+
+    # Initialize the financial entry and DataFrame builder
+    financial_entry = FinancialEntry()
+    df_builder = DataFrameBuilder(financial_entry)
+
+    # Initial empty DataFrame
     if "df" not in st.session_state:
-        # Pass the FinancialEntry instance when creating DataFrameBuilder
-        st.session_state.df = DataFrameBuilder(FinancialEntry()).build_empty_dataframe()
+        st.session_state.df = df_builder.build_empty_dataframe()
 
-    # Create an instance of DataFrameBuilder with FinancialEntry
-    df_builder = DataFrameBuilder(FinancialEntry())
-
-    st.title("Personal Financial Dashboard")
-
-    selected_section = st.sidebar.radio("Navigate", ("Salary", "Expenses", "Housing"))
+    # Sidebar for salary, expenses, and housing with toggle capability
+    selected_section = st.sidebar.radio("Select Section", ("Salary", "Expenses", "Housing"))
 
     if selected_section == "Salary":
         SalaryUI().display(df_builder)
@@ -23,18 +25,25 @@ def main():
     elif selected_section == "Housing":
         HousingUI().display(df_builder)
 
-    st.write("### Data Overview")
-    st.dataframe(st.session_state.df)
+    # Displaying the DataFrame
+    st.write("### Monthly Financial Overview")
+    st.write(st.session_state.df)
 
-    st.write("### Graphical Analysis")
+    # Selecting columns to display on the graph
     columns_to_display = st.multiselect(
         "Select columns to display on the graph",
         options=st.session_state.df.columns,
         default=["Salary", "Take Home Pay", "Expenses"]
     )
 
-    if len(st.session_state.df) > 0 and columns_to_display:
-        st.line_chart(st.session_state.df[columns_to_display])
+    # Plotting the results
+    st.write("### Monthly Breakdown Graph")
+
+    if len(st.session_state.df) > 0:
+        st.line_chart(st.session_state.df.set_index("Month")[columns_to_display])
+    else:
+        st.write("No data available for graphing.")
+
 
 if __name__ == "__main__":
     main()
