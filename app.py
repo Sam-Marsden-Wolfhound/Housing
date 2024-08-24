@@ -45,33 +45,24 @@ def calculate_tax(gross_income):
 def calculate_ni(gross_income):
     return gross_income * NI_RATE
 
-
-# Function to calculate mortgage monthly payment, total repayment, borrowed capital, and total interest
-def calculate_mortgage(property_price, deposit, mortgage_term, interest_rate):
-    borrowed_capital = property_price - deposit
-    monthly_interest_rate = interest_rate / 12
-    number_of_payments = mortgage_term * 12
-    monthly_payment = (borrowed_capital * monthly_interest_rate) / \
-                      (1 - (1 + monthly_interest_rate) ** -number_of_payments)
-    total_repayment = monthly_payment * number_of_payments
-    total_interest = total_repayment - borrowed_capital
-    return {
-        "total_repayment": total_repayment,
-        "borrowed_capital": borrowed_capital,
-        "total_interest": total_interest,
-        "monthly_payment": monthly_payment,
-    }
-
-
 # Function to calculate mortgage schedule
 def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
-    mortgage_details = calculate_mortgage(property_price, deposit, mortgage_term, interest_rate)
-    monthly_payment = mortgage_details['monthly_payment']
-    borrowed_capital = mortgage_details['borrowed_capital']
+    # print('property_price', property_price)
+    # print('deposit', deposit)
+    # print('mortgage_term', mortgage_term)
+    # print('interest_rate', interest_rate)
+
+    # Borrowed capital
+    borrowed_capital = property_price - deposit
+    # Monthly interest rate
+    monthly_interest_rate = interest_rate / 12
+    # Number of monthly payments
+    number_of_payments = mortgage_term * 12
+    # Monthly payment calculation
+    monthly_payment = (borrowed_capital * monthly_interest_rate) / \
+                      (1 - (1 + monthly_interest_rate) ** -number_of_payments)
 
     months = []
-    equity_delta = []
-    equity = []
     payments = []
     interest_loss = []
     remaining_balances = []
@@ -79,20 +70,15 @@ def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
     remaining_balance = borrowed_capital
     for month in range(1, mortgage_term * 12 + 1):
         months.append(month)
-        interest_payment = remaining_balance * (interest_rate / 12)
+        interest_payment = remaining_balance * monthly_interest_rate
         principal_payment = monthly_payment - interest_payment
         remaining_balance -= principal_payment
-
-        equity_delta.append(principal_payment)
-        equity.append(property_price - remaining_balance)
         payments.append(monthly_payment)
         interest_loss.append(interest_payment)
         remaining_balances.append(remaining_balance)
 
     df = pd.DataFrame({
         "Month": months,
-        "Equity Delta": equity_delta,
-        "Equity": equity,
         "Monthly Payment": payments,
         "Interest Payment": interest_loss,
         "Remaining Balance": remaining_balances
@@ -188,6 +174,7 @@ def rebuild_dataframe():
             mortgage_term=entry["mortgage_term"],
             interest_rate=entry["standard_rate"]  # Use standard rate for simplicity
         )
+        print('mortgage_df', mortgage_df)
 
         for i, month in enumerate(range(entry["month_acquisition"], entry["month_acquisition"] + len(mortgage_df))):
             if month in data["Month"]:
