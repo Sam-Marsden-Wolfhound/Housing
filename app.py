@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import logging
+
+# Set up logging
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 # Constants for UK 2024 tax and NI rates
 PERSONAL_ALLOWANCE = 12570
@@ -22,7 +26,7 @@ if "house_counter" not in st.session_state:
     st.session_state.house_counter = 1
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame(columns=[
-        "Month", "Years", "Salary", "Pension Deductions", "Tax", "National Insurance",
+        "Years", "Salary", "Pension Deductions", "Tax", "National Insurance",
         "Combined Pension Contribution", "Take Home Pay", "Expenses"
     ])
 
@@ -45,27 +49,24 @@ def calculate_tax(gross_income):
 def calculate_ni(gross_income):
     return gross_income * NI_RATE
 
+
 # Function to calculate mortgage schedule
 def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
-    print('interest_rate', interest_rate)
-    # Borrowed capital
+    logging.info(f"Calculating mortgage schedule for property_price={property_price}, deposit={deposit}, "
+                 f"mortgage_term={mortgage_term}, interest_rate={interest_rate}")
+
     borrowed_capital = property_price - deposit
-    # Monthly interest rate
     monthly_interest_rate = interest_rate / 12
-    # Number of monthly payments
     number_of_payments = mortgage_term * 12
-    # Monthly payment calculation
     monthly_payment = (borrowed_capital * monthly_interest_rate) / \
                       (1 - (1 + monthly_interest_rate) ** -number_of_payments)
 
-    months = []
     payments = []
     interest_loss = []
     remaining_balances = []
 
     remaining_balance = borrowed_capital
     for month in range(1, mortgage_term * 12 + 1):
-        months.append(month)
         interest_payment = remaining_balance * monthly_interest_rate
         principal_payment = monthly_payment - interest_payment
         remaining_balance -= principal_payment
@@ -74,18 +75,19 @@ def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
         remaining_balances.append(remaining_balance)
 
     df = pd.DataFrame({
-        "Month": months,
         "Monthly Payment": payments,
         "Interest Payment": interest_loss,
         "Remaining Balance": remaining_balances
-    })
+    }, index=range(1, len(payments) + 1))
 
+    logging.info(f"Mortgage schedule calculated successfully for {property_price}.")
     return df
+
 
 # Function to rebuild the entire DataFrame
 def rebuild_dataframe():
+    logging.info("Starting to rebuild DataFrame...")
     data = {
-        "Month": [],
         "Years": [],
         "Salary": [],
         "Pension Deductions": [],
@@ -96,35 +98,21 @@ def rebuild_dataframe():
         "Expenses": []
     }
 
-    # Helper function to extend all columns in data to the same length
-    def extend_columns_to_length(new_length):
-        current_length = len(data["Month"])
-        if new_length > current_length:
-            for _ in range(current_length, new_length):
-                data["Month"].append(len(data["Month"]) + 1)
-                data["Years"].append(f"{(len(data['Month']) // 12)} years, {(len(data['Month']) % 12)} months")
-                data["Salary"].append(0)
-                data["Pension Deductions"].append(0)
-                data["Tax"].append(0)
-                data["National Insurance"].append(0)
-                data["Combined Pension Contribution"].append(0)
-                data["Take Home Pay"].append(0)
-                data["Expenses"].append(0)
+    max_length = 0
 
     # Process salary entries
-    start_month = 1
-    for entry in st.session_state.salary_entries:
+    for i, entry in enumerate(st.session_state.salary_entries):
+        logging.info(f"Processing salary entry {i + 1}: {entry}")
         monthly_gross = entry["gross_income"] / 12
         pension_contribution = (entry["pension_contribution_percent"] / 100) * monthly_gross
         company_match = (entry["company_match_percent"] / 100) * monthly_gross
         combined_pension_contribution = pension_contribution + company_match
 
-        for month in range(start_month, start_month + entry["num_months"]):
+        for month in range(1, entry["num_months"] + 1):
             tax = calculate_tax(monthly_gross)
             ni = calculate_ni(monthly_gross)
             take_home_pay = monthly_gross - pension_contribution - tax - ni
 
-            data["Month"].append(month)
             data["Years"].append(f"{month // 12} years, {month % 12} months")
             data["Salary"].append(monthly_gross)
             data["Pension Deductions"].append(pension_contribution)
@@ -134,15 +122,15 @@ def rebuild_dataframe():
             data["Take Home Pay"].append(take_home_pay)
             data["Expenses"].append(0)
 
-        start_month += entry["num_months"]
+        max_length = max(max_length, entry["num_months"])
 
     # Process expense entries
-    for entry in st.session_state.expense_entries:
-        for month in range(start_month, start_month + entry["num_months"]):
-            if month in data["Month"]:
-                data["Expenses"][data["Month"].index(month)] += entry["monthly_expense"]
+    for i, entry in enumerate(st.session_state.expense_entries):
+        logging.info(f"Processing expense entry {i + 1}: {entry}")
+        for month in range(1, entry["num_months"] + 1):
+            if month <= len(data["Years"]):
+                data["Expenses"][month - 1] += entry["monthly_expense"]
             else:
-                data["Month"].append(month)
                 data["Years"].append(f"{month // 12} years, {month % 12} months")
                 data["Salary"].append(0)
                 data["Pension Deductions"].append(0)
@@ -152,21 +140,19 @@ def rebuild_dataframe():
                 data["Take Home Pay"].append(0)
                 data["Expenses"].append(entry["monthly_expense"])
 
-        start_month += entry["num_months"]
+        max_length = max(max_length, entry["num_months"])
 
     # Add housing data to the DataFrame
-    for entry in sorted(st.session_state.housing_entries, key=lambda x: x["month_acquisition"]):
+    for i, entry in enumerate(sorted(st.session_state.housing_entries, key=lambda x: x["month_acquisition"])):
         house_column = f"{entry['house_name']}"
-
-        # Extend all columns to the month of acquisition if needed
-        extend_columns_to_length(entry["month_acquisition"])
+        logging.info(f"Processing housing entry {i + 1}: {entry}")
 
         # Initialize the columns for this house
-        data[house_column] = [0] * len(data["Month"])
-        data[f"Monthly payments for {house_column}"] = [0] * len(data["Month"])
-        data[f"Monthly interest paid for {house_column}"] = [0] * len(data["Month"])
-        data[f"Equity for {house_column}"] = [0] * len(data["Month"])
-        data[f"Remaining debt for {house_column}"] = [0] * len(data["Month"])
+        data[house_column] = [0] * max_length
+        data[f"Monthly payments for {house_column}"] = [0] * max_length
+        data[f"Monthly interest paid for {house_column}"] = [0] * max_length
+        data[f"Equity for {house_column}"] = [0] * max_length
+        data[f"Remaining debt for {house_column}"] = [0] * max_length
 
         # Only calculate the mortgage if the mortgage flag is set
         if entry.get("mortgage"):
@@ -177,57 +163,36 @@ def rebuild_dataframe():
                 interest_rate=entry["standard_rate"] / 100  # Convert the rate to a float
             )
 
-            for i, month in enumerate(range(entry["month_acquisition"], entry["month_acquisition"] + len(mortgage_df))):
-                if month in data["Month"]:
-                    index = data["Month"].index(month)
-                    data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
-                    data[f"Monthly payments for {house_column}"][index] = mortgage_df.loc[i, "Monthly Payment"]
-                    data[f"Monthly interest paid for {house_column}"][index] = mortgage_df.loc[i, "Interest Payment"]
+            for month in range(entry["month_acquisition"], entry["month_acquisition"] + len(mortgage_df)):
+                if month <= max_length:
+                    index = month - 1
+                    data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (
+                            (month - entry["month_acquisition"]) / 12)
+                    data[f"Monthly payments for {house_column}"][index] = mortgage_df.loc[
+                        month - entry["month_acquisition"] + 1, "Monthly Payment"]
+                    data[f"Monthly interest paid for {house_column}"][index] = mortgage_df.loc[
+                        month - entry["month_acquisition"] + 1, "Interest Payment"]
                     data[f"Equity for {house_column}"][index] = data[house_column][index] - mortgage_df.loc[
-                        i, "Remaining Balance"]
-                    data[f"Remaining debt for {house_column}"][index] = mortgage_df.loc[i, "Remaining Balance"]
-                    data["Expenses"][index] += mortgage_df.loc[i, "Monthly Payment"]
-                else:
-                    data["Month"].append(month)
-                    data["Years"].append(f"{month // 12} years, {month % 12} months")
-                    data[house_column].append(entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
-                    data[f"Monthly payments for {house_column}"].append(mortgage_df.loc[i, "Monthly Payment"])
-                    data[f"Monthly interest paid for {house_column}"].append(mortgage_df.loc[i, "Interest Payment"])
-                    data[f"Equity for {house_column}"].append(
-                        data[house_column][-1] - mortgage_df.loc[i, "Remaining Balance"])
-                    data[f"Remaining debt for {house_column}"].append(mortgage_df.loc[i, "Remaining Balance"])
-                    data["Salary"].append(0)
-                    data["Pension Deductions"].append(0)
-                    data["Tax"].append(0)
-                    data["National Insurance"].append(0)
-                    data["Combined Pension Contribution"].append(0)
-                    data["Take Home Pay"].append(0)
-                    data["Expenses"].append(mortgage_df.loc[i, "Monthly Payment"])
+                        month - entry["month_acquisition"] + 1, "Remaining Balance"]
+                    data[f"Remaining debt for {house_column}"][index] = mortgage_df.loc[
+                        month - entry["month_acquisition"] + 1, "Remaining Balance"]
+                    data["Expenses"][index] += mortgage_df.loc[
+                        month - entry["month_acquisition"] + 1, "Monthly Payment"]
+
         else:
             # Handle the case where there is no mortgage
-            for i, month in enumerate(range(entry["month_acquisition"], entry["month_acquisition"] + 12)):
-                if month in data["Month"]:
-                    index = data["Month"].index(month)
-                    data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
+            for month in range(entry["month_acquisition"], entry["month_acquisition"] + 12):
+                if month <= max_length:
+                    index = month - 1
+                    data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (
+                            (month - entry["month_acquisition"]) / 12)
                     data[f"Equity for {house_column}"][index] = data[house_column][index]
-                else:
-                    data["Month"].append(month)
-                    data["Years"].append(f"{month // 12} years, {month % 12} months")
-                    data[house_column].append(entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
-                    data[f"Monthly payments for {house_column}"].append(0)
-                    data[f"Monthly interest paid for {house_column}"].append(0)
-                    data[f"Equity for {house_column}"].append(data[house_column][-1])
-                    data[f"Remaining debt for {house_column}"].append(0)
-                    data["Salary"].append(0)
-                    data["Pension Deductions"].append(0)
-                    data["Tax"].append(0)
-                    data["National Insurance"].append(0)
-                    data["Combined Pension Contribution"].append(0)
-                    data["Take Home Pay"].append(0)
-                    data["Expenses"].append(0)
 
-    return pd.DataFrame(data)
+    # Create DataFrame with correct index
+    df = pd.DataFrame(data, index=range(1, max_length + 1))
 
+    logging.info("DataFrame rebuild complete.")
+    return df
 
 # Sidebar for salary, expenses, and housing with toggle capability
 selected_section = st.sidebar.radio("Select Section", ("Salary", "Expenses", "Housing"))
@@ -429,7 +394,7 @@ if len(st.session_state.df) > 0:
     plt.figure(figsize=(10, 6))
 
     for column in columns_to_display:
-        plt.plot(st.session_state.df["Month"], st.session_state.df[column], label=column)
+        plt.plot(st.session_state.df.index, st.session_state.df[column], label=column)
 
     plt.xlabel("Month")
     plt.ylabel("Amount (£)")
