@@ -6,7 +6,6 @@ from mortgage_calculator import MortgageCalculator
 class DataFrameBuilder:
     def __init__(self):
         self.financial_entry = FinancialEntry()
-        self.mortgage_calculator = MortgageCalculator()
 
     def rebuild_dataframe(self):
         logging.info("Starting to rebuild DataFrame...")
@@ -100,7 +99,7 @@ class DataFrameBuilder:
             data[f"Remaining debt for {house_column}"] = [0] * len(data["Month"])
 
             if entry.get("mortgage"):
-                mortgage_df = self.mortgage_calculator.calculate_mortgage_schedule(
+                mortgage_df = MortgageCalculator.calculate_mortgage_schedule(
                     property_price=entry["house_value"],
                     deposit=entry["deposit"],
                     mortgage_term=entry["mortgage_term"],
@@ -136,28 +135,25 @@ class DataFrameBuilder:
             else:
                 for i, month in enumerate(range(entry["month_acquisition"], entry["month_acquisition"] + 12)):
                     extend_existing_columns_to_length(len(data["Month"]) + 1)
-                if month in data["Month"]:
-                    index = data["Month"].index(month)
-                    data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (
-                                i / 12)
-                    data[f"Equity for {house_column}"][index] = data[house_column][index]
-                else:
-                    data["Month"].append(month)
-                    data["Years"].append(f"{month // 12} years, {month % 12} months")
-                    data[house_column].append(
-                        entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
-                    data[f"Monthly payments for {house_column}"].append(0)
-                    data[f"Monthly interest paid for {house_column}"].append(0)
-                    data[f"Equity for {house_column}"].append(data[house_column][-1])
-                    data[f"Remaining debt for {house_column}"].append(0)
-                    data["Salary"].append(0)
-                    data["Pension Deductions"].append(0)
-                    data["Tax"].append(0)
-                    data["National Insurance"].append(0)
-                    data["Combined Pension Contribution"].append(0)
-                    data["Take Home Pay"].append(0)
-                    data["Expenses"].append(0)
+                    if month in data["Month"]:
+                        index = data["Month"].index(month)
+                        data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
+                        data[f"Equity for {house_column}"][index] = data[house_column][index]
+                    else:
+                        data["Month"].append(month)
+                        data["Years"].append(f"{month // 12} years, {month % 12} months")
+                        data[house_column].append(entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
+                        data[f"Monthly payments for {house_column}"].append(0)
+                        data[f"Monthly interest paid for {house_column}"].append(0)
+                        data[f"Equity for {house_column}"].append(data[house_column][-1])
+                        data[f"Remaining debt for {house_column}"].append(0)
+                        data["Salary"].append(0)
+                        data["Pension Deductions"].append(0)
+                        data["Tax"].append(0)
+                        data["National Insurance"].append(0)
+                        data["Combined Pension Contribution"].append(0)
+                        data["Take Home Pay"].append(0)
+                        data["Expenses"].append(0)
 
         logging.info("DataFrame rebuild complete.")
         return pd.DataFrame(data)
-

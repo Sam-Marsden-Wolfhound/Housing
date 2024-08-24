@@ -1,12 +1,8 @@
 import logging
 import pandas as pd
 
-# Configure logging
-logging.basicConfig(filename="app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
 class MortgageCalculator:
-    @staticmethod
-    def calculate_mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
+    def calculate_mortgage_schedule(self, property_price, deposit, mortgage_term, interest_rate):
         logging.info(f"Calculating mortgage schedule: property_price={property_price}, deposit={deposit}, "
                      f"mortgage_term={mortgage_term}, interest_rate={interest_rate}")
 

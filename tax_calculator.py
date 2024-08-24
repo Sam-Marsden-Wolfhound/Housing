@@ -14,26 +14,20 @@ class TaxCalculator:
 
     @staticmethod
     def calculate_tax(gross_income):
-        logging.info(f"Calculating tax for gross_income={gross_income}")
-
+        logging.info(f"Calculating tax for gross income: {gross_income}")
         if gross_income <= TaxCalculator.PERSONAL_ALLOWANCE:
-            tax = 0
+            return 0
         elif gross_income <= TaxCalculator.BASIC_RATE_LIMIT:
-            tax = (gross_income - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE
+            return (gross_income - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE
         elif gross_income <= TaxCalculator.HIGHER_RATE_LIMIT:
-            tax = (TaxCalculator.BASIC_RATE_LIMIT - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE + \
-                  (gross_income - TaxCalculator.BASIC_RATE_LIMIT) * TaxCalculator.HIGHER_RATE
+            return (TaxCalculator.BASIC_RATE_LIMIT - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE + \
+                   (gross_income - TaxCalculator.BASIC_RATE_LIMIT) * TaxCalculator.HIGHER_RATE
         else:
-            tax = (TaxCalculator.BASIC_RATE_LIMIT - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE + \
-                  (TaxCalculator.HIGHER_RATE_LIMIT - TaxCalculator.BASIC_RATE_LIMIT) * TaxCalculator.HIGHER_RATE + \
-                  (gross_income - TaxCalculator.HIGHER_RATE_LIMIT) * TaxCalculator.ADDITIONAL_RATE
-
-        logging.info(f"Tax calculated: {tax}")
-        return tax
+            return (TaxCalculator.BASIC_RATE_LIMIT - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE + \
+                   (TaxCalculator.HIGHER_RATE_LIMIT - TaxCalculator.BASIC_RATE_LIMIT) * TaxCalculator.HIGHER_RATE + \
+                   (gross_income - TaxCalculator.HIGHER_RATE_LIMIT) * TaxCalculator.ADDITIONAL_RATE
 
     @staticmethod
     def calculate_ni(gross_income):
-        logging.info(f"Calculating NI for gross_income={gross_income}")
-        ni = gross_income * TaxCalculator.NI_RATE
-        logging.info(f"NI calculated: {ni}")
-        return ni
+        logging.info(f"Calculating National Insurance for gross income: {gross_income}")
+        return gross_income * TaxCalculator.NI_RATE
