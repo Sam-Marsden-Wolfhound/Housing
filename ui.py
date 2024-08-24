@@ -1,5 +1,4 @@
 import streamlit as st
-from financial_entry import FinancialEntry
 from dataframe_builder import DataFrameBuilder
 
 class SalaryUI:
@@ -50,29 +49,33 @@ class SalaryUI:
                     break
 
 
-class ExpenseUI:
+class ExpensesUI:
     def display(self, df_builder: DataFrameBuilder):
         st.sidebar.header("Add New Expense Entry")
         new_monthly_expense = st.sidebar.number_input("Monthly Expense (£)", min_value=0, max_value=20000, value=1000,
                                                       key="expense_amount")
-        new_expense_num_months = st.sidebar.number_input("Number of Months", min_value=1, value=12, key="expense_months")
+        new_expense_num_months = st.sidebar.number_input("Number of Months", min_value=1, value=12,
+                                                         key="expense_months")
+
         if st.sidebar.button("Add Expense"):
-            df_builder.financial_entry.add_expense(new_monthly_expense, new_expense_num_months)
+            st.session_state.expense_entries.append({
+                "monthly_expense": new_monthly_expense,
+                "num_months": new_expense_num_months
+            })
             st.session_state.df = df_builder.rebuild_dataframe()
 
         # Expense entries in collapsible sections
-        for i, entry in enumerate(df_builder.financial_entry.expense_entries):
+        for i, entry in enumerate(st.session_state.expense_entries):
             with st.sidebar.expander(
                     f"Expense Entry {i + 1}: £{entry['monthly_expense']} for {entry['num_months']} months"):
-                updated_monthly_expense = st.number_input(f"Monthly Expense (£) for Entry {i + 1}",
-                                                          min_value=0, max_value=20000, value=entry['monthly_expense'],
+                updated_monthly_expense = st.number_input(f"Monthly Expense (£) for Entry {i + 1}", min_value=0,
+                                                          max_value=20000, value=entry['monthly_expense'],
                                                           key=f"monthly_expense_{i}")
-                updated_expense_num_months = st.number_input(f"Number of Months for Entry {i + 1}",
-                                                             min_value=1, value=entry['num_months'],
-                                                             key=f"expense_num_months_{i}")
+                updated_expense_num_months = st.number_input(f"Number of Months for Entry {i + 1}", min_value=1,
+                                                             value=entry['num_months'], key=f"expense_num_months_{i}")
 
                 if st.button(f"Save Changes for Expense Entry {i + 1}"):
-                    df_builder.financial_entry.expense_entries[i] = {
+                    st.session_state.expense_entries[i] = {
                         "monthly_expense": updated_monthly_expense,
                         "num_months": updated_expense_num_months
                     }
@@ -80,7 +83,7 @@ class ExpenseUI:
                     st.success(f"Updated data for Expense Entry {i + 1}.")
 
                 if st.button(f"Delete Expense Entry {i + 1}"):
-                    df_builder.financial_entry.expense_entries.pop(i)
+                    st.session_state.expense_entries.pop(i)
                     st.session_state.df = df_builder.rebuild_dataframe()
                     st.success(f"Deleted data for Expense Entry {i + 1}.")
                     break
