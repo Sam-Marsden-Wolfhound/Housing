@@ -1,12 +1,14 @@
 import pandas as pd
 import logging
-from financial_entry import FinancialEntry
 from mortgage_calculator import MortgageCalculator
+from tax_calculator import TaxCalculator
+
+# Configure logging
+logging.basicConfig(filename="app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 class DataFrameBuilder:
-    def __init__(self):
-        self.financial_entry = FinancialEntry()
-        self.mortgage_calculator = MortgageCalculator()
+    def __init__(self, financial_entry):
+        self.financial_entry = financial_entry
 
     def rebuild_dataframe(self):
         logging.info("Starting to rebuild DataFrame...")
@@ -55,8 +57,8 @@ class DataFrameBuilder:
             combined_pension_contribution = pension_contribution + company_match
 
             for month in range(start_month, start_month + entry["num_months"]):
-                tax = self.financial_entry.calculate_tax(monthly_gross)
-                ni = self.financial_entry.calculate_ni(monthly_gross)
+                tax = TaxCalculator.calculate_tax(monthly_gross)
+                ni = TaxCalculator.calculate_ni(monthly_gross)
                 take_home_pay = monthly_gross - pension_contribution - tax - ni
 
                 data["Month"].append(month)
@@ -107,7 +109,7 @@ class DataFrameBuilder:
 
             # Only calculate the mortgage if the mortgage flag is set
             if entry.get("mortgage"):
-                mortgage_df = self.mortgage_calculator.mortgage_schedule(
+                mortgage_df = MortgageCalculator.calculate_mortgage_schedule(
                     property_price=entry["house_value"],
                     deposit=entry["deposit"],
                     mortgage_term=entry["mortgage_term"],
@@ -118,10 +120,12 @@ class DataFrameBuilder:
                     extend_existing_columns_to_length(len(data["Month"]) + 1)
                     if month in data["Month"]:
                         index = data["Month"].index(month)
-                        data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
+                        data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (
+                                    i / 12)
                         data[f"Monthly payments for {house_column}"][index] = mortgage_df.loc[i, "Monthly Payment"]
                         data[f"Monthly interest paid for {house_column}"][index] = mortgage_df.loc[i, "Interest Payment"]
-                        data[f"Equity for {house_column}"][index] = data[house_column][index] - mortgage_df.loc[i, "Remaining Balance"]
+                        data[f"Equity for {house_column}"][index] = data[house_column][index] - mortgage_df.loc[
+                            i, "Remaining Balance"]
                         data[f"Remaining debt for {house_column}"][index] = mortgage_df.loc[i, "Remaining Balance"]
                         data["Expenses"][index] += mortgage_df.loc[i, "Monthly Payment"]
                     else:
@@ -130,7 +134,8 @@ class DataFrameBuilder:
                         data[house_column].append(entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
                         data[f"Monthly payments for {house_column}"].append(mortgage_df.loc[i, "Monthly Payment"])
                         data[f"Monthly interest paid for {house_column}"].append(mortgage_df.loc[i, "Interest Payment"])
-                        data[f"Equity for {house_column}"].append(data[house_column][-1] - mortgage_df.loc[i, "Remaining Balance"])
+                        data[f"Equity for {house_column}"].append(
+                            data[house_column][-1] - mortgage_df.loc[i, "Remaining Balance"])
                         data[f"Remaining debt for {house_column}"].append(mortgage_df.loc[i, "Remaining Balance"])
                         data["Salary"].append(0)
                         data["Pension Deductions"].append(0)
@@ -145,7 +150,8 @@ class DataFrameBuilder:
                     extend_existing_columns_to_length(len(data["Month"]) + 1)
                     if month in data["Month"]:
                         index = data["Month"].index(month)
-                        data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
+                        data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (
+                                    i / 12)
                         data[f"Equity for {house_column}"][index] = data[house_column][index]
                     else:
                         data["Month"].append(month)
