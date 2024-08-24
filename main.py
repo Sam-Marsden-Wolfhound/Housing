@@ -1,13 +1,17 @@
 import streamlit as st
 import pandas as pd
-from dataframe_builder import DataFrameBuilder
-from ui import SalaryUI, ExpensesUI, HousingUI
 import logging
+from ui import SalaryUI, ExpensesUI, HousingUI
+from dataframe_builder import DataFrameBuilder
+from financial_entry import FinancialEntry
 
-logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+# Configure logging
+logging.basicConfig(filename="app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 
 def main():
-    logging.info("Application started")
+    logging.info("App started")
+
     # Initialize session state
     if "salary_entries" not in st.session_state:
         st.session_state.salary_entries = []
@@ -15,7 +19,7 @@ def main():
         st.session_state.expense_entries = []
     if "housing_entries" not in st.session_state:
         st.session_state.housing_entries = []
-    if "house_counter" not in st.session_state:  # Ensure house_counter is initialized
+    if "house_counter" not in st.session_state:
         st.session_state.house_counter = 1
     if "df" not in st.session_state:
         st.session_state.df = pd.DataFrame(columns=[
@@ -23,10 +27,10 @@ def main():
             "Combined Pension Contribution", "Take Home Pay", "Expenses"
         ])
 
-    # Create an instance of DataFrameBuilder
-    df_builder = DataFrameBuilder()
+    # Create instances of UI classes
+    df_builder = DataFrameBuilder(FinancialEntry())
 
-    # Sidebar for salary, expenses, and housing with toggle capability
+    # Render the UI sections
     selected_section = st.sidebar.radio("Select Section", ("Salary", "Expenses", "Housing"))
 
     if selected_section == "Salary":
@@ -36,7 +40,7 @@ def main():
     elif selected_section == "Housing":
         HousingUI().display(df_builder)
 
-    # Displaying the DataFrame
+    # Display the DataFrame
     st.write("### Monthly Financial Overview")
     st.write(st.session_state.df)
 
@@ -51,9 +55,21 @@ def main():
     st.write("### Monthly Breakdown Graph")
 
     if len(st.session_state.df) > 0:
-        df_builder.plot_graph(columns_to_display)
+        plt.figure(figsize=(10, 6))
+
+        for column in columns_to_display:
+            plt.plot(st.session_state.df.index, st.session_state.df[column], label=column)
+
+        plt.xlabel("Month")
+        plt.ylabel("Amount (£)")
+        plt.title("Monthly Financial Breakdown")
+        plt.legend()
+        st.pyplot(plt)
     else:
         st.write("No data available for graphing.")
+
+    logging.info("App finished execution")
+
 
 if __name__ == "__main__":
     main()
