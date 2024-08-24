@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 
 # Constants for UK 2024 tax and NI rates
@@ -28,7 +27,7 @@ if "df" not in st.session_state:
     ])
 
 
-# Function to calculate tax and NI
+# Function to calculate tax based on UK 2024 tax brackets
 def calculate_tax(gross_income):
     if gross_income <= PERSONAL_ALLOWANCE:
         return 0
@@ -42,47 +41,64 @@ def calculate_tax(gross_income):
             (gross_income - HIGHER_RATE_LIMIT) * ADDITIONAL_RATE
 
 
+# Function to calculate NI based on UK rates
 def calculate_ni(gross_income):
     return gross_income * NI_RATE
 
 
-# Function to calculate mortgage payments and other mortgage-related data
-def calculate_mortgage_payments(house_value, deposit, term_years, discounted_rate, discounted_period_months,
-                                standard_rate):
-    mortgage_amount = house_value - deposit
-    monthly_payments = []
-    monthly_interest_paid = []
-    remaining_debt = mortgage_amount
-    equity = deposit
+# Function to calculate mortgage monthly payment, total repayment, borrowed capital, and total interest
+def calculate_mortgage(property_price, deposit, mortgage_term, interest_rate):
+    borrowed_capital = property_price - deposit
+    monthly_interest_rate = interest_rate / 12
+    number_of_payments = mortgage_term * 12
+    monthly_payment = (borrowed_capital * monthly_interest_rate) / \
+                      (1 - (1 + monthly_interest_rate) ** -number_of_payments)
+    total_repayment = monthly_payment * number_of_payments
+    total_interest = total_repayment - borrowed_capital
+    return {
+        "total_repayment": total_repayment,
+        "borrowed_capital": borrowed_capital,
+        "total_interest": total_interest,
+        "monthly_payment": monthly_payment,
+    }
 
-    # Calculate payments for discounted rate period
-    monthly_discounted_rate = discounted_rate / 100 / 12
-    discounted_payments = (mortgage_amount * monthly_discounted_rate) / (
-                1 - (1 + monthly_discounted_rate) ** -discounted_period_months)
 
-    for _ in range(discounted_period_months):
-        interest_payment = remaining_debt * monthly_discounted_rate
-        principal_payment = discounted_payments - interest_payment
-        remaining_debt -= principal_payment
-        equity += principal_payment
-        monthly_payments.append(discounted_payments)
-        monthly_interest_paid.append(interest_payment)
+# Function to calculate mortgage schedule
+def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
+    mortgage_details = calculate_mortgage(property_price, deposit, mortgage_term, interest_rate)
+    monthly_payment = mortgage_details['monthly_payment']
+    borrowed_capital = mortgage_details['borrowed_capital']
 
-    # Calculate payments for the remaining period with the standard variable rate
-    remaining_months = term_years * 12 - discounted_period_months
-    monthly_standard_rate = standard_rate / 100 / 12
-    standard_payments = (remaining_debt * monthly_standard_rate) / (
-                1 - (1 + monthly_standard_rate) ** -remaining_months)
+    months = []
+    equity_delta = []
+    equity = []
+    payments = []
+    interest_loss = []
+    remaining_balances = []
 
-    for _ in range(remaining_months):
-        interest_payment = remaining_debt * monthly_standard_rate
-        principal_payment = standard_payments - interest_payment
-        remaining_debt -= principal_payment
-        equity += principal_payment
-        monthly_payments.append(standard_payments)
-        monthly_interest_paid.append(interest_payment)
+    remaining_balance = borrowed_capital
+    for month in range(1, mortgage_term * 12 + 1):
+        months.append(month)
+        interest_payment = remaining_balance * (interest_rate / 12)
+        principal_payment = monthly_payment - interest_payment
+        remaining_balance -= principal_payment
 
-    return monthly_payments, monthly_interest_paid, equity, remaining_debt
+        equity_delta.append(principal_payment)
+        equity.append(property_price - remaining_balance)
+        payments.append(monthly_payment)
+        interest_loss.append(interest_payment)
+        remaining_balances.append(remaining_balance)
+
+    df = pd.DataFrame({
+        "Month": months,
+        "Equity Delta": equity_delta,
+        "Equity": equity,
+        "Monthly Payment": payments,
+        "Interest Payment": interest_loss,
+        "Remaining Balance": remaining_balances
+    })
+
+    return df
 
 
 # Function to rebuild the entire DataFrame
@@ -165,55 +181,40 @@ def rebuild_dataframe():
         data[f"Equity for {house_column}"] = [0] * len(data["Month"])
         data[f"Remaining debt for {house_column}"] = [0] * len(data["Month"])
 
-        mortgage_payments = None
-        monthly_interest_paid = None
-        equity = 0
-        remaining_debt = entry["house_value"] - entry.get("deposit", 0)
+        # Calculate the mortgage schedule
+        mortgage_df = mortgage_schedule(
+            property_price=entry["house_value"],
+            deposit=entry["deposit"],
+            mortgage_term=entry["mortgage_term"],
+            interest_rate=entry["standard_rate"]  # Use standard rate for simplicity
+        )
 
-        if entry.get("mortgage", False):
-            mortgage_payments, monthly_interest_paid, equity, remaining_debt = calculate_mortgage_payments(
-                entry["house_value"],
-                entry["deposit"],
-                entry["mortgage_term"],
-                entry["discounted_rate"],
-                entry["discounted_period"],
-                entry["standard_rate"]
-            )
-
-        for month in range(entry["month_acquisition"], max(data["Month"]) + 1):
+        for i, month in enumerate(range(entry["month_acquisition"], entry["month_acquisition"] + len(mortgage_df))):
             if month in data["Month"]:
                 index = data["Month"].index(month)
-                years_owned = (month - entry["month_acquisition"]) / 12
-                appreciated_value = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** years_owned
-                if entry.get("sale", False) and month >= entry["month_sale"]:
-                    appreciated_value = 0
-                data[house_column][index] = appreciated_value
-
-                # Apply mortgage payments and update related columns
-                if mortgage_payments and not (entry.get("sale", False) and month >= entry["month_sale"]):
-                    data[f"Monthly payments for {house_column}"][index] = mortgage_payments[
-                        min(month - entry["month_acquisition"], len(mortgage_payments) - 1)]
-                    data[f"Monthly interest paid for {house_column}"][index] = monthly_interest_paid[
-                        min(month - entry["month_acquisition"], len(monthly_interest_paid) - 1)]
-                    data[f"Equity for {house_column}"][index] = equity
-                    data[f"Remaining debt for {house_column}"][index] = remaining_debt
-                    data["Expenses"][index] += data[f"Monthly payments for {house_column}"][index]
+                data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
+                data[f"Monthly payments for {house_column}"][index] = mortgage_df.loc[i, "Monthly Payment"]
+                data[f"Monthly interest paid for {house_column}"][index] = mortgage_df.loc[i, "Interest Payment"]
+                data[f"Equity for {house_column}"][index] = data[house_column][index] - mortgage_df.loc[
+                    i, "Remaining Balance"]
+                data[f"Remaining debt for {house_column}"][index] = mortgage_df.loc[i, "Remaining Balance"]
+                data["Expenses"][index] += mortgage_df.loc[i, "Monthly Payment"]
             else:
-                # Append missing months with initial zero values for the house column
                 data["Month"].append(month)
                 data["Years"].append(f"{month // 12} years, {month % 12} months")
-                data[house_column].append(0)
-                data[f"Monthly payments for {house_column}"].append(0)
-                data[f"Monthly interest paid for {house_column}"].append(0)
-                data[f"Equity for {house_column}"].append(equity)
-                data[f"Remaining debt for {house_column}"].append(remaining_debt)
+                data[house_column].append(entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
+                data[f"Monthly payments for {house_column}"].append(mortgage_df.loc[i, "Monthly Payment"])
+                data[f"Monthly interest paid for {house_column}"].append(mortgage_df.loc[i, "Interest Payment"])
+                data[f"Equity for {house_column}"].append(
+                    data[house_column][-1] - mortgage_df.loc[i, "Remaining Balance"])
+                data[f"Remaining debt for {house_column}"].append(mortgage_df.loc[i, "Remaining Balance"])
                 data["Salary"].append(0)
                 data["Pension Deductions"].append(0)
                 data["Tax"].append(0)
                 data["National Insurance"].append(0)
                 data["Combined Pension Contribution"].append(0)
                 data["Take Home Pay"].append(0)
-                data["Expenses"].append(0)
+                data["Expenses"].append(mortgage_df.loc[i, "Monthly Payment"])
 
     return pd.DataFrame(data)
 
