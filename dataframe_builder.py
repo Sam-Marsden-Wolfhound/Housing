@@ -1,16 +1,14 @@
 import logging
 import pandas as pd
-from financial_entry import FinancialEntry
 from mortgage_calculator import MortgageCalculator
 
 class DataFrameBuilder:
-    def __init__(self, financial_entry: FinancialEntry):
+    def __init__(self, financial_entry):
         self.financial_entry = financial_entry
 
-    def build_empty_dataframe(self):
-        logging.info("Building an empty DataFrame...")
+    def rebuild_dataframe(self):
+        logging.info("Starting to rebuild DataFrame...")
         data = {
-            "Month": [],
             "Years": [],
             "Salary": [],
             "Pension Deductions": [],
@@ -20,25 +18,19 @@ class DataFrameBuilder:
             "Take Home Pay": [],
             "Expenses": []
         }
-        return pd.DataFrame(data)
-
-    def rebuild_dataframe(self):
-        logging.info("Starting to rebuild DataFrame...")
-        data = self.build_empty_dataframe()
 
         def extend_existing_columns_to_length(target_length):
-            for key in data.columns:
+            for key in data.keys():
                 if len(data[key]) < target_length:
                     difference = target_length - len(data[key])
                     data[key].extend([0] * difference)
 
         def extend_columns_to_length(new_length):
-            current_length = len(data["Month"])
+            current_length = len(data["Years"])
             logging.info(f"Extending columns from length {current_length} to {new_length}")
             if new_length > current_length:
                 for _ in range(current_length, new_length):
-                    new_month = len(data["Month"]) + 1
-                    data["Month"].append(new_month)
+                    new_month = len(data["Years"]) + 1
                     data["Years"].append(f"{(new_month // 12)} years, {(new_month % 12)} months")
                     data["Salary"].append(0)
                     data["Pension Deductions"].append(0)
@@ -61,7 +53,6 @@ class DataFrameBuilder:
                 ni = self.financial_entry.calculate_ni(monthly_gross)
                 take_home_pay = monthly_gross - pension_contribution - tax - ni
 
-                data["Month"].append(month)
                 data["Years"].append(f"{month // 12} years, {month % 12} months")
                 data["Salary"].append(monthly_gross)
                 data["Pension Deductions"].append(pension_contribution)
@@ -76,10 +67,9 @@ class DataFrameBuilder:
         for i, entry in enumerate(self.financial_entry.expense_entries):
             logging.info(f"Processing expense entry {i + 1}: {entry}")
             for month in range(start_month, start_month + entry["num_months"]):
-                if month in data["Month"]:
-                    data["Expenses"][data["Month"].index(month)] += entry["monthly_expense"]
+                if month <= len(data["Years"]):
+                    data["Expenses"][month - 1] += entry["monthly_expense"]
                 else:
-                    data["Month"].append(month)
                     data["Years"].append(f"{month // 12} years, {month % 12} months")
                     data["Salary"].append(0)
                     data["Pension Deductions"].append(0)
@@ -97,14 +87,14 @@ class DataFrameBuilder:
 
             extend_columns_to_length(entry["month_acquisition"])
 
-            data[house_column] = [0] * len(data["Month"])
-            data[f"Monthly payments for {house_column}"] = [0] * len(data["Month"])
-            data[f"Monthly interest paid for {house_column}"] = [0] * len(data["Month"])
-            data[f"Equity for {house_column}"] = [0] * len(data["Month"])
-            data[f"Remaining debt for {house_column}"] = [0] * len(data["Month"])
+            data[house_column] = [0] * len(data["Years"])
+            data[f"Monthly payments for {house_column}"] = [0] * len(data["Years"])
+            data[f"Monthly interest paid for {house_column}"] = [0] * len(data["Years"])
+            data[f"Equity for {house_column}"] = [0] * len(data["Years"])
+            data[f"Remaining debt for {house_column}"] = [0] * len(data["Years"])
 
             if entry.get("mortgage"):
-                mortgage_df = MortgageCalculator.calculate_mortgage_schedule(
+                mortgage_df = MortgageCalculator.mortgage_schedule(
                     property_price=entry["house_value"],
                     deposit=entry["deposit"],
                     mortgage_term=entry["mortgage_term"],
@@ -112,9 +102,9 @@ class DataFrameBuilder:
                 )
 
                 for i, month in enumerate(range(entry["month_acquisition"], entry["month_acquisition"] + len(mortgage_df))):
-                    extend_existing_columns_to_length(len(data["Month"]) + 1)
-                    if month in data["Month"]:
-                        index = data["Month"].index(month)
+                    extend_existing_columns_to_length(len(data["Years"]) + 1)
+                    if month <= len(data["Years"]):
+                        index = month - 1
                         data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
                         data[f"Monthly payments for {house_column}"][index] = mortgage_df.loc[i, "Monthly Payment"]
                         data[f"Monthly interest paid for {house_column}"][index] = mortgage_df.loc[i, "Interest Payment"]
@@ -122,7 +112,6 @@ class DataFrameBuilder:
                         data[f"Remaining debt for {house_column}"][index] = mortgage_df.loc[i, "Remaining Balance"]
                         data["Expenses"][index] += mortgage_df.loc[i, "Monthly Payment"]
                     else:
-                        data["Month"].append(month)
                         data["Years"].append(f"{month // 12} years, {month % 12} months")
                         data[house_column].append(entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
                         data[f"Monthly payments for {house_column}"].append(mortgage_df.loc[i, "Monthly Payment"])
@@ -139,13 +128,12 @@ class DataFrameBuilder:
 
             else:
                 for i, month in enumerate(range(entry["month_acquisition"], entry["month_acquisition"] + 12)):
-                    extend_existing_columns_to_length(len(data["Month"]) + 1)
-                    if month in data["Month"]:
-                        index = data["Month"].index(month)
+                    extend_existing_columns_to_length(len(data["Years"]) + 1)
+                    if month <= len(data["Years"]):
+                        index = month - 1
                         data[house_column][index] = entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12)
                         data[f"Equity for {house_column}"][index] = data[house_column][index]
                     else:
-                        data["Month"].append(month)
                         data["Years"].append(f"{month // 12} years, {month % 12} months")
                         data[house_column].append(entry["house_value"] * (1 + entry["appreciation_rate"] / 100) ** (i / 12))
                         data[f"Monthly payments for {house_column}"].append(0)
@@ -162,3 +150,5 @@ class DataFrameBuilder:
 
         logging.info("DataFrame rebuild complete.")
         return pd.DataFrame(data)
+
+

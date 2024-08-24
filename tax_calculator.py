@@ -1,33 +1,28 @@
 import logging
 
-# Configure logging
-logging.basicConfig(filename="app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
-
 class TaxCalculator:
-    PERSONAL_ALLOWANCE = 12570
-    BASIC_RATE_LIMIT = 50270
-    HIGHER_RATE_LIMIT = 125140
-    BASIC_RATE = 0.20
-    HIGHER_RATE = 0.40
-    ADDITIONAL_RATE = 0.45
-    NI_RATE = 0.12
-
     @staticmethod
-    def calculate_tax(gross_income):
-        logging.info(f"Calculating tax for gross income: {gross_income}")
-        if gross_income <= TaxCalculator.PERSONAL_ALLOWANCE:
-            return 0
-        elif gross_income <= TaxCalculator.BASIC_RATE_LIMIT:
-            return (gross_income - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE
-        elif gross_income <= TaxCalculator.HIGHER_RATE_LIMIT:
-            return (TaxCalculator.BASIC_RATE_LIMIT - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE + \
-                   (gross_income - TaxCalculator.BASIC_RATE_LIMIT) * TaxCalculator.HIGHER_RATE
+    def calculate_tax(income):
+        logging.info(f"Calculating tax for income={income}")
+        if income <= 12570:
+            tax = 0
+        elif income <= 50270:
+            tax = (income - 12570) * 0.2
+        elif income <= 150000:
+            tax = (50270 - 12570) * 0.2 + (income - 50270) * 0.4
         else:
-            return (TaxCalculator.BASIC_RATE_LIMIT - TaxCalculator.PERSONAL_ALLOWANCE) * TaxCalculator.BASIC_RATE + \
-                   (TaxCalculator.HIGHER_RATE_LIMIT - TaxCalculator.BASIC_RATE_LIMIT) * TaxCalculator.HIGHER_RATE + \
-                   (gross_income - TaxCalculator.HIGHER_RATE_LIMIT) * TaxCalculator.ADDITIONAL_RATE
+            tax = (50270 - 12570) * 0.2 + (150000 - 50270) * 0.4 + (income - 150000) * 0.45
+        logging.info(f"Calculated tax: {tax}")
+        return tax
 
     @staticmethod
-    def calculate_ni(gross_income):
-        logging.info(f"Calculating National Insurance for gross income: {gross_income}")
-        return gross_income * TaxCalculator.NI_RATE
+    def calculate_ni(income):
+        logging.info(f"Calculating national insurance for income={income}")
+        if income <= 1048:
+            ni = 0
+        elif income <= 4189:
+            ni = (income - 1048) * 0.12
+        else:
+            ni = (4189 - 1048) * 0.12 + (income - 4189) * 0.02
+        logging.info(f"Calculated national insurance: {ni}")
+        return ni
