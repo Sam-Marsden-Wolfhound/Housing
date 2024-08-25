@@ -154,16 +154,29 @@ class SalaryUI:
 
     def combined_salary_df(self):
         if len(st.session_state.salary_dfs) > 0:
-            combined_df = pd.concat([salary['input_df'] for salary in st.session_state.salary_dfs])
+            # Combine the salary_output_df from each salary in the order they appear in the sidebar
+            combined_df = pd.concat([salary['output_df'] for salary in st.session_state.salary_dfs], ignore_index=True)
             st.dataframe(combined_df)
         else:
             st.write("No salaries added yet.")
 
     def plot_salary_data(self):
         if len(st.session_state.salary_dfs) > 0:
-            combined_df = pd.concat([salary['output_df'] for salary in st.session_state.salary_dfs])
-            columns_to_plot = st.multiselect("Select columns to plot", combined_df.columns.tolist())
+            # Combine the salary_output_df from each salary in the order they appear in the sidebar
+            combined_df = pd.concat([salary['output_df'] for salary in st.session_state.salary_dfs], ignore_index=True)
+
+            # Default selection for the graph
+            default_selection = ["Monthly Salary"] if "Monthly Salary" in combined_df.columns else []
+
+            # Select columns to plot with "Monthly Salary" selected by default
+            columns_to_plot = st.multiselect("Select columns to plot", combined_df.columns.tolist(),
+                                             default=default_selection)
+
             if columns_to_plot:
-                st.line_chart(combined_df[columns_to_plot])
+                # Plot the selected columns using the index as the x-axis
+                st.line_chart(combined_df[columns_to_plot].reset_index(drop=True))
+
         else:
             st.write("No data available to plot.")
+
+
