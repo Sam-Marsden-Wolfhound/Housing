@@ -1,6 +1,5 @@
-import streamlit as st
 import pandas as pd
-
+import streamlit as st
 
 class SalaryUI:
     def __init__(self):
@@ -27,28 +26,51 @@ class SalaryUI:
             submitted = st.form_submit_button("Save Salary")
 
             if submitted:
-                df = self.create_salary_df(name, annual_gross_income, pension_contrib, company_match, num_months)
+                input_df, output_df = self.create_salary_df(name, annual_gross_income, pension_contrib, company_match, num_months)
                 st.session_state.salary_dfs.append({
                     'name': name,
-                    'df': df,
+                    'input_df': input_df,
+                    'output_df': output_df,
                     'annual_gross_income': annual_gross_income,
                     'pension_contrib': pension_contrib,
                     'company_match': company_match,
                     'num_months': num_months
-                })  # Append the data to the list
+                })
                 st.session_state.next_salary_id += 1  # Increment the default salary ID for the next salary
                 st.success(f"Salary '{name}' added successfully!")
 
     def create_salary_df(self, name, annual_gross_income, pension_contrib, company_match, num_months):
-        data = {
+        # Create salary_input_dataframe
+        input_data = {
             'Name': [name],
             'Annual Gross Income': [annual_gross_income],
             'Pension Contribution (%)': [pension_contrib],
             'Company Match (%)': [company_match],
             'Number of Months': [num_months],
         }
-        df = pd.DataFrame(data)
-        return df
+        input_df = pd.DataFrame(input_data)
+
+        # Calculate monthly amounts
+        monthly_salary = annual_gross_income / 12
+        pension_deduction = monthly_salary * (pension_contrib / 100)
+        company_pension_contribution = monthly_salary * (company_match / 100)
+        combined_pension_contribution = pension_deduction + company_pension_contribution
+        tax = monthly_salary * 0.2  # Assuming a flat 20% tax rate
+        national_insurance = monthly_salary * 0.12  # Assuming a flat 12% NI rate
+        take_home_pay = monthly_salary - pension_deduction - tax - national_insurance
+
+        # Create salary_output_dataframe
+        output_data = {
+            'Monthly Salary': [monthly_salary] * num_months,
+            'Pension Deduction': [pension_deduction] * num_months,
+            'Tax': [tax] * num_months,
+            'National Insurance': [national_insurance] * num_months,
+            'Combined Pension Contribution': [combined_pension_contribution] * num_months,
+            'Take Home Pay': [take_home_pay] * num_months,
+        }
+        output_df = pd.DataFrame(output_data)
+
+        return input_df, output_df
 
     def salary_sidebar(self):
         st.sidebar.header("Your Salaries")
@@ -77,20 +99,17 @@ class SalaryUI:
                 if st.session_state.editing_index == i:
                     # Edit mode
                     new_name = st.text_input("Salary Name", value=salary_data['name'], key=f"name_{i}")
-                    new_annual_gross_income = st.number_input("Annual Gross Income",
-                                                              value=salary_data['annual_gross_income'], key=f"agi_{i}")
-                    new_pension_contrib = st.number_input("Pension Contribution (%)",
-                                                          value=salary_data['pension_contrib'], key=f"pension_{i}")
-                    new_company_match = st.number_input("Company Match (%)", value=salary_data['company_match'],
-                                                        key=f"match_{i}")
-                    new_num_months = st.number_input("Number of Months", min_value=1, max_value=120,
-                                                     value=salary_data['num_months'], key=f"months_{i}")
+                    new_annual_gross_income = st.number_input("Annual Gross Income", value=salary_data['annual_gross_income'], key=f"agi_{i}")
+                    new_pension_contrib = st.number_input("Pension Contribution (%)", value=salary_data['pension_contrib'], key=f"pension_{i}")
+                    new_company_match = st.number_input("Company Match (%)", value=salary_data['company_match'], key=f"match_{i}")
+                    new_num_months = st.number_input("Number of Months", min_value=1, max_value=120, value=salary_data['num_months'], key=f"months_{i}")
 
                     if st.button("Save", key=f"save_{i}"):
+                        input_df, output_df = self.create_salary_df(new_name, new_annual_gross_income, new_pension_contrib, new_company_match, new_num_months)
                         st.session_state.salary_dfs[i] = {
                             'name': new_name,
-                            'df': self.create_salary_df(new_name, new_annual_gross_income, new_pension_contrib,
-                                                        new_company_match, new_num_months),
+                            'input_df': input_df,
+                            'output_df': output_df,
                             'annual_gross_income': new_annual_gross_income,
                             'pension_contrib': new_pension_contrib,
                             'company_match': new_company_match,
@@ -135,14 +154,14 @@ class SalaryUI:
 
     def combined_salary_df(self):
         if len(st.session_state.salary_dfs) > 0:
-            combined_df = pd.concat([salary['df'] for salary in st.session_state.salary_dfs])
+            combined_df = pd.concat([salary['input_df'] for salary in st.session_state.salary_dfs])
             st.dataframe(combined_df)
         else:
             st.write("No salaries added yet.")
 
     def plot_salary_data(self):
         if len(st.session_state.salary_dfs) > 0:
-            combined_df = pd.concat([salary['df'] for salary in st.session_state.salary_dfs])
+            combined_df = pd.concat([salary['output_df'] for salary in st.session_state.salary_dfs])
             columns_to_plot = st.multiselect("Select columns to plot", combined_df.columns.tolist())
             if columns_to_plot:
                 st.line_chart(combined_df[columns_to_plot])
