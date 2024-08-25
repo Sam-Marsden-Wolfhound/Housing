@@ -2,9 +2,9 @@ import logging
 import pandas as pd
 
 class MortgageCalculator:
-    def calculate_mortgage_schedule(self, property_price, deposit, mortgage_term, interest_rate):
-        logging.info(f"Calculating mortgage schedule: property_price={property_price}, deposit={deposit}, "
-                     f"mortgage_term={mortgage_term}, interest_rate={interest_rate}")
+    @staticmethod
+    def calculate_mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
+        logging.info(f"Calculating mortgage schedule: property_price={property_price}, deposit={deposit}, mortgage_term={mortgage_term}, interest_rate={interest_rate}")
 
         borrowed_capital = property_price - deposit
         monthly_interest_rate = interest_rate / 12
@@ -14,8 +14,7 @@ class MortgageCalculator:
             logging.warning("Number of payments is zero, returning empty DataFrame.")
             return pd.DataFrame()
 
-        monthly_payment = (borrowed_capital * monthly_interest_rate) / \
-                          (1 - (1 + monthly_interest_rate) ** -number_of_payments)
+        monthly_payment = (borrowed_capital * monthly_interest_rate) / (1 - (1 + monthly_interest_rate) ** -number_of_payments)
 
         months = []
         payments = []
