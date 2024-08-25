@@ -3,6 +3,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
+class UI:
+    def __init__(self):
+        pass
+
+    def display(self):
+        tab1, tab2, tab3, tab4 = st.tabs(["Salary", "Expenses", "Housing", "Analysis"])
+        with tab1:
+            SalaryUI().display()
+        with tab2:
+            ExpensesUI().display()
+        with tab3:
+            HousingUI().display()
+        with tab4:
+            AnalysisUI().display()
+
 class SalaryUI:
     def display(self, df_builder):
         st.header("Salary Input")
