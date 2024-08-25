@@ -82,5 +82,6 @@ class DataFrameBuilder:
 
             start_month += entry["num_months"]
 
+        df = pd.DataFrame(data)
         logging.info("DataFrame rebuild complete.")
-        return pd.DataFrame(data)
+        return df

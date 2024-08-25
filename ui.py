@@ -1,5 +1,7 @@
 import logging
 import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
 from dataframe_builder import DataFrameBuilder
 
 class SalaryUI:
@@ -44,21 +46,23 @@ class HousingUI:
             st.session_state.df = df_builder.rebuild_dataframe()
             st.success("House entry added and DataFrame updated.")
 
+
 class AnalysisUI:
     def display(self, df_builder):
-        logging.info("Displaying Analysis UI.")
-        st.write("Analysis Tab - Placeholder for future enhancements.")
+        st.title("Analysis")
+        st.write("Placeholder for data analysis.")
 
-        # Placeholder DataFrame
         data = {
-            "x": list(range(1, 11)),
-            "y1": list(range(1, 11)),
-            "y2": [x ** 2 for x in range(1, 11)]
+            "x": [i for i in range(1, 11)],
+            "y1": [i for i in range(1, 11)],
+            "y2": [i ** 2 for i in range(1, 11)]
         }
         df = pd.DataFrame(data)
         st.write(df)
 
-        st.line_chart(df.set_index("x"))
-
-        logging.info("Analysis UI displayed.")
+        fig, ax = plt.subplots()
+        ax.plot(df["x"], df["y1"], label="y1 = x")
+        ax.plot(df["x"], df["y2"], label="y2 = x^2")
+        ax.legend()
+        st.pyplot(fig)
 

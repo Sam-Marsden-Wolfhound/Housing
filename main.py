@@ -1,36 +1,32 @@
-import logging
 import streamlit as st
-from ui import SalaryUI, ExpensesUI, HousingUI, AnalysisUI
-from dataframe_builder import DataFrameBuilder
+import pandas as pd
 from financial_entry import FinancialEntry
-
-logging.basicConfig(filename="app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+from dataframe_builder import DataFrameBuilder
+from ui import SalaryUI, ExpensesUI, HousingUI, AnalysisUI
 
 def main():
     st.set_page_config(layout="wide")
-    logging.info("Application started.")
 
     if "df" not in st.session_state:
-        st.session_state.df = DataFrameBuilder(FinancialEntry()).build_empty_dataframe()
-
-    st.title("Financial Planning Tool")
-
-    tabs = ["Salary", "Expenses", "Housing", "Analysis"]
-    selected_tab = st.selectbox("Select a tab", tabs)
+        st.session_state.df = pd.DataFrame()
 
     df_builder = DataFrameBuilder(FinancialEntry())
 
-    if selected_tab == "Salary":
+    tab1, tab2, tab3, tab4 = st.tabs(["Salary", "Expenses", "Housing", "Analysis"])
+
+    with tab1:
         SalaryUI().display(df_builder)
-    elif selected_tab == "Expenses":
+
+    with tab2:
         ExpensesUI().display(df_builder)
-    elif selected_tab == "Housing":
+
+    with tab3:
         HousingUI().display(df_builder)
-    elif selected_tab == "Analysis":
+
+    with tab4:
         AnalysisUI().display(df_builder)
 
     st.session_state.df.set_index("Month", inplace=True)
-    logging.info("Application finished.")
 
 if __name__ == "__main__":
     main()
