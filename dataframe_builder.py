@@ -3,32 +3,16 @@ import pandas as pd
 from financial_entry import FinancialEntry
 from mortgage_calculator import MortgageCalculator
 
+# Configure logging
+logging.basicConfig(filename="app.log", level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+
 class DataFrameBuilder:
     def __init__(self, financial_entry):
         self.financial_entry = financial_entry
-        logging.info("DataFrameBuilder initialized.")
-
-    def build_empty_dataframe(self):
-        logging.info("Building empty DataFrame...")
-        data = {
-            "Month": [],
-            "Years": [],
-            "Salary": [],
-            "Pension Deductions": [],
-            "Tax": [],
-            "National Insurance": [],
-            "Combined Pension Contribution": [],
-            "Take Home Pay": [],
-            "Expenses": []
-        }
-        df = pd.DataFrame(data)
-        logging.info("Empty DataFrame built.")
-        return df
 
     def rebuild_dataframe(self):
         logging.info("Starting to rebuild DataFrame...")
         data = {
-            "Month": [],
             "Years": [],
             "Salary": [],
             "Pension Deductions": [],
@@ -52,8 +36,7 @@ class DataFrameBuilder:
                 ni = self.financial_entry.calculate_ni(monthly_gross)
                 take_home_pay = monthly_gross - pension_contribution - tax - ni
 
-                data["Month"].append(month)
-                data["Years"].append(f"{month // 12} years, {month % 12} months")
+                data["Years"].append(f"{(month // 12)} years, {(month % 12)} months")
                 data["Salary"].append(monthly_gross)
                 data["Pension Deductions"].append(pension_contribution)
                 data["Tax"].append(tax)
@@ -67,10 +50,9 @@ class DataFrameBuilder:
         for i, entry in enumerate(self.financial_entry.expense_entries):
             logging.info(f"Processing expense entry {i + 1}: {entry}")
             for month in range(start_month, start_month + entry["num_months"]):
-                if month in data["Month"]:
-                    data["Expenses"][data["Month"].index(month)] += entry["monthly_expense"]
+                if month < len(data["Years"]):
+                    data["Expenses"][month - 1] += entry["monthly_expense"]
                 else:
-                    data["Month"].append(month)
                     data["Years"].append(f"{month // 12} years, {month % 12} months")
                     data["Salary"].append(0)
                     data["Pension Deductions"].append(0)
@@ -82,6 +64,5 @@ class DataFrameBuilder:
 
             start_month += entry["num_months"]
 
-        df = pd.DataFrame(data)
         logging.info("DataFrame rebuild complete.")
-        return df
+        return pd.DataFrame(data)

@@ -1,44 +1,47 @@
 import logging
 import pandas as pd
 
+
 class MortgageCalculator:
     @staticmethod
     def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
-        logging.info(f"Calculating mortgage schedule: property_price={property_price}, deposit={deposit}, "
-                     f"mortgage_term={mortgage_term}, interest_rate={interest_rate}")
+        logging.info(
+            f"Calculating mortgage schedule: property_price={property_price}, deposit={deposit}, mortgage_term={mortgage_term}, interest_rate={interest_rate}")
 
         borrowed_capital = property_price - deposit
         monthly_interest_rate = interest_rate / 12
         number_of_payments = mortgage_term * 12
 
-        if number_of_payments == 0:
-            logging.warning("Number of payments is zero, returning empty DataFrame.")
-            return pd.DataFrame()
+        monthly_payment = (borrowed_capital * monthly_interest_rate) / (
+                    1 - (1 + monthly_interest_rate) ** -number_of_payments)
 
-        monthly_payment = (borrowed_capital * monthly_interest_rate) / \
-                          (1 - (1 + monthly_interest_rate) ** -number_of_payments)
-
-        months = []
+        months = list(range(1, number_of_payments + 1))
         payments = []
-        interest_loss = []
+        interest_payments = []
+        principal_payments = []
         remaining_balances = []
 
         remaining_balance = borrowed_capital
-        for month in range(1, mortgage_term * 12 + 1):
-            months.append(month)
+
+        for month in months:
             interest_payment = remaining_balance * monthly_interest_rate
             principal_payment = monthly_payment - interest_payment
             remaining_balance -= principal_payment
+
             payments.append(monthly_payment)
-            interest_loss.append(interest_payment)
+            interest_payments.append(interest_payment)
+            principal_payments.append(principal_payment)
             remaining_balances.append(remaining_balance)
 
-        df = pd.DataFrame({
+        data = {
             "Month": months,
-            "Monthly Payment": payments,
-            "Interest Payment": interest_loss,
+            "Payment": payments,
+            "Interest Payment": interest_payments,
+            "Principal Payment": principal_payments,
             "Remaining Balance": remaining_balances
-        })
+        }
 
-        logging.info("Mortgage schedule calculated successfully.")
-        return df
+        mortgage_df = pd.DataFrame(data)
+        logging.info("Mortgage schedule calculation complete.")
+        return mortgage_df
+
