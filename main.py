@@ -1,13 +1,11 @@
 import streamlit as st
 from ui import UI
+from dataframe_builder import DataFrameBuilder
+from financial_entry import FinancialEntry
 
 def main():
-    # Initialize the session state if necessary
-    if "df" not in st.session_state:
-        st.session_state.df = None
-
-    # Display the UI
-    UI().display()
+    df_builder = DataFrameBuilder(FinancialEntry())
+    UI().display(df_builder)
 
 if __name__ == "__main__":
     main()
