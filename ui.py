@@ -73,7 +73,6 @@ class SalaryUI:
         return input_df, output_df
 
     def salary_sidebar(self):
-        st.sidebar.header("Your Salaries")
 
         # Add a refresh button at the top of the sidebar
         if st.sidebar.button("Refresh Sidebar"):
@@ -85,6 +84,7 @@ class SalaryUI:
                 """,
                 unsafe_allow_html=True
             )
+        st.sidebar.header("Your Salaries")
 
         # Track if a deletion has occurred
         deletion_occurred = False
@@ -224,10 +224,6 @@ class ExpensesUI:
 
     def expenses_sidebar(self):
         st.sidebar.header("Your Expenses")
-
-        # Add a refresh button at the top of the sidebar with a unique key
-        if st.sidebar.button("Refresh Sidebar", key="refresh_expenses_sidebar"):
-            st.experimental_rerun()  # Use this to re-render the app when the button is clicked
 
         # Track if a deletion has occurred
         deletion_occurred = False
