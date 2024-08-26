@@ -1,5 +1,5 @@
 import streamlit as st
-from ui import SalaryUI
+from ui import SalaryUI, ExpensesUI
 
 def main():
     st.title("Personal Finance Planner")
@@ -7,12 +7,13 @@ def main():
     tabs = st.tabs(["Salary", "Expenses", "Housing", "Analysis"])
 
     with tabs[0]:
-        SalaryUI().display()
+        ui = SalaryUI()
+        ui.display()
 
     # Placeholder: Implement similar classes for Expenses, Housing, and Analysis.
     with tabs[1]:
-        st.header("Expenses Management")
-        st.write("Expenses management content goes here.")
+        ui = ExpensesUI()
+        ui.display()
 
     with tabs[2]:
         st.header("Housing Management")
