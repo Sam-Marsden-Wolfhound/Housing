@@ -1,27 +1,26 @@
 import streamlit as st
 from ui import SalaryUI, ExpensesUI
+from state_manager import initialize_state
+
 
 def main():
+    initialize_state()
+
     st.title("Personal Finance Planner")
 
-    tabs = st.tabs(["Salary", "Expenses", "Housing", "Analysis"])
+    tab = st.tabs(["Salary", "Expenses", "Housing", "Analysis"])
 
-    with tabs[0]:
+    with tab[0]:
         ui = SalaryUI()
         ui.display()
-
-    # Placeholder: Implement similar classes for Expenses, Housing, and Analysis.
-    with tabs[1]:
+    with tab[1]:
         ui = ExpensesUI()
         ui.display()
+    with tab[2]:
+        st.subheader("Housing Tab")
+    with tab[3]:
+        st.subheader("Analysis Tab")
 
-    with tabs[2]:
-        st.header("Housing Management")
-        st.write("Housing management content goes here.")
-
-    with tabs[3]:
-        st.header("Analysis")
-        st.write("Analysis content goes here.")
 
 if __name__ == "__main__":
     main()
