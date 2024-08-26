@@ -188,10 +188,13 @@ class ExpensesUI:
             st.session_state.next_expense_id = 1  # Track the next default expense ID
         if 'editing_expense_index' not in st.session_state:
             st.session_state.editing_expense_index = None  # Track the index of the expense being edited
+        if 'combined_expenses_df' not in st.session_state:
+            st.session_state.combined_expenses_df = pd.DataFrame()  # Initialize the combined DataFrame
 
     def display(self):
         self.expenses_input_form()
         self.expenses_sidebar()
+        self.display_combined_expenses_df()
 
     def expenses_input_form(self):
         st.header("Add New Expense")
@@ -203,24 +206,38 @@ class ExpensesUI:
             submitted = st.form_submit_button("Save Expense")
 
             if submitted:
-                input_df = self.create_expense_df(name, monthly_expense, months)
+                output_df = self.create_expense_output_df(monthly_expense, months)
                 st.session_state.expenses_dfs.append({
                     'name': name,
-                    'input_df': input_df,
+                    'output_df': output_df,
                     'monthly_expense': monthly_expense,
                     'months': months
                 })
                 st.session_state.next_expense_id += 1  # Increment the default expense ID for the next expense
                 st.success(f"Expense '{name}' added successfully!")
+                self.update_combined_expenses_df()  # Update the combined DataFrame
 
-    def create_expense_df(self, name, monthly_expense, months):
-        # Create expense_inputs_dataframe
-        input_data = {
-            'Name': [name],
-            'Monthly Expenses': [monthly_expense],
-            'Months': [months],
+    def create_expense_output_df(self, monthly_expense, months):
+        # Create output_dataframe
+        output_data = {
+            'Monthly Expenses': [monthly_expense] * months
         }
-        return pd.DataFrame(input_data)
+        return pd.DataFrame(output_data)
+
+    def update_combined_expenses_df(self):
+        # Combine all the individual expense output DataFrames
+        combined_df = pd.concat([expense['output_df'] for expense in st.session_state.expenses_dfs], ignore_index=True)
+        st.session_state.combined_expenses_df = combined_df  # Update the session state
+
+    def display_combined_expenses_df(self):
+        st.header("Combined Expenses DataFrame")
+        st.dataframe(st.session_state.combined_expenses_df)
+
+        if not st.session_state.combined_expenses_df.empty:
+            st.header("Expenses Graph")
+            columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_expenses_df.columns.tolist(), default=["Monthly Expenses"])
+            if columns_to_plot:
+                st.line_chart(st.session_state.combined_expenses_df[columns_to_plot])
 
     def expenses_sidebar(self):
         st.sidebar.header("Your Expenses")
@@ -229,11 +246,10 @@ class ExpensesUI:
         deletion_occurred = False
 
         # Display each expense in the sidebar
-        for i in range(len(st.session_state.expenses_dfs)):
+        for i, expense_data in enumerate(st.session_state.expenses_dfs):
             if deletion_occurred:
                 break  # Stop further processing if a deletion has already occurred
 
-            expense_data = st.session_state.expenses_dfs[i]
             with st.sidebar.expander(expense_data['name'], expanded=False):
                 if st.session_state.editing_expense_index == i:
                     # Edit mode
@@ -242,15 +258,16 @@ class ExpensesUI:
                     new_months = st.number_input("Months", min_value=1, max_value=120, value=expense_data['months'], key=f"expense_months_{i}")
 
                     if st.button("Save", key=f"save_expense_{i}"):
-                        input_df = self.create_expense_df(new_name, new_monthly_expense, new_months)
+                        output_df = self.create_expense_output_df(new_monthly_expense, new_months)
                         st.session_state.expenses_dfs[i] = {
                             'name': new_name,
-                            'input_df': input_df,
+                            'output_df': output_df,
                             'monthly_expense': new_monthly_expense,
                             'months': new_months
                         }
                         st.session_state.editing_expense_index = None
                         st.success(f"Expense '{new_name}' updated successfully!")
+                        self.update_combined_expenses_df()  # Update the combined DataFrame
 
                     if st.button("Cancel", key=f"cancel_expense_{i}"):
                         st.session_state.editing_expense_index = None
@@ -268,6 +285,7 @@ class ExpensesUI:
                     del st.session_state.expenses_dfs[i]
                     st.session_state.editing_expense_index = None  # Reset editing index
                     deletion_occurred = True  # Set the flag to indicate deletion has occurred
+                    self.update_combined_expenses_df()  # Update the combined DataFrame
 
                     # Trigger a page reload using JavaScript to refresh the sidebar
                     st.write(
@@ -279,5 +297,3 @@ class ExpensesUI:
                         unsafe_allow_html=True
                     )
                     break  # Exit loop to prevent further processing after deletion
-
-
