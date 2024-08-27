@@ -61,12 +61,14 @@ def display_housing_sidebar(output_df_handler, update_combined_df):
             st.write(f"House Value: ${house_data['house_value']}")
             st.write(f"Month of Acquisition: {house_data['acquisition_month']}")
             st.write(f"Appreciation Rate (%): {house_data['appreciation_rate']}%")
-            # if house_data["mortgage"]:
-            #     st.write(f"Mortgage Term: {house_data['mortgage_term']} years")
-            #     st.write(f"Interest Rate: {house_data['interest_rate']}%")
-            #     st.write(f"Deposit: ${house_data['deposit']}")
-            # if house_data["sale"]:
-            #     st.write(f"Month of Sale: {house_data['sale_month']}")
+            if house_data["mortgage"]:
+                st.write(f"Deposit: ${house_data['deposit']}")
+                st.write(f"Mortgage Term: {house_data['mortgage_term']} years")
+                st.write(f"Interest Rate: {house_data['interest_rate']}%")
+            else:
+                st.write(f"No Mortgage")
+            if house_data["sale"]:
+                st.write(f"Month of Sale: {house_data['sale_month']}")
 
             if st.button("Edit", key=f"edit_house_{i}"):
                 st.session_state.editing_house_index = i
@@ -74,13 +76,41 @@ def display_housing_sidebar(output_df_handler, update_combined_df):
             if st.session_state.editing_house_index == i:
                 handle_house_edit(i, house_data, update_combined_df, output_df_handler)
 
-            # edit_button = st.button("Edit", key=f"edit_house_{i}")
-            # delete_button = st.button("Delete", key=f"delete_house_{i}")
-            #
-            # if edit_button:
-            #     st.session_state.edit_house_index = i
-            # if delete_button:
-            #     st.session_state.delete_house_index = i
+            if st.button("Delete", key=f"delete_house_{i}"):
+                del st.session_state.housing_dfs[i]
+                update_combined_df()
+                st.session_state.editing_house_index = None
+                break  # Exit loop after deletion to prevent index errors
+
+
+def display_stock_sidebar(output_df_handler, update_combined_df):
+    """Displays the housing widgets in the sidebar."""
+    st.sidebar.header("Your Stocks")
+
+    for i, stock_data in enumerate(st.session_state.stock_dfs):
+        with st.sidebar.expander(stock_data['name'], expanded=False):
+            st.write(f"Acquisition Month: {stock_data['acquisition_month']}")
+            st.write(f"Dollar-Cost Averaging Amount (£): {stock_data['investment_amount']}")
+            st.write(f"Dollar-Cost Averaging Months: {stock_data['months_buying_stock']}")
+            st.write(f"Appreciation Rate (%): {stock_data['appreciation_rate']}")
+            if stock_data['sale']:
+                st.write(f"Month of Sale: {stock_data['sale_month']}")
+            else:
+                st.write("Hold Stock")
+
+            if st.button("Edit", key=f"edit_stock_{i}"):
+                st.session_state.editing_stock_index = i
+
+            if st.session_state.editing_stock_index == i:
+                handle_stock_edit(i, stock_data, update_combined_df, output_df_handler)
+
+            if st.button("Delete", key=f"delete_stock_{i}"):
+                del st.session_state.stock_dfs[i]
+                # update_combined_df()
+                st.session_state.editing_stock_index = None
+                break  # Exit loop after deletion to prevent index errors
+
+
 
 
 def handle_salary_edit(index, salary_data, update_combined_df, output_df_handler):
@@ -141,9 +171,9 @@ def handle_house_edit(index, house_data, update_combined_df, output_df_handler):
 
         # Mortgage related inputs
         new_mortgage = st.checkbox("Mortgage", value=house_data['mortgage'])
-        new_deposit = st.number_input("Deposit", value=house_data['deposit'])
-        new_mortgage_term = st.number_input("Mortgage Term (years)", value=house_data['mortgage_term'])
-        new_interest_rate = st.number_input("Interest Rate (%)", value=house_data['interest_rate'])
+        new_deposit = st.number_input("Deposit", value= house_data['deposit'] if (house_data['deposit'] is not None) else 50000)
+        new_mortgage_term = st.number_input("Mortgage Term (years)", value=house_data['mortgage_term'] if (house_data['mortgage_term'] is not None) else 25)
+        new_interest_rate = st.number_input("Interest Rate (%)", value=house_data['interest_rate'] if (house_data['interest_rate'] is not None) else 3.50)
         if new_mortgage:
             pass
         else:
@@ -191,4 +221,36 @@ def handle_house_edit(index, house_data, update_combined_df, output_df_handler):
 
         if st.button("Cancel", key=f"cancel_edit_expense_{index}"):
             st.session_state.editing_house_index = None
+
+def handle_stock_edit(index, stock_data, update_combined_df, output_df_handler):
+    if st.session_state.editing_stock_index == index:
+
+        new_name = st.text_input("Stock Name", value=stock_data['name'])
+        new_acquisition_month = st.number_input("Acquisition Month", value=stock_data['acquisition_month'])
+        new_investment_amount = st.number_input("Dollar-Cost Averaging Amount (£)", value=stock_data['investment_amount'])
+        new_months_buying_stock = st.number_input("Dollar-Cost Averaging Months", value=stock_data['months_buying_stock'])
+        new_appreciation_rate = st.number_input("Appreciation Rate (%)", value=stock_data['appreciation_rate'])
+        new_sale = st.checkbox("Sell Stock", value=stock_data['sale'])
+        new_sale_month = st.number_input("Month of Sale", value=new_acquisition_month + new_months_buying_stock + 1,
+                                     min_value=new_acquisition_month + new_months_buying_stock + 1)
+
+        if st.button("Save Changes", key=f"save_stock_{index}"):
+            st.session_state.stock_dfs[index]['name'] = new_name
+            st.session_state.stock_dfs[index]['acquisition_month'] = new_acquisition_month
+            st.session_state.stock_dfs[index]['investment_amount'] = new_investment_amount
+            st.session_state.stock_dfs[index]['months_buying_stock'] = new_months_buying_stock
+            st.session_state.stock_dfs[index]['appreciation_rate'] = new_appreciation_rate
+            st.session_state.stock_dfs[index]['sale'] = new_sale
+            st.session_state.stock_dfs[index]['sale_month'] = new_sale_month
+
+            # Recreate the expense output dataframe with the new values
+            new_output_df = output_df_handler(new_name, new_appreciation_rate, new_investment_amount, new_acquisition_month, new_months_buying_stock, new_sale, new_sale_month)
+            st.session_state.stock_dfs[index]['output_df'] = new_output_df
+
+            # update_combined_df()  # Update the combined expense dataframe with the new changes
+            st.session_state.editing_stock_index = None
+
+        if st.button("Cancel", key=f"cancel_edit_stock_{index}"):
+            st.session_state.editing_stock_index = None
+
 
