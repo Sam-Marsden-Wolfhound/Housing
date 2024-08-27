@@ -13,3 +13,12 @@ def display_expenses_graph():
         columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_expenses_df.columns.tolist(), default=["Monthly Expenses"])
         if columns_to_plot:
             st.line_chart(st.session_state.combined_expenses_df[columns_to_plot])
+
+def display_housing_graph():
+    st.subheader("Housing Graph")
+    if not st.session_state.combined_housing_df.empty:
+        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_housing_df.columns.tolist())
+        if columns_to_plot:
+            st.line_chart(st.session_state.combined_housing_df[columns_to_plot])
+
+

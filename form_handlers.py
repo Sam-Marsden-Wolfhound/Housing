@@ -74,6 +74,7 @@ def handle_housing_form():
 
     if st.form_submit_button("Add House"):
         output_df = create_housing_output_df(
+            name,
             house_value,
             acquisition_month,
             appreciation_rate,
@@ -84,7 +85,20 @@ def handle_housing_form():
             sale,
             sale_month
         )
+        st.session_state.housing_dfs.append({
+            'name': name,
+            'house_value': house_value,
+            'acquisition_month': acquisition_month,
+            'appreciation_rate': appreciation_rate,
+            'mortgage': mortgage,
+            'deposit': deposit,
+            'mortgage_term': mortgage_term,
+            'interest_rate': interest_rate,
+            'sale': sale,
+            'sale_month': sale_month,
+            'output_df': output_df,
 
+        })
 
         st.session_state.next_housing_id += 1
         return True
@@ -108,9 +122,9 @@ def create_salary_output_df(annual_income, pension_contrib, company_match, num_m
 def create_expense_output_df(monthly_expense, months):
     return pd.DataFrame({'Monthly Expenses': [monthly_expense] * months})
 
-def create_housing_output_df(house_value, acquisition_month, appreciation_rate, mortgage, deposit, mortgage_term, interest_rate, sale, sale_month):
+def create_housing_output_df(name, house_value, acquisition_month, appreciation_rate, mortgage, deposit, mortgage_term, interest_rate, sale, sale_month):
 
-    monthly_appreciation_rate = appreciation_rate/12
+    monthly_appreciation_rate = (appreciation_rate/100)/12
 
     if sale:
         ownership_months = sale_month - acquisition_month
@@ -127,7 +141,7 @@ def create_housing_output_df(house_value, acquisition_month, appreciation_rate, 
         house_value += house_value * monthly_appreciation_rate
 
     output_data = {
-        'House Value': house_values
+        f'House Value for {name}': house_values
     }
 
     return pd.DataFrame(output_data)
@@ -169,5 +183,4 @@ def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
     }
 
     mortgage_df = pd.DataFrame(data)
-    logging.info("Mortgage schedule calculation complete.")
     return mortgage_df
