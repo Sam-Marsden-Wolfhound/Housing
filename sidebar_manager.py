@@ -53,6 +53,30 @@ def display_expense_sidebar(update_combined_df):
                 break  # Exit loop after deletion to prevent index errors
 
 
+def display_housing_sidebar(houses):
+    """Displays the housing widgets in the sidebar."""
+    st.sidebar.header("Your Houses")
+
+    for i, house_data in enumerate(houses):
+        with st.sidebar.expander(f"{house_data['name']}"):
+            st.write(f"House Value: ${house_data['house_value']}")
+            st.write(f"Month of Acquisition: {house_data['acquisition_month']}")
+            st.write(f"Appreciation Rate (%): {house_data['appreciation_rate']}%")
+            if house_data["mortgage"]:
+                st.write(f"Mortgage Term: {house_data['mortgage_term']} years")
+                st.write(f"Interest Rate: {house_data['interest_rate']}%")
+                st.write(f"Deposit: ${house_data['deposit']}")
+            if house_data["sale"]:
+                st.write(f"Month of Sale: {house_data['sale_month']}")
+            edit_button = st.button("Edit", key=f"edit_house_{i}")
+            delete_button = st.button("Delete", key=f"delete_house_{i}")
+
+            if edit_button:
+                st.session_state.edit_house_index = i
+            if delete_button:
+                st.session_state.delete_house_index = i
+
+
 def handle_salary_edit(index, salary_data, update_combined_df):
     if st.session_state.editing_salary_index == index:
         new_name = st.text_input("Salary Name", value=salary_data['name'])

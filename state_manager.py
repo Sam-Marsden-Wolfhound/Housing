@@ -10,6 +10,8 @@ def initialize_state():
         st.session_state['next_salary_id'] = 1
     if 'next_expense_id' not in st.session_state:
         st.session_state['next_expense_id'] = 1
+    if 'next_housing_id' not in st.session_state:
+        st.session_state['next_housing_id'] = 1
     if 'editing_salary_index' not in st.session_state:
         st.session_state['editing_salary_index'] = None
     if 'editing_expense_index' not in st.session_state:

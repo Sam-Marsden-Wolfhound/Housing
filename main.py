@@ -1,5 +1,5 @@
 import streamlit as st
-from ui import SalaryUI, ExpensesUI
+from ui import SalaryUI, ExpensesUI, HousingUI
 from state_manager import initialize_state
 
 
@@ -17,7 +17,8 @@ def main():
         ui = ExpensesUI()
         ui.display()
     with tab[2]:
-        st.subheader("Housing Tab")
+        ui = HousingUI()
+        ui.display()
     with tab[3]:
         st.subheader("Analysis Tab")
 

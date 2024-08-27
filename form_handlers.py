@@ -10,7 +10,7 @@ def handle_salary_form():
     company_match = st.number_input("Company Match (%)", value=3.0)
     num_months = st.number_input("Number of Months", value=12, min_value=1, max_value=120)
 
-    if st.form_submit_button("Save Salary"):
+    if st.form_submit_button("Add Salary"):
         output_df = create_salary_output_df(annual_income, pension_contrib, company_match, num_months)
         st.session_state.salary_dfs.append({
             'name': name,
@@ -31,7 +31,7 @@ def handle_expense_form():
     monthly_expense = st.number_input("Monthly Expenses", value=1000.00)
     months = st.number_input("Months", value=12, min_value=1, max_value=120)
 
-    if st.form_submit_button("Save Expense"):
+    if st.form_submit_button("Add Expense"):
         output_df = create_expense_output_df(monthly_expense, months)
         st.session_state.expenses_dfs.append({
             'name': name,
@@ -43,6 +43,52 @@ def handle_expense_form():
         return True
     return False
 
+def handle_housing_form():
+    """Handles the housing input form and returns the data."""
+    st.write("Add a new house")
+    default_name = f"House {st.session_state.next_housing_id}"
+    name = st.text_input("House Name", value=default_name)
+    house_value = st.number_input("House Value", value=200000)
+    acquisition_month = st.number_input("Month of Acquisition", value=0)
+    appreciation_rate = st.number_input("House Appreciation Rate (%)", value=1.5)
+
+    # Mortgage related inputs
+    mortgage = st.checkbox("Mortgage")
+    deposit = st.number_input("Deposit", value=0)
+    mortgage_term = st.number_input("Mortgage Term (years)", value=25)
+    interest_rate = st.number_input("Interest Rate (%)", value=3.5)
+    if mortgage:
+        pass
+    else:
+        deposit = None
+        mortgage_term = None
+        interest_rate = None
+
+    # Sale related inputs
+    sale = st.checkbox("Sale of House")
+    sale_month = st.number_input("Month of Sale", value=acquisition_month + 1, min_value=acquisition_month + 1)
+    if sale:
+        pass
+    else:
+        sale_month = None
+
+    if st.form_submit_button("Add House"):
+        output_df = create_housing_output_df(
+            house_value,
+            acquisition_month,
+            appreciation_rate,
+            mortgage,
+            deposit,
+            mortgage_term,
+            interest_rate,
+            sale,
+            sale_month
+        )
+
+
+        st.session_state.next_housing_id += 1
+        return True
+    return False
 
 def create_salary_output_df(annual_income, pension_contrib, company_match, num_months):
     monthly_salary = annual_income / num_months
@@ -61,3 +107,67 @@ def create_salary_output_df(annual_income, pension_contrib, company_match, num_m
 
 def create_expense_output_df(monthly_expense, months):
     return pd.DataFrame({'Monthly Expenses': [monthly_expense] * months})
+
+def create_housing_output_df(house_value, acquisition_month, appreciation_rate, mortgage, deposit, mortgage_term, interest_rate, sale, sale_month):
+
+    monthly_appreciation_rate = appreciation_rate/12
+
+    if sale:
+        ownership_months = sale_month - acquisition_month
+    else:
+        ownership_months = 1200  # 100 years
+
+    house_values = []
+
+    for month in range(acquisition_month):
+        house_values.append(0)
+
+    for month in range(ownership_months):
+        house_values.append(house_value)
+        house_value += house_value * monthly_appreciation_rate
+
+    output_data = {
+        'House Value': house_values
+    }
+
+    return pd.DataFrame(output_data)
+
+
+def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
+
+    borrowed_capital = property_price - deposit
+    monthly_interest_rate = interest_rate / 12
+    number_of_payments = mortgage_term * 12
+
+    monthly_payment = (borrowed_capital * monthly_interest_rate) / (
+                1 - (1 + monthly_interest_rate) ** -number_of_payments)
+
+    months = list(range(1, number_of_payments + 1))
+    payments = []
+    interest_payments = []
+    principal_payments = []
+    remaining_balances = []
+
+    remaining_balance = borrowed_capital
+
+    for month in months:
+        interest_payment = remaining_balance * monthly_interest_rate
+        principal_payment = monthly_payment - interest_payment
+        remaining_balance -= principal_payment
+
+        payments.append(monthly_payment)
+        interest_payments.append(interest_payment)
+        principal_payments.append(principal_payment)
+        remaining_balances.append(remaining_balance)
+
+    data = {
+        "Month": months,
+        "Payment": payments,
+        "Interest Payment": interest_payments,
+        "Principal Payment": principal_payments,
+        "Remaining Balance": remaining_balances
+    }
+
+    mortgage_df = pd.DataFrame(data)
+    logging.info("Mortgage schedule calculation complete.")
+    return mortgage_df
