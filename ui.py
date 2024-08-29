@@ -1,8 +1,8 @@
 import streamlit as st
-from form_handlers import handle_salary_form, handle_expense_form, handle_housing_form, handle_stock_form, handle_savings_form, create_salary_output_df, create_expense_output_df, create_housing_output_df, create_stock_output_df
-from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_stock_sidebar
-from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df
-from visualizations import display_salary_graph, display_expenses_graph, display_housing_graph
+from form_handlers import handle_salary_form, handle_expense_form, handle_housing_form, handle_stock_form, handle_savings_form, create_salary_output_df, create_expense_output_df, create_housing_output_df, create_stock_output_df, create_savings_output_df
+from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_stock_sidebar, display_savings_sidebar
+from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_stock_df, update_combined_savings_df
+from visualizations import display_salary_graph, display_expenses_graph, display_housing_graph, display_stock_graph, display_savings_graph
 
 class SalaryUI:
     def display(self):
@@ -43,24 +43,23 @@ class StockUI:
         st.header("Stock Management")
         with st.form(key='stock_form'):
             if handle_stock_form():
-                # update_combined_housing_df()
+                update_combined_stock_df()
                 pass
         st.subheader("Combined Stock DataFrame")
         # cb_housing_df_timeframe = st.number_input("Time Frame", value=40)
-        display_stock_sidebar(create_stock_output_df, None)
-        # st.dataframe(st.session_state.combined_housing_df)
-        # display_housing_graph()
+        display_stock_sidebar(create_stock_output_df, update_combined_stock_df)
+        st.dataframe(st.session_state.combined_stock_df)
+        display_stock_graph()
 
 class SavingsUI:
     def display(self):
         st.header("Savings Management")
         with st.form(key='savings_form'):
             if handle_savings_form():
-                # update_combined_housing_df()
-                pass
+                update_combined_savings_df()
+
         st.subheader("Combined Savings DataFrame")
-        # cb_housing_df_timeframe = st.number_input("Time Frame", value=40)
-        # display_stock_sidebar(create_stock_output_df, None)
-        # st.dataframe(st.session_state.combined_housing_df)
-        # display_housing_graph()
+        display_savings_sidebar(create_savings_output_df, update_combined_savings_df)
+        st.dataframe(st.session_state.combined_savings_df)
+        # display_savings_graph()
 

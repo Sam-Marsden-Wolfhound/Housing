@@ -297,6 +297,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
     monthly_investment_amounts = []
     monthly_action = []
     stock_values = []
+    cashout_values = []
 
     for month in range(acquisition_month):
         stock_prices.append(0)
@@ -304,6 +305,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
         monthly_investment_amounts.append(0)
         monthly_action.append(0)
         stock_values.append(0)
+        cashout_values.append(0)
 
     for month in range(ownership_months):
         stock_prices.append(stock_price)
@@ -312,7 +314,9 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
             owned_stock_amounts.append(owned_stock_amount)
             monthly_investment_amounts.append(investment_amount)
             monthly_action.append(1)
+            cashout_values.append(0)
         elif month == ownership_months - 1:
+            cashout_values.append(owned_stock_amount * stock_price)
             owned_stock_amount = 0
             owned_stock_amounts.append(owned_stock_amount)
             monthly_investment_amounts.append(0)
@@ -321,6 +325,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
             owned_stock_amounts.append(owned_stock_amount)
             monthly_investment_amounts.append(0)
             monthly_action.append(0)
+            cashout_values.append(0)
 
         stock_values.append(owned_stock_amount * stock_price)
         stock_price += stock_price * monthly_appreciation_rate
@@ -331,6 +336,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
         f'Investment Amount for {name}': monthly_investment_amounts,
         f'Action for {name}': monthly_action,
         f'Cash Value for {name}': stock_values,
+        f'Cashout Value for {name}': cashout_values,
     }
 
     return pd.DataFrame(output_data)

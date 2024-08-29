@@ -110,6 +110,26 @@ def display_stock_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_stock_index = None
                 break  # Exit loop after deletion to prevent index errors
 
+def display_savings_sidebar(output_df_handler, update_combined_df):
+    """Displays the housing widgets in the sidebar."""
+    st.sidebar.header("Your Savings")
+
+    for i, savings_data in enumerate(st.session_state.savings_dfs):
+        with st.sidebar.expander(savings_data['name'], expanded=False):
+            st.write(f"Asset Value: {savings_data['asset_value']}")
+            st.write(f"Acquisition Month: {savings_data['acquisition_month']}")
+
+            if st.button("Edit", key=f"edit_savings_{i}"):
+                st.session_state.editing_savings_index = i
+
+            if st.session_state.editing_savings_index == i:
+                handle_savings_edit(i, savings_data, update_combined_df, output_df_handler)
+
+            if st.button("Delete", key=f"delete_savings_{i}"):
+                del st.session_state.savings_dfs[i]
+                update_combined_df()
+                st.session_state.editing_savings_index = None
+                break  # Exit loop after deletion to prevent index errors
 
 
 
@@ -247,10 +267,29 @@ def handle_stock_edit(index, stock_data, update_combined_df, output_df_handler):
             new_output_df = output_df_handler(new_name, new_appreciation_rate, new_investment_amount, new_acquisition_month, new_months_buying_stock, new_sale, new_sale_month)
             st.session_state.stock_dfs[index]['output_df'] = new_output_df
 
-            # update_combined_df()  # Update the combined expense dataframe with the new changes
+            update_combined_df()  # Update the combined expense dataframe with the new changes
             st.session_state.editing_stock_index = None
 
         if st.button("Cancel", key=f"cancel_edit_stock_{index}"):
             st.session_state.editing_stock_index = None
 
+def handle_savings_edit(index, savings_data, update_combined_df, output_df_handler):
+    if st.session_state.editing_savings_index == index:
+        new_name = st.text_input("Asset Name", value=savings_data['name'])
+        new_asset_value = st.number_input("Asset Value", value=savings_data['asset_value'])
+        new_acquisition_month = st.number_input("Acquisition Month", value=savings_data['acquisition_month'])
+
+        if st.button("Save Changes", key=f"save_asset_{index}"):
+            st.session_state.savings_dfs[index]['name'] = new_name
+            st.session_state.savings_dfs[index]['asset_value'] = new_asset_value
+            st.session_state.savings_dfs[index]['acquisition_month'] = new_acquisition_month
+
+            output_df = output_df_handler(new_name, new_asset_value, new_acquisition_month)
+            st.session_state.savings_dfs[index]['output_df'] = output_df
+
+            update_combined_df()  # Update the combined expense dataframe with the new changes
+            st.session_state.editing_savings_index = None
+
+        if st.button("Cancel", key=f"cancel_edit_savings_{index}"):
+            st.session_state.editing_savings_index = None
 
