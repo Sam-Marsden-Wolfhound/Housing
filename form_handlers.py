@@ -8,7 +8,7 @@ def handle_salary_form():
     annual_income = st.number_input("Annual Gross Income", value=60000)
     pension_contrib = st.number_input("Pension Contribution (%)", value=3.0)
     company_match = st.number_input("Company Match (%)", value=3.0)
-    num_months = st.number_input("Number of Months", value=12, min_value=1, max_value=120)
+    num_months = st.number_input("Number of Months", value=12, min_value=1)
 
     if st.form_submit_button("Add Salary"):
         output_df = create_salary_output_df(annual_income, pension_contrib, company_match, num_months)
@@ -29,7 +29,7 @@ def handle_expense_form():
     default_name = f"Expense {st.session_state.next_expense_id}"
     name = st.text_input("Expense Name", value=default_name)
     monthly_expense = st.number_input("Monthly Expenses", value=1000.00)
-    months = st.number_input("Months", value=12, min_value=1, max_value=120)
+    months = st.number_input("Months", value=12, min_value=1)
 
     if st.form_submit_button("Add Expense"):
         output_df = create_expense_output_df(monthly_expense, months)
@@ -66,7 +66,7 @@ def handle_housing_form():
     # Sale related inputs
     with st.expander("Sale Details", expanded=False):
         sale = st.checkbox("Sell House")
-        sale_month = st.number_input("Month of Sale", value=acquisition_month + 1, min_value=acquisition_month + 1)
+        sale_month = st.number_input("Month of Sale", value=acquisition_month + 300, min_value=acquisition_month + 1)
     if not sale:
         sale_month = None
 
@@ -101,6 +101,27 @@ def handle_housing_form():
         })
 
         st.session_state.next_housing_id += 1
+        return True
+    return False
+
+def handle_rent_form():
+    default_name = f"Rent {st.session_state.next_rent_id}"
+    name = st.text_input("Rent Name", value=default_name)
+    rent_amount = st.number_input("Rent Amount", value=2000)
+    start_month = st.number_input("Starting Month", value=0)
+    duration = st.number_input("Duration", value=12, min_value=0)
+
+    if st.form_submit_button("Add Rent"):
+        output_df = create_rent_output_df(name, rent_amount, start_month, duration)
+
+        st.session_state.rent_dfs.append({
+            'name': name,
+            'rent_amount': rent_amount,
+            'start_month': start_month,
+            'duration': duration,
+            'output_df': output_df,
+        })
+        st.session_state.next_rent_id += 1
         return True
     return False
 
@@ -187,6 +208,7 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
     principal_payments = []
     remaining_balances = []
     equitys = []
+    cashout_values = []
 
     if mortgage:
         borrowed_capital = og_house_value - deposit
@@ -205,6 +227,7 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
         principal_payments.append(0)
         remaining_balances.append(0)
         equitys.append(0)
+        cashout_values.append(0)
 
     for month in range(ownership_months):
         if not mortgage:
@@ -229,7 +252,12 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
         interest_payments.append(interest_payment)
         principal_payments.append(principal_payment)
         remaining_balances.append(remaining_balance)
-        equitys.append(house_value-remaining_balance)
+        equitys.append(house_value - remaining_balance)
+
+        if sale and month == (ownership_months-1):
+            cashout_values.append(house_value - remaining_balance)
+        else:
+            cashout_values.append(0)
 
         house_value += house_value * monthly_appreciation_rate
 
@@ -240,47 +268,29 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
         f'Principal Payment for {name}': principal_payments,
         f'Remaining Balance for {name}': remaining_balances,
         f'Equity for {name}': equitys,
+        f'Cashout Value for {name}': cashout_values,
     }
 
     return pd.DataFrame(output_data)
 
-# def mortgage_schedule(property_price, deposit, mortgage_term, interest_rate):
-#
-#     borrowed_capital = property_price - deposit
-#     monthly_interest_rate = interest_rate / 12
-#     number_of_payments = mortgage_term * 12
-#
-#     monthly_payment = (borrowed_capital * monthly_interest_rate) / (
-#                 1 - (1 + monthly_interest_rate) ** -number_of_payments)
-#
-#     months = list(range(1, number_of_payments + 1))
-#     payments = []
-#     interest_payments = []
-#     principal_payments = []
-#     remaining_balances = []
-#
-#     remaining_balance = borrowed_capital
-#
-#     for month in months:
-#         interest_payment = remaining_balance * monthly_interest_rate
-#         principal_payment = monthly_payment - interest_payment
-#         remaining_balance -= principal_payment
-#
-#         payments.append(monthly_payment)
-#         interest_payments.append(interest_payment)
-#         principal_payments.append(principal_payment)
-#         remaining_balances.append(remaining_balance)
-#
-#     data = {
-#         "Month": months,
-#         "Payment": payments,
-#         "Interest Payment": interest_payments,
-#         "Principal Payment": principal_payments,
-#         "Remaining Balance": remaining_balances
-#     }
-#
-#     mortgage_df = pd.DataFrame(data)
-#     return mortgage_df
+
+def create_rent_output_df(name, rent_amount, start_month, duration):
+
+    rent_amounts = []
+
+    for month in range(start_month):
+        rent_amounts.append(0)
+
+    for month in range(duration):
+        rent_amounts.append(rent_amount)
+
+    output_data = {
+        f'Rent for {name}': rent_amounts,
+    }
+
+    return pd.DataFrame(output_data)
+
+
 
 def create_stock_output_df(name, appreciation_rate, investment_amount, acquisition_month, months_buying_stock, sale, sale_month):
     if sale:

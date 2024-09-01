@@ -82,6 +82,29 @@ def display_housing_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_house_index = None
                 break  # Exit loop after deletion to prevent index errors
 
+def display_rent_sidebar(output_df_handler, update_combined_df):
+    """Displays the housing widgets in the sidebar."""
+    st.sidebar.header("Your Houses")
+
+    for i, house_data in enumerate(st.session_state.housing_dfs):
+        with st.sidebar.expander(f"{house_data['name']}"):
+            st.write(f"House Value: ${house_data['house_value']}")
+            st.write(f"Month of Acquisition: {house_data['acquisition_month']}")
+            st.write(f"Appreciation Rate (%): {house_data['appreciation_rate']}%")
+
+
+            if st.button("Edit", key=f"edit_house_{i}"):
+                st.session_state.editing_house_index = i
+
+            if st.session_state.editing_house_index == i:
+                handle_house_edit(i, house_data, update_combined_df, output_df_handler)
+
+            if st.button("Delete", key=f"delete_house_{i}"):
+                del st.session_state.housing_dfs[i]
+                update_combined_df()
+                st.session_state.editing_house_index = None
+                break  # Exit loop after deletion to prevent index errors
+
 
 def display_stock_sidebar(output_df_handler, update_combined_df):
     """Displays the housing widgets in the sidebar."""

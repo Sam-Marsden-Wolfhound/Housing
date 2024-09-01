@@ -1,4 +1,61 @@
 
+# To do 
+
+## Overview
+
+* Save data
+* load data 
+
+Stage 2
+* Tax System
+
+
+## Salary
+
+* Add NI payments
+* Graph coulers 
+* Layout Graph over dataframe?
+
+Stage 2
+* US vs UK tax
+
+## Expenses
+
+Stage 2
+* Add more granular breakdown on monthly expenses
+
+## Housing
+
+* Add sell colum to housing
+* Add row totals for portfolio
+* Add rent to housing 
+* Add graph defult values
+
+Stage 2
+* Show house value heat map 
+* Show rent heat map 
+* Show rent/house value heat mapp
+* Industry long term normal Growth rate values 
+* Add Variability patterns
+* Add Monty carlo normal distribution
+
+## Stocks
+
+Stage 2
+* Add index and Industry long term normal Growth rate values 
+* Add Variability patterns
+* Add Monty carlo normal distribution
+
+## Savings 
+
+Stage 2
+* ISA 
+
+## Analysis 
+
+* Add Combined dataframe 
+
+
 # Financial Planner Application
 
 This Financial Planner Application is designed to help users manage their personal finances by calculating and analyzing their salaries, expenses, housing costs, and more. The application is built using Streamlit and provides an intuitive interface for users to input their financial data and visualize the results.

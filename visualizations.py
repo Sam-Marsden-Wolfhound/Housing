@@ -3,7 +3,7 @@ import streamlit as st
 def display_salary_graph():
     st.subheader("Salary Graph")
     if not st.session_state.combined_salary_df.empty:
-        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_salary_df.columns.tolist(), default=["Monthly Salary"])
+        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_salary_df.columns.tolist(), default=["Monthly Salary", "Take Home Pay"])
         if columns_to_plot:
             st.line_chart(st.session_state.combined_salary_df[columns_to_plot])
 

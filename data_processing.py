@@ -12,9 +12,36 @@ def update_combined_expenses_df():
 def update_combined_housing_df():
     combined_df = pd.concat([house['output_df'] for house in st.session_state.housing_dfs], axis=1)
     combined_df.fillna(0, inplace=True)
-    # print(combined_df)
+
+    # Calculate the row sum of "Payment" columns
+    housing_cashout_columns = [col for col in combined_df.columns if 'Payment for' in col]
+    combined_df['Row Total Payment Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+    # Calculate the row sum of "Interest" columns
+    housing_cashout_columns = [col for col in combined_df.columns if 'Interest Payment for' in col]
+    combined_df['Row Total Interest Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+    # Calculate the row sum of "Principal Payment" columns
+    housing_cashout_columns = [col for col in combined_df.columns if 'Principal Payment for' in col]
+    combined_df['Row Total Principal Payment Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+    # Calculate the row sum of "Remaining Balance" columns
+    housing_cashout_columns = [col for col in combined_df.columns if 'Remaining Balance for' in col]
+    combined_df['Row Total Remaining Balance Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+    # Calculate the row sum of "Equity" columns
+    housing_cashout_columns = [col for col in combined_df.columns if 'Equity for' in col]
+    combined_df['Row Total Equity Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+    # Calculate the row sum of "Cashout Value" columns
+    housing_cashout_columns = [col for col in combined_df.columns if 'Cashout Value for' in col]
+    combined_df['Row Total Cashout Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
     st.session_state.combined_housing_df = combined_df
 
+
+def update_combined_rent_df():
+    pass
 
 def update_combined_stock_df():
     # Concatenate all the output_df DataFrames along the columns
