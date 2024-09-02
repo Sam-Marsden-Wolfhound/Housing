@@ -41,7 +41,21 @@ def update_combined_housing_df():
 
 
 def update_combined_rent_df():
-    pass
+    # Concatenate all the output_df DataFrames along the columns
+    combined_df = pd.concat([rent['output_df'] for rent in st.session_state.rent_dfs], axis=1)
+    combined_df.fillna(0, inplace=True)
+
+    # Calculate the row sum of "Rent Amount" columns
+    rent_amount_columns = [col for col in combined_df.columns if 'Rent for' in col]
+    combined_df['Row Total Investment Amount'] = combined_df[rent_amount_columns].sum(axis=1)
+
+    # Store the combined DataFrame in session state
+    st.session_state.combined_rent_df = combined_df
+
+def update_combined_housing_and_rent_df():
+    combined_df = pd.concat([st.session_state.combined_housing_df, st.session_state.combined_rent_df], axis=1)
+    combined_df.fillna(0, inplace=True)
+    st.session_state.combined_housing_and_rent_df = combined_df
 
 def update_combined_stock_df():
     # Concatenate all the output_df DataFrames along the columns
@@ -81,3 +95,7 @@ def update_combined_savings_df():
     combined_df['Row Total Asset Value'] = combined_df[asset_value_columns].sum(axis=1)
     combined_df.fillna(0, inplace=True)
     st.session_state.combined_savings_df = combined_df
+
+def update_combined_analysis_df():
+    combined_df = pd.DataFrame()
+    combined_df = pd.concat([combined_df, st.session_state.combined_salary_df], axis=1)

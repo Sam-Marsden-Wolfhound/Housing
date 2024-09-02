@@ -55,10 +55,14 @@ def initialize_state():
         st.session_state['combined_housing_df'] = pd.DataFrame()
     if 'combined_rent_df' not in st.session_state:
         st.session_state['combined_rent_df'] = pd.DataFrame()
+    if 'combined_housing_and_rent_df' not in st.session_state:
+        st.session_state['combined_housing_and_rent_df'] = pd.DataFrame()
     if 'combined_stock_df' not in st.session_state:
         st.session_state['combined_stock_df'] = pd.DataFrame()
     if 'combined_savings_df' not in st.session_state:
         st.session_state['combined_savings_df'] = pd.DataFrame()
+    if 'combined_analysis_df' not in st.session_state:
+        st.session_state['combined_analysis_df'] = pd.DataFrame()
 
 def clear_state():
     st.session_state.clear()

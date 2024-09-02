@@ -14,12 +14,12 @@ def display_expenses_graph():
         if columns_to_plot:
             st.line_chart(st.session_state.combined_expenses_df[columns_to_plot])
 
-def display_housing_graph():
-    st.subheader("Housing Graph")
-    if not st.session_state.combined_housing_df.empty:
-        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_housing_df.columns.tolist())
+def display_housing_and_rent_graph():
+    st.subheader("Housing & Rent Graph")
+    if not st.session_state.combined_housing_and_rent_df.empty:
+        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_housing_and_rent_df.columns.tolist())
         if columns_to_plot:
-            st.line_chart(st.session_state.combined_housing_df[columns_to_plot])
+            st.line_chart(st.session_state.combined_housing_and_rent_df[columns_to_plot])
 
 def display_stock_graph():
     st.subheader("Stock Graph")
@@ -31,8 +31,10 @@ def display_stock_graph():
 def display_savings_graph():
     st.subheader("Savings Graph")
     if not st.session_state.combined_savings_df.empty:
-        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_housing_df.columns.tolist())
+        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_savings_df.columns.tolist(), default=["Row Total Asset Value"])
         if columns_to_plot:
-            st.line_chart(st.session_state.combined_housing_df[columns_to_plot])
+            st.line_chart(st.session_state.combined_savings_df[columns_to_plot])
 
 
+def display_analysis_graph():
+    pass

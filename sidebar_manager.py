@@ -52,7 +52,7 @@ def display_expense_sidebar(output_df_handler, update_combined_df):
                 break  # Exit loop after deletion to prevent index errors
 
 
-def display_housing_sidebar(output_df_handler, update_combined_df):
+def display_housing_sidebar(output_df_handler, update_combined_df, update_joint_combined_df):
     """Displays the housing widgets in the sidebar."""
     st.sidebar.header("Your Houses")
 
@@ -74,7 +74,7 @@ def display_housing_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_house_index = i
 
             if st.session_state.editing_house_index == i:
-                handle_house_edit(i, house_data, update_combined_df, output_df_handler)
+                handle_house_edit(i, house_data, update_combined_df, output_df_handler, update_joint_combined_df)
 
             if st.button("Delete", key=f"delete_house_{i}"):
                 del st.session_state.housing_dfs[i]
@@ -82,27 +82,26 @@ def display_housing_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_house_index = None
                 break  # Exit loop after deletion to prevent index errors
 
-def display_rent_sidebar(output_df_handler, update_combined_df):
-    """Displays the housing widgets in the sidebar."""
-    st.sidebar.header("Your Houses")
+def display_rent_sidebar(output_df_handler, update_combined_df, update_joint_combined_df):
+    """Displays the rent widgets in the sidebar."""
+    st.sidebar.header("Your Rents")
 
-    for i, house_data in enumerate(st.session_state.housing_dfs):
-        with st.sidebar.expander(f"{house_data['name']}"):
-            st.write(f"House Value: ${house_data['house_value']}")
-            st.write(f"Month of Acquisition: {house_data['acquisition_month']}")
-            st.write(f"Appreciation Rate (%): {house_data['appreciation_rate']}%")
+    for i, rent_data in enumerate(st.session_state.rent_dfs):
+        with st.sidebar.expander(f"{rent_data['name']}"):
+            st.write(f"Rent Amount: ${rent_data['rent_amount']}")
+            st.write(f"Starting Month: {rent_data['start_month']}")
+            st.write(f"Duration: {rent_data['duration']}")
 
+            if st.button("Edit", key=f"edit_rent_{i}"):
+                st.session_state.editing_rent_index = i
 
-            if st.button("Edit", key=f"edit_house_{i}"):
-                st.session_state.editing_house_index = i
+            if st.session_state.editing_rent_index == i:
+                handle_rent_edit(i, rent_data, update_combined_df, output_df_handler, update_joint_combined_df)
 
-            if st.session_state.editing_house_index == i:
-                handle_house_edit(i, house_data, update_combined_df, output_df_handler)
-
-            if st.button("Delete", key=f"delete_house_{i}"):
-                del st.session_state.housing_dfs[i]
+            if st.button("Delete", key=f"delete_rent_{i}"):
+                del st.session_state.rent_dfs[i]
                 update_combined_df()
-                st.session_state.editing_house_index = None
+                st.session_state.editing_rent_index = None
                 break  # Exit loop after deletion to prevent index errors
 
 
@@ -205,7 +204,7 @@ def handle_expense_edit(index, expense_data, update_combined_df, output_df_handl
         if st.button("Cancel", key=f"cancel_edit_expense_{index}"):
             st.session_state.editing_expense_index = None
 
-def handle_house_edit(index, house_data, update_combined_df, output_df_handler):
+def handle_house_edit(index, house_data, update_combined_df, output_df_handler, update_joint_combined_df):
     if st.session_state.editing_house_index == index:
         new_name = st.text_input("House Name", value=house_data['name'])
         new_house_value = st.number_input("House Value", value=house_data['house_value'])
@@ -260,10 +259,37 @@ def handle_house_edit(index, house_data, update_combined_df, output_df_handler):
             st.session_state.housing_dfs[index]['output_df'] = new_output_df
 
             update_combined_df()  # Update the combined housing dataframe with the new changes
+            update_joint_combined_df()
             st.session_state.editing_house_index = None
 
         if st.button("Cancel", key=f"cancel_edit_expense_{index}"):
             st.session_state.editing_house_index = None
+
+
+def handle_rent_edit(index, rent_data, update_combined_df, output_df_handler, update_joint_combined_df):
+    if st.session_state.editing_rent_index == index:
+        new_name = st.text_input("Rent Name", value=rent_data['name'])
+        new_rent_amount = st.number_input("Rent Amount", value=rent_data['rent_amount'])
+        new_start_month = st.number_input("Starting Month", value=rent_data['start_month'])
+        new_duration = st.number_input("Duration", value=rent_data['duration'])
+
+        if st.button("Save Changes", key=f"save_rent_{index}"):
+            st.session_state.rent_dfs[index]['name'] = new_name
+            st.session_state.rent_dfs[index]['rent_amount'] = new_rent_amount
+            st.session_state.rent_dfs[index]['start_month'] = new_start_month
+            st.session_state.rent_dfs[index]['duration'] = new_duration
+
+            # Recreate the expense output dataframe with the new values
+            new_output_df = output_df_handler(new_name, new_rent_amount, new_start_month, new_duration)
+            st.session_state.rent_dfs[index]['output_df'] = new_output_df
+
+            update_combined_df()  # Update the combined rent dataframe with the new changes
+            update_joint_combined_df()
+            st.session_state.editing_rent_index = None
+
+        if st.button("Cancel", key=f"cancel_edit_rent_{index}"):
+            st.session_state.editing_rent_index = None
+
 
 def handle_stock_edit(index, stock_data, update_combined_df, output_df_handler):
     if st.session_state.editing_stock_index == index:

@@ -1,8 +1,8 @@
 import streamlit as st
 from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_housing_form, handle_stock_form, handle_savings_form, create_salary_output_df, create_expense_output_df, create_housing_output_df, create_rent_output_df, create_stock_output_df, create_savings_output_df
 from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_rent_sidebar, display_stock_sidebar, display_savings_sidebar
-from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_stock_df, update_combined_savings_df
-from visualizations import display_salary_graph, display_expenses_graph, display_housing_graph, display_stock_graph, display_savings_graph
+from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_housing_and_rent_df, update_combined_stock_df, update_combined_savings_df, update_combined_analysis_df
+from visualizations import display_salary_graph, display_expenses_graph, display_housing_and_rent_graph, display_stock_graph, display_savings_graph, display_analysis_graph
 
 class SalaryUI:
     def display(self):
@@ -32,23 +32,28 @@ class HousingUI:
         with st.form(key='housing_form'):
             if handle_housing_form():
                 update_combined_housing_df()
-        display_housing_sidebar(create_housing_output_df, update_combined_housing_df)
+                update_combined_housing_and_rent_df()
 
-        with st.expander("Combined Housing DataFrame", expanded=True):
+        display_housing_sidebar(create_housing_output_df, update_combined_housing_df, update_combined_housing_and_rent_df)
+
+        with st.expander("Combined Housing DataFrame", expanded=False):
             st.dataframe(st.session_state.combined_housing_df)
 
         st.header("Rent Management")
         with st.form(key='rent_form'):
             if handle_rent_form():
-                # update_combined_rent_df()
-                pass
+                update_combined_rent_df()
+                update_combined_housing_and_rent_df()
 
-        display_rent_sidebar(create_rent_output_df, update_combined_rent_df)
+        display_rent_sidebar(create_rent_output_df, update_combined_rent_df, update_combined_housing_and_rent_df)
 
-        with st.expander("Combined Rent DataFrame", expanded=True):
+        with st.expander("Combined Rent DataFrame", expanded=False):
             st.dataframe(st.session_state.combined_rent_df)
 
-        display_housing_graph()
+        st.subheader("Housing & Rent DataFrame")
+        st.dataframe(st.session_state.combined_housing_and_rent_df)
+
+        display_housing_and_rent_graph()
 
 class StockUI:
     def display(self):
@@ -73,5 +78,20 @@ class SavingsUI:
         st.subheader("Combined Savings DataFrame")
         display_savings_sidebar(create_savings_output_df, update_combined_savings_df)
         st.dataframe(st.session_state.combined_savings_df)
-        # display_savings_graph()
+        display_savings_graph()
+
+class AnalysisUI:
+    def display(self):
+        st.header("Analysis")
+        if st.button("Refresh Page", key="refresh_analysis"):
+            update_combined_analysis_df()
+
+        with st.form(key='Analysis_form'):
+            pass
+
+        st.subheader("Combined DataFrame")
+        st.dataframe(st.session_state.combined_analysis_df)
+        display_analysis_graph()
+
+
 
