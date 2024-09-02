@@ -12,6 +12,12 @@ class SalaryUI:
                 update_combined_salary_df()
         display_salary_sidebar(create_salary_output_df, update_combined_salary_df)
         st.subheader("Combined Salary DataFrame")
+
+        pension_groth = st.number_input("Pension Groth", value=st.session_state.pension_groth)
+        if st.button("Update Pension Groth", key="update_pension_groth"):
+            st.session_state['pension_groth'] = pension_groth
+            update_combined_salary_df()
+
         st.dataframe(st.session_state.combined_salary_df)
         display_salary_graph()
 
@@ -89,7 +95,7 @@ class AnalysisUI:
         with st.form(key='Analysis_form'):
             pass
 
-        st.subheader("Combined DataFrame")
+        st.subheader("Analysis_Combined DataFrame")
         st.dataframe(st.session_state.combined_analysis_df)
         display_analysis_graph()
 

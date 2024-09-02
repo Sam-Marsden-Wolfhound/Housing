@@ -176,14 +176,17 @@ def handle_savings_form():
 
 
 def create_salary_output_df(annual_income, pension_contrib, company_match, num_months):
+    # Need to handel tax
     monthly_salary = annual_income / num_months
     pension_deduction = (pension_contrib / 100) * monthly_salary
-    combined_pension_contribution = pension_deduction + (company_match / 100) * monthly_salary
+    pension_company_match = (company_match / 100) * monthly_salary
+    combined_pension_contribution = pension_deduction + pension_company_match
     take_home_pay = monthly_salary - pension_deduction
 
     output_data = {
         'Monthly Salary': [monthly_salary] * num_months,
         'Pension Deduction': [pension_deduction] * num_months,
+        'Company Contribution': [pension_company_match] * num_months,
         'Combined Pension Contribution': [combined_pension_contribution] * num_months,
         'Take Home Pay': [take_home_pay] * num_months
     }
@@ -208,6 +211,7 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
     principal_payments = []
     remaining_balances = []
     equitys = []
+    deposits = []
     cashout_values = []
 
     if mortgage:
@@ -227,6 +231,7 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
         principal_payments.append(0)
         remaining_balances.append(0)
         equitys.append(0)
+        deposits.append(0)
         cashout_values.append(0)
 
     for month in range(ownership_months):
@@ -259,6 +264,11 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
         else:
             cashout_values.append(0)
 
+        if mortgage and month == 0:
+            deposits.append(deposit)
+        else:
+            deposits.append(0)
+
         house_value += house_value * monthly_appreciation_rate
 
     output_data = {
@@ -268,6 +278,7 @@ def create_housing_output_df(name, og_house_value, acquisition_month, appreciati
         f'Principal Payment for {name}': principal_payments,
         f'Remaining Balance for {name}': remaining_balances,
         f'Equity for {name}': equitys,
+        f'Deposit for {name}': deposits,
         f'Cashout Value for {name}': cashout_values,
     }
 
@@ -346,7 +357,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
         f'Investment Amount for {name}': monthly_investment_amounts,
         f'Action for {name}': monthly_action,
         f'Cash Value for {name}': stock_values,
-        f'Cashout Value for {name}': cashout_values,
+        f'Cashout Amount for {name}': cashout_values,
     }
 
     return pd.DataFrame(output_data)

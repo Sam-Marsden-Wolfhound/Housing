@@ -64,5 +64,10 @@ def initialize_state():
     if 'combined_analysis_df' not in st.session_state:
         st.session_state['combined_analysis_df'] = pd.DataFrame()
 
+    # Global Values
+    if 'pension_groth' not in st.session_state:
+        st.session_state['pension_groth'] = 3.5
+
+
 def clear_state():
     st.session_state.clear()

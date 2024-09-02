@@ -24,7 +24,7 @@ def display_housing_and_rent_graph():
 def display_stock_graph():
     st.subheader("Stock Graph")
     if not st.session_state.combined_stock_df.empty:
-        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_stock_df.columns.tolist(), default=["Running Total Investment Amount", "Running Total Cash Value", "Running Total Cashout Value", "Delta"])
+        columns_to_plot = st.multiselect("Select columns to plot", st.session_state.combined_stock_df.columns.tolist(), default=["Running Total Investment Amount", "Running Total Cash Value", "Running Total Cashout Amount Stocks", "Delta"])
         if columns_to_plot:
             st.line_chart(st.session_state.combined_stock_df[columns_to_plot])
 
@@ -37,4 +37,10 @@ def display_savings_graph():
 
 
 def display_analysis_graph():
-    pass
+    st.subheader("Analysis Graph")
+    if not st.session_state.combined_analysis_df.empty:
+        columns_to_plot = st.multiselect("Select columns to plot",
+                                         st.session_state.combined_analysis_df.columns.tolist(),
+                                         default=[])
+        if columns_to_plot:
+            st.line_chart(st.session_state.combined_analysis_df[columns_to_plot])

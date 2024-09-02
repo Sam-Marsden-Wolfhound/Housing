@@ -12,6 +12,7 @@ Stage 2
 
 ## Salary
 
+* Add tax
 * Add NI payments
 * Graph coulers 
 * Layout Graph over dataframe?
@@ -26,9 +27,6 @@ Stage 2
 
 ## Housing
 
-* Add sell colum to housing
-* Add row totals for portfolio
-* Add rent to housing 
 * Add graph defult values
 
 Stage 2
