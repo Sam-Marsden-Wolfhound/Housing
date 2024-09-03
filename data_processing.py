@@ -137,5 +137,8 @@ def update_combined_analysis_df():
     combined_df['Running Total Monthly Investment'] = combined_df['Monthly Investment'].cumsum()
     combined_df['Running Total Monthly Losses'] = combined_df['Monthly Losses'].cumsum()
     combined_df['Running Total Cash Savings'] = combined_df['Monthly Cash Savings'].cumsum()
+    combined_df['Running Total Asset Amount'] = combined_df['Row Total Equity Amount'] + combined_df['Running Total Cash Value']
+    combined_df['Running Total Cash & Asset'] = combined_df['Running Total Cash Savings'] + combined_df['Running Total Asset Amount']
+    combined_df['Running Total Cash & Asset & Pension'] = combined_df['Running Total Cash & Asset'] + combined_df['Running Total Pension']
 
     st.session_state.combined_analysis_df = combined_df
