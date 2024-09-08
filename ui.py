@@ -1,8 +1,11 @@
 import streamlit as st
+import pandas as pd
+import os
 from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_housing_form, handle_stock_form, handle_savings_form, create_salary_output_df, create_expense_output_df, create_housing_output_df, create_rent_output_df, create_stock_output_df, create_savings_output_df
 from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_rent_sidebar, display_stock_sidebar, display_savings_sidebar
 from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_housing_and_rent_df, update_combined_stock_df, update_combined_savings_df, update_combined_analysis_df
 from visualizations import display_salary_graph, display_expenses_graph, display_housing_and_rent_graph, display_stock_graph, display_savings_graph, display_analysis_graph
+from state_manager import save_session_state, load_session_state
 
 class SalaryUI:
     def display(self):
@@ -97,7 +100,40 @@ class AnalysisUI:
 
         st.subheader("Analysis_Combined DataFrame")
         st.dataframe(st.session_state.combined_analysis_df)
+
+        # Add download button to download the combined analysis DataFrame as a CSV
+        csv = st.session_state.combined_analysis_df.to_csv(index=False)
+        st.download_button(
+            label="Download DataFrame",
+            data=csv,
+            file_name='combined_analysis.csv',
+            mime='text/csv'
+        )
         display_analysis_graph()
 
+
+class SessionsUI:
+    def display(self):
+        st.header("Sessions")
+
+        # Input for directory
+        directory = st.text_input("Save Session Directory", value="saved_sessions", key="directory_save")
+        filename = st.text_input("File Name", value="Finances", key="filename_save")
+
+        # Save Session
+        if st.button("Save Session", key="save_session"):
+            print("saved")
+            save_session_state(directory, filename)
+
+        # Load Session
+        session_files = [f for f in os.listdir(directory) if f.startswith("Session_") and f.endswith(".pkl")]
+        selected_file = st.selectbox("Select a session to load:", session_files)
+        # selected_file = "Session_Finances1.pkl"
+
+        if st.button("Load Session", key="loud_session"):
+            if selected_file:
+                print("louding button", selected_file)
+                file_path = os.path.join(directory, selected_file)
+                load_session_state(file_path)
 
 

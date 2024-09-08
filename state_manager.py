@@ -1,5 +1,8 @@
-import streamlit as st
+import os
+import time
+import pickle
 import pandas as pd
+import streamlit as st
 
 def initialize_state():
     # Input DFs
@@ -68,6 +71,55 @@ def initialize_state():
     if 'pension_groth' not in st.session_state:
         st.session_state['pension_groth'] = 3.5
 
-
 def clear_state():
     st.session_state.clear()
+
+
+def save_session_state(directory, file_name):
+    """Save the current session state to a file."""
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    filename = f"Session_{file_name}.pkl" #  _{int(time.time())}
+    filepath = os.path.join(directory, filename)
+
+    with open(filepath, "wb") as f:
+        pickle.dump(st.session_state, f)
+
+    st.success(f"Session saved as {filename}!")
+
+
+def load_session_state(file_path):
+    """Load a session state from a file."""
+    with open(file_path, "rb") as f:
+        loaded_state = pickle.load(f)
+        # time.sleep(0.1)
+
+    # Print out the contents to see what is stored
+    # print(loaded_state)
+
+    if loaded_state:
+        # Merge loaded state into session state
+        for key, value in loaded_state.items():
+            print(key)
+        key_list = [
+            'salary_dfs',
+            'expenses_dfs',
+            'housing_dfs',
+            'rent_dfs',
+            'stock_dfs',
+            'savings_dfs']
+
+        for key in key_list:
+            print(key, loaded_state[key])
+            st.session_state[key] = loaded_state[key]
+    else:
+        st.warning("Loaded state is empty. No changes were made.")
+
+    # Clear the current session state and update it with the loaded state
+    # st.session_state.clear()
+    # time.sleep(0.3)
+    # st.session_state.update(loaded_state)
+
+    st.success(f"Session loaded from {os.path.basename(file_path)}!")
+
