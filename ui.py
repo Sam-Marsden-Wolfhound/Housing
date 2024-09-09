@@ -1,11 +1,11 @@
 import streamlit as st
 import pandas as pd
 import os
-from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_housing_form, handle_stock_form, handle_savings_form, create_salary_output_df, create_expense_output_df, create_housing_output_df, create_rent_output_df, create_stock_output_df, create_savings_output_df
-from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_rent_sidebar, display_stock_sidebar, display_savings_sidebar
+from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_housing_form, handle_stock_form, handle_asset_form, create_salary_output_df, create_expense_output_df, create_housing_output_df, create_rent_output_df, create_stock_output_df, create_savings_output_df
+from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
 from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_housing_and_rent_df, update_combined_stock_df, update_combined_savings_df, update_combined_analysis_df
 
-from visualizations import display_salary_graph, display_expenses_graph, display_housing_and_rent_graph, display_stock_graph, display_savings_graph, display_analysis_graph
+from visualizations import display_graph, display_expenses_graph, display_housing_and_rent_graph, display_stock_graph, display_savings_graph, display_analysis_graph
 
 from StateManager import save_session_state, update_session_state, load_session_state
 
@@ -71,19 +71,24 @@ class SalaryUI:
         with st.form(key='salary_form'):
             if handle_salary_form(self.state_manager):
                 self.state_manager.update_all()
-                # update_combined_salary_df()
 
+        display_salary_sidebar(self.state_manager)
 
-        # display_salary_sidebar(create_salary_output_df, update_combined_salary_df)
-        # st.subheader("Combined Salary DataFrame")
+        st.subheader("Combined Salary DataFrame")
         #
         # pension_groth = st.number_input("Pension Groth", value=st.session_state.pension_groth)
         # if st.button("Update Pension Groth", key="update_pension_groth"):
         #     st.session_state['pension_groth'] = pension_groth
         #     update_combined_salary_df()
         #
-        # st.dataframe(st.session_state.combined_salary_df)
-        # display_salary_graph()
+        st.dataframe(self.state_manager.get_combined_salary_df())
+        display_graph(
+            title='Salary Graph',
+            dataframe=self.state_manager.get_combined_salary_df(),
+            default_columns=['Monthly Salary',
+                             'Take Home Pay'
+            ]
+        )
 
 class ExpensesUI:
     def display(self):
@@ -142,11 +147,11 @@ class SavingsUI:
     def display(self):
         st.header("Savings Management")
         with st.form(key='savings_form'):
-            if handle_savings_form():
+            if handle_asset_form():
                 update_combined_savings_df()
 
         st.subheader("Combined Savings DataFrame")
-        display_savings_sidebar(create_savings_output_df, update_combined_savings_df)
+        display_asset_sidebar(create_savings_output_df, update_combined_savings_df)
         st.dataframe(st.session_state.combined_savings_df)
         display_savings_graph()
 

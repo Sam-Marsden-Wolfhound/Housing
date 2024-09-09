@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from form_handlers import handle_salary_edit, handle_expense_edit, handle_house_edit, handle_rent_edit, handle_stock_edit, handle_asset_edit
 
 def display_refresh_sidebar_button():
     if st.sidebar.button("Refresh Sidebar", key="refresh_sidebar_button"):
@@ -7,11 +8,11 @@ def display_refresh_sidebar_button():
         st.session_state.editing_expense_index = None
 
 
-def display_salary_sidebar(output_df_handler, update_combined_df):
+def display_salary_sidebar(state_manager):
     display_refresh_sidebar_button()  # Add the Refresh Sidebar button at the top with a unique key
     st.sidebar.header("Your Salaries")
 
-    for i, salary_data in enumerate(st.session_state.salary_dfs):
+    for i, salary_data in enumerate(state_manager.get_salary_dfs()):
         with st.sidebar.expander(salary_data['name'], expanded=False):
             st.write(f"Annual Income: {salary_data['annual_income']}")
             st.write(f"Pension Contribution (%): {salary_data['pension_contrib']}")
@@ -19,15 +20,21 @@ def display_salary_sidebar(output_df_handler, update_combined_df):
             st.write(f"Number of Months: {salary_data['num_months']}")
 
             if st.button("Edit", key=f"edit_salary_{i}"):
-                st.session_state.editing_salary_index = i
-
-            if st.session_state.editing_salary_index == i:
-                handle_salary_edit(i, salary_data, update_combined_df, output_df_handler)
+                state_manager.set_editing_index(
+                    key='editing_salary_index',
+                    value=i
+                )
+            print('val', state_manager.get_editing_index(key='editing_salary_index'), i)
+            if state_manager.get_editing_index(key='editing_salary_index') == i:
+                handle_salary_edit(i, salary_data, state_manager)
 
             if st.button("Delete", key=f"delete_salary_{i}"):
-                del st.session_state.salary_dfs[i]
-                update_combined_df()
-                st.session_state.editing_salary_index = None
+                del state_manager.get_salary_dfs()[i]
+                state_manager.update_all()
+                state_manager.set_editing_index(
+                    key='editing_salary_index',
+                    value=None
+                )
                 break  # Exit loop after deletion to prevent index errors
 
 
@@ -132,7 +139,7 @@ def display_stock_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_stock_index = None
                 break  # Exit loop after deletion to prevent index errors
 
-def display_savings_sidebar(output_df_handler, update_combined_df):
+def display_asset_sidebar(output_df_handler, update_combined_df):
     """Displays the housing widgets in the sidebar."""
     st.sidebar.header("Your Savings")
 
@@ -153,192 +160,4 @@ def display_savings_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_savings_index = None
                 break  # Exit loop after deletion to prevent index errors
 
-
-
-def handle_salary_edit(index, salary_data, update_combined_df, output_df_handler):
-    if st.session_state.editing_salary_index == index:
-        new_name = st.text_input("Salary Name", value=salary_data['name'])
-        new_annual_income = st.number_input("Annual Gross Income", value=salary_data['annual_income'])
-        new_pension_contrib = st.number_input("Pension Contribution (%)", value=salary_data['pension_contrib'])
-        new_company_match = st.number_input("Company Match (%)", value=salary_data['company_match'])
-        new_num_months = st.number_input("Number of Months", value=salary_data['num_months'], min_value=1,
-                                         max_value=120)
-
-        if st.button("Save Changes", key=f"save_salary_{index}"):
-            st.session_state.salary_dfs[index]['name'] = new_name
-            st.session_state.salary_dfs[index]['annual_income'] = new_annual_income
-            st.session_state.salary_dfs[index]['pension_contrib'] = new_pension_contrib
-            st.session_state.salary_dfs[index]['company_match'] = new_company_match
-            st.session_state.salary_dfs[index]['num_months'] = new_num_months
-
-            # Recreate the salary output dataframe with the new values
-            new_output_df = output_df_handler(new_annual_income, new_pension_contrib, new_company_match,
-                                                    new_num_months)
-            st.session_state.salary_dfs[index]['output_df'] = new_output_df
-
-            update_combined_df()  # Update the combined salary dataframe with the new changes
-            st.session_state.editing_salary_index = None
-
-        if st.button("Cancel", key=f"cancel_edit_salary_{index}"):
-            st.session_state.editing_salary_index = None
-
-
-def handle_expense_edit(index, expense_data, update_combined_df, output_df_handler):
-    if st.session_state.editing_expense_index == index:
-        new_name = st.text_input("Expense Name", value=expense_data['name'])
-        new_monthly_expense = st.number_input("Monthly Expenses", value=expense_data['monthly_expense'])
-        new_months = st.number_input("Months", value=expense_data['months'], min_value=1, max_value=120)
-
-        if st.button("Save Changes", key=f"save_expense_{index}"):
-            st.session_state.expenses_dfs[index]['name'] = new_name
-            st.session_state.expenses_dfs[index]['monthly_expense'] = new_monthly_expense
-            st.session_state.expenses_dfs[index]['months'] = new_months
-
-            # Recreate the expense output dataframe with the new values
-            new_output_df = output_df_handler(new_monthly_expense, new_months)
-            st.session_state.expenses_dfs[index]['output_df'] = new_output_df
-
-            update_combined_df()  # Update the combined expense dataframe with the new changes
-            st.session_state.editing_expense_index = None
-
-        if st.button("Cancel", key=f"cancel_edit_expense_{index}"):
-            st.session_state.editing_expense_index = None
-
-def handle_house_edit(index, house_data, update_combined_df, output_df_handler, update_joint_combined_df):
-    if st.session_state.editing_house_index == index:
-        new_name = st.text_input("House Name", value=house_data['name'])
-        new_house_value = st.number_input("House Value", value=house_data['house_value'])
-        new_acquisition_month = st.number_input("Month of Acquisition", value=house_data['acquisition_month'])
-        new_appreciation_rate = st.number_input("House Appreciation Rate (%)", value=house_data['appreciation_rate'])
-
-        # Mortgage related inputs
-        new_mortgage = st.checkbox("Mortgage", value=house_data['mortgage'])
-        new_deposit = st.number_input("Deposit", value= house_data['deposit'] if (house_data['deposit'] is not None) else 50000)
-        new_mortgage_term = st.number_input("Mortgage Term (years)", value=house_data['mortgage_term'] if (house_data['mortgage_term'] is not None) else 25)
-        new_interest_rate = st.number_input("Interest Rate (%)", value=house_data['interest_rate'] if (house_data['interest_rate'] is not None) else 3.50)
-        if new_mortgage:
-            pass
-        else:
-            new_deposit = None
-            new_mortgage_term = None
-            new_interest_rate = None
-
-        # Sale related inputs
-        new_sale = st.checkbox("Sale of House", value=house_data['sale'])
-        new_sale_month = st.number_input("Month of Sale", value=new_acquisition_month + 1, min_value=new_acquisition_month + 1)
-        if new_sale:
-            pass
-        else:
-            new_sale_month = None
-
-        if st.button("Save Changes", key=f"save_expense_{index}"):
-            st.session_state.housing_dfs[index]['name'] = new_name
-            st.session_state.housing_dfs[index]['house_value'] = new_house_value
-            st.session_state.housing_dfs[index]['acquisition_month'] = new_acquisition_month
-            st.session_state.housing_dfs[index]['appreciation_rate'] = new_appreciation_rate
-            st.session_state.housing_dfs[index]['mortgage'] = new_mortgage
-            st.session_state.housing_dfs[index]['deposit'] = new_deposit
-            st.session_state.housing_dfs[index]['mortgage_term'] = new_mortgage_term
-            st.session_state.housing_dfs[index]['interest_rate'] = new_interest_rate
-            st.session_state.housing_dfs[index]['sale'] = new_sale
-            st.session_state.housing_dfs[index]['sale_month'] = new_sale_month
-
-            # Recreate the housing output dataframe with the new values
-            new_output_df = output_df_handler(
-                new_name,
-                new_house_value,
-                new_acquisition_month,
-                new_appreciation_rate,
-                new_mortgage,
-                new_deposit,
-                new_mortgage_term,
-                new_interest_rate,
-                new_sale,
-                new_sale_month
-            )
-            st.session_state.housing_dfs[index]['output_df'] = new_output_df
-
-            update_combined_df()  # Update the combined housing dataframe with the new changes
-            update_joint_combined_df()
-            st.session_state.editing_house_index = None
-
-        if st.button("Cancel", key=f"cancel_edit_expense_{index}"):
-            st.session_state.editing_house_index = None
-
-
-def handle_rent_edit(index, rent_data, update_combined_df, output_df_handler, update_joint_combined_df):
-    if st.session_state.editing_rent_index == index:
-        new_name = st.text_input("Rent Name", value=rent_data['name'])
-        new_rent_amount = st.number_input("Rent Amount", value=rent_data['rent_amount'])
-        new_start_month = st.number_input("Starting Month", value=rent_data['start_month'])
-        new_duration = st.number_input("Duration", value=rent_data['duration'])
-
-        if st.button("Save Changes", key=f"save_rent_{index}"):
-            st.session_state.rent_dfs[index]['name'] = new_name
-            st.session_state.rent_dfs[index]['rent_amount'] = new_rent_amount
-            st.session_state.rent_dfs[index]['start_month'] = new_start_month
-            st.session_state.rent_dfs[index]['duration'] = new_duration
-
-            # Recreate the expense output dataframe with the new values
-            new_output_df = output_df_handler(new_name, new_rent_amount, new_start_month, new_duration)
-            st.session_state.rent_dfs[index]['output_df'] = new_output_df
-
-            update_combined_df()  # Update the combined rent dataframe with the new changes
-            update_joint_combined_df()
-            st.session_state.editing_rent_index = None
-
-        if st.button("Cancel", key=f"cancel_edit_rent_{index}"):
-            st.session_state.editing_rent_index = None
-
-
-def handle_stock_edit(index, stock_data, update_combined_df, output_df_handler):
-    if st.session_state.editing_stock_index == index:
-
-        new_name = st.text_input("Stock Name", value=stock_data['name'])
-        new_acquisition_month = st.number_input("Acquisition Month", value=stock_data['acquisition_month'])
-        new_investment_amount = st.number_input("Dollar-Cost Averaging Amount (£)", value=stock_data['investment_amount'])
-        new_months_buying_stock = st.number_input("Dollar-Cost Averaging Months", value=stock_data['months_buying_stock'])
-        new_appreciation_rate = st.number_input("Appreciation Rate (%)", value=stock_data['appreciation_rate'])
-        new_sale = st.checkbox("Sell Stock", value=stock_data['sale'])
-        new_sale_month = st.number_input("Month of Sale", value=new_acquisition_month + new_months_buying_stock + 1,
-                                     min_value=new_acquisition_month + new_months_buying_stock + 1)
-
-        if st.button("Save Changes", key=f"save_stock_{index}"):
-            st.session_state.stock_dfs[index]['name'] = new_name
-            st.session_state.stock_dfs[index]['acquisition_month'] = new_acquisition_month
-            st.session_state.stock_dfs[index]['investment_amount'] = new_investment_amount
-            st.session_state.stock_dfs[index]['months_buying_stock'] = new_months_buying_stock
-            st.session_state.stock_dfs[index]['appreciation_rate'] = new_appreciation_rate
-            st.session_state.stock_dfs[index]['sale'] = new_sale
-            st.session_state.stock_dfs[index]['sale_month'] = new_sale_month
-
-            # Recreate the expense output dataframe with the new values
-            new_output_df = output_df_handler(new_name, new_appreciation_rate, new_investment_amount, new_acquisition_month, new_months_buying_stock, new_sale, new_sale_month)
-            st.session_state.stock_dfs[index]['output_df'] = new_output_df
-
-            update_combined_df()  # Update the combined expense dataframe with the new changes
-            st.session_state.editing_stock_index = None
-
-        if st.button("Cancel", key=f"cancel_edit_stock_{index}"):
-            st.session_state.editing_stock_index = None
-
-def handle_savings_edit(index, savings_data, update_combined_df, output_df_handler):
-    if st.session_state.editing_savings_index == index:
-        new_name = st.text_input("Asset Name", value=savings_data['name'])
-        new_asset_value = st.number_input("Asset Value", value=savings_data['asset_value'])
-        new_acquisition_month = st.number_input("Acquisition Month", value=savings_data['acquisition_month'])
-
-        if st.button("Save Changes", key=f"save_asset_{index}"):
-            st.session_state.savings_dfs[index]['name'] = new_name
-            st.session_state.savings_dfs[index]['asset_value'] = new_asset_value
-            st.session_state.savings_dfs[index]['acquisition_month'] = new_acquisition_month
-
-            output_df = output_df_handler(new_name, new_asset_value, new_acquisition_month)
-            st.session_state.savings_dfs[index]['output_df'] = output_df
-
-            update_combined_df()  # Update the combined expense dataframe with the new changes
-            st.session_state.editing_savings_index = None
-
-        if st.button("Cancel", key=f"cancel_edit_savings_{index}"):
-            st.session_state.editing_savings_index = None
 

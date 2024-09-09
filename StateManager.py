@@ -29,6 +29,12 @@ class StateManager:
     def add_salary_df(self, obj):
         st.session_state.session.add_salary_df(obj)
 
+    def get_salary_dfs(self):
+        return st.session_state.session.get_salary_dfs()
+
+    def get_combined_salary_df(self):
+        return st.session_state.session.get_combined_salary_df()
+
 
     # UI State ----------------------------------------------------------------
     def get_current_ui_state(self):
@@ -40,8 +46,18 @@ class StateManager:
     def add_one_to_form_id(self, key):
         st.session_state.ui_state.add_one_to_form_id(key)
 
+    def get_editing_index(self, key):
+        return st.session_state.ui_state.get_editing_index(key)
+
+    def set_editing_index(self, key, value):
+        st.session_state.ui_state.set_editing_index(key, value)
+
+
+
     def update_all(self):
         st.session_state.ui_state.update_all(st.session_state.session)
+
+
 
 
 
@@ -49,6 +65,7 @@ class StateManager:
 class Session:
 
     def __init__(self):
+        print("Initialize Session")
         # Input DFs
         self.salary_dfs = []
         self.pension_dfs = []
@@ -73,22 +90,46 @@ class Session:
         self.salary_dfs.append(obj)
 
     def add_pension_df(self, obj):
-        self.salary_dfs.append(obj)
+        self.pension_dfs.append(obj)
 
     def add_expense_df(self, obj):
-        self.salary_dfs.append(obj)
+        self.expense_dfs.append(obj)
 
     def add_house_df(self, obj):
-        self.salary_dfs.append(obj)
+        self.house_dfs.append(obj)
 
     def add_rent_df(self, obj):
-        self.salary_dfs.append(obj)
+        self.rent_dfs.append(obj)
 
     def add_stock_df(self, obj):
-        self.salary_dfs.append(obj)
+        self.stock_dfs.append(obj)
 
     def add_asset_df(self, obj):
-        self.salary_dfs.append(obj)
+        self.asset_dfs.append(obj)
+
+    def get_salary_dfs(self):
+        return self.salary_dfs
+
+    def get_pension_dfs(self):
+        return self.pension_dfs
+
+    def get_expense_dfs(self):
+        return self.expense_dfs
+
+    def get_house_dfs(self):
+        return self.house_dfs
+
+    def get_rent_dfs(self):
+        return self.rent_dfs
+
+    def get_stock_dfs(self):
+        return self.stock_dfs
+
+    def get_asset_dfs(self):
+        return self.asset_dfs
+
+    def get_combined_salary_df(self):
+        return self.combined_salary_df
 
     def initialise_combined_salary_df(self):
         pass
@@ -99,16 +140,28 @@ class Session:
 class UiState:
 
     def __init__(self):
+        print("Initialize UiState")
         self.form_id_key = [
             'next_salary_id',
             'next_expense_id',
             'next_housing_id',
             'next_rent_id',
             'next_stock_id',
-            'next_savings_id'
+            'next_asset_id'
         ]
         self.form_id = {}
         self.initialise_form_ids()
+        self.editing_index_key = [
+            'editing_salary_index',
+            'editing_expense_index',
+            'editing_house_index',
+            'editing_rent_index',
+            'editing_stock_index',
+            'editing_asset_index'
+        ]
+        self.editing_index = {}
+        self.initialise_editing_index()
+
         self.ui_update_handlers = {}
         self.add_update_handlers()
 
@@ -123,6 +176,21 @@ class UiState:
 
     def add_one_to_form_id(self, key):
         self.form_id[key] += 1
+
+    def initialise_editing_index(self):
+        for index in self.editing_index_key:
+            if index not in self.editing_index:
+                self.editing_index[index] = None
+
+    def get_editing_index(self, key):
+        return self.editing_index[key]
+
+    def set_editing_index(self, key, value):
+        self.editing_index[key] = value
+
+
+
+
 
     def add_combined_salary_df_update_handler(self, update_handler):
         self.ui_update_handlers['combined_salary_df_update_handler'] = update_handler
@@ -140,7 +208,7 @@ class UiState:
     def update_all(self, session):
         print('updating all')
         for handler_key in self.ui_update_handlers:
-            print(handler_key, self.ui_update_handlers[handler_key])
+            # print(handler_key, self.ui_update_handlers[handler_key])
             self.ui_update_handlers[handler_key](session)
 
 
@@ -199,8 +267,8 @@ def load_session_state_old(file_path):
 
     if loaded_state:
         # Merge loaded state into session state
-        for key, value in loaded_state.items():
-            print(key)
+        # for key, value in loaded_state.items():
+        #     print(key)
         key_list = [
             'salary_dfs',
             'expenses_dfs',
@@ -210,7 +278,6 @@ def load_session_state_old(file_path):
             'savings_dfs']
 
         for key in key_list:
-            print(key, loaded_state[key])
             st.session_state[key] = loaded_state[key]
     else:
         st.warning("Loaded state is empty. No changes were made.")
