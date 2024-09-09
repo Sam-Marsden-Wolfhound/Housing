@@ -29,6 +29,21 @@ class StateManager:
     def add_salary_df(self, obj):
         st.session_state.session.add_salary_df(obj)
 
+    def add_expense_df(self, obj):
+        st.session_state.session.add_expense_df(obj)
+
+    def add_house_df(self, obj):
+        st.session_state.session.add_house_df(obj)
+
+    def add_rent_df(self, obj):
+        st.session_state.session.add_rent_df(obj)
+
+    def add_stock_df(self, obj):
+        st.session_state.session.add_stock_df(obj)
+
+    def add_asset_df(self, obj):
+        st.session_state.session.add_asset_df(obj)
+
     def get_salary_dfs(self):
         return st.session_state.session.get_salary_dfs()
 

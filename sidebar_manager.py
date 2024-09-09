@@ -24,7 +24,6 @@ def display_salary_sidebar(state_manager):
                     key='editing_salary_index',
                     value=i
                 )
-            print('val', state_manager.get_editing_index(key='editing_salary_index'), i)
             if state_manager.get_editing_index(key='editing_salary_index') == i:
                 handle_salary_edit(i, salary_data, state_manager)
 
@@ -152,7 +151,7 @@ def display_asset_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_savings_index = i
 
             if st.session_state.editing_savings_index == i:
-                handle_savings_edit(i, savings_data, update_combined_df, output_df_handler)
+                handle_asset_edit(i, savings_data, update_combined_df, output_df_handler)
 
             if st.button("Delete", key=f"delete_savings_{i}"):
                 del st.session_state.savings_dfs[i]

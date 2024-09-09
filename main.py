@@ -4,15 +4,20 @@ from StateManager import StateManager, initialize_state
 
 
 def main():
-    st.title("Finance Planner")
+    st.title('Finance Planner')
     # st.set_page_config(page_title="Personal Finance Planner", layout="wide")
 
     # Initialize state manager
     state_manager = StateManager()
 
     tab = st.tabs([
-        "Sessions",
-        "Salary"
+        'Sessions',
+        'Salary',
+        'Expenses',
+        'Housing',
+        'Stocks',
+        'Savings',
+        'Analysis'
     ])
 
     with tab[0]:
@@ -23,8 +28,11 @@ def main():
         ui = SalaryUI(state_manager)
         ui.display()
 
+    # with tab[2]:
+    #     ui = ExpensesUI(state_manager)
+    #     ui.display()
 
-    # initialize_state()
+
 
     # tab = st.tabs(["Salary", "Expenses", "Housing", "Stocks", "Savings", "Analysis", "Compare", "Sessions"])
     #

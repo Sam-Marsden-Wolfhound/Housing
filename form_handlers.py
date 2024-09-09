@@ -60,8 +60,8 @@ def handle_salary_edit(index, salary_data, state_manager):
         )
 
 
-def handle_expense_form():
-    default_name = f"Expense {st.session_state.next_expense_id}"
+def handle_expense_form(state_manager):
+    default_name = f"Expense {state_manager.get_form_id(key='next_expense_id')}"
     name = st.text_input("Expense Name", value=default_name)
     monthly_expense = st.number_input("Monthly Expenses", value=1000.00)
     months = st.number_input("Months", value=12, min_value=1)
@@ -101,7 +101,7 @@ def handle_expense_edit(index, expense_data, update_combined_df, output_df_handl
             st.session_state.editing_expense_index = None
 
 
-def handle_housing_form():
+def handle_house_form():
     """Handles the housing input form and returns the data."""
     st.write("Add a new house")
     default_name = f"House {st.session_state.get('next_housing_id', 1)}"
