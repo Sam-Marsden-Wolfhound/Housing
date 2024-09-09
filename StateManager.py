@@ -16,61 +16,63 @@ class StateManager:
         if "ui_state" not in st.session_state:
             st.session_state.ui_state = UiState()
             pass
+        self.session = st.session_state.session
+        self.ui_state = st.session_state.ui_state
 
 
     # Session -----------------------------------------------------------------
     def get_current_session(self):
-        return st.session_state.session
+        return self.session
 
     def load_session_as_current_session(self, loaded_state):
-        st.session_state.session = None
-        st.session_state.session = loaded_state
+        self.session = None
+        self.session = loaded_state
 
     def add_salary_df(self, obj):
-        st.session_state.session.add_salary_df(obj)
+        self.session.add_salary_df(obj)
 
     def add_expense_df(self, obj):
-        st.session_state.session.add_expense_df(obj)
+        self.session.add_expense_df(obj)
 
     def add_house_df(self, obj):
-        st.session_state.session.add_house_df(obj)
+        self.session.add_house_df(obj)
 
     def add_rent_df(self, obj):
-        st.session_state.session.add_rent_df(obj)
+        self.session.add_rent_df(obj)
 
     def add_stock_df(self, obj):
-        st.session_state.session.add_stock_df(obj)
+        self.session.add_stock_df(obj)
 
     def add_asset_df(self, obj):
-        st.session_state.session.add_asset_df(obj)
+        self.session.add_asset_df(obj)
 
     def get_salary_dfs(self):
-        return st.session_state.session.get_salary_dfs()
+        return self.session.get_salary_dfs()
 
     def get_combined_salary_df(self):
-        return st.session_state.session.get_combined_salary_df()
+        return self.session.get_combined_salary_df()
 
 
     # UI State ----------------------------------------------------------------
     def get_current_ui_state(self):
-        return st.session_state.ui_state
+        return self.ui_state
 
     def get_form_id(self, key):
-        return st.session_state.ui_state.get_form_id(key)
+        return self.ui_state.get_form_id(key)
 
     def add_one_to_form_id(self, key):
-        st.session_state.ui_state.add_one_to_form_id(key)
+        self.ui_state.add_one_to_form_id(key)
 
     def get_editing_index(self, key):
-        return st.session_state.ui_state.get_editing_index(key)
+        return self.ui_state.get_editing_index(key)
 
     def set_editing_index(self, key, value):
-        st.session_state.ui_state.set_editing_index(key, value)
+        self.ui_state.set_editing_index(key, value)
 
 
 
     def update_all(self):
-        st.session_state.ui_state.update_all(st.session_state.session)
+        self.ui_state.update_all(self.session)
 
 
 
