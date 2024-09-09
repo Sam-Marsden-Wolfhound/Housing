@@ -65,6 +65,27 @@ class StateManager:
     def get_combined_salary_df(self):
         return self.session.get_combined_salary_df()
 
+    def get_combined_expense_df(self):
+        return self.session.get_combined_expense_df()
+
+    def get_combined_house_df(self):
+        return self.session.get_combined_house_df()
+
+    def get_combined_rent_df(self):
+        return self.session.get_combined_rent_df()
+
+    def get_combined_house_and_rent_df(self):
+        return self.session.get_combined_house_and_rent_df()
+
+    def get_combined_stock_df(self):
+        return self.session.get_combined_stock_df()
+
+    def get_combined_asset_df(self):
+        return self.session.get_combined_asset_df()
+
+    def get_combined_analysis_df(self):
+        return self.session.get_combined_analysis_df()
+
 
     # UI State ----------------------------------------------------------------
     def get_current_ui_state(self):
@@ -107,12 +128,12 @@ class Session:
 
         # Combined DF's
         self.combined_salary_df = pd.DataFrame()
-        self.combined_expenses_df = pd.DataFrame()
-        self.combined_housing_df = pd.DataFrame()
+        self.combined_expense_df = pd.DataFrame()
+        self.combined_house_df = pd.DataFrame()
         self.combined_rent_df = pd.DataFrame()
-        self.combined_housing_and_rent_df = pd.DataFrame()
+        self.combined_house_and_rent_df = pd.DataFrame()
         self.combined_stock_df = pd.DataFrame()
-        self.combined_savings_df = pd.DataFrame()
+        self.combined_asset_df = pd.DataFrame()
         self.combined_analysis_df = pd.DataFrame()
 
 
@@ -160,6 +181,27 @@ class Session:
 
     def get_combined_salary_df(self):
         return self.combined_salary_df
+
+    def get_combined_expense_df(self):
+        return self.combined_expense_df
+
+    def get_combined_house_df(self):
+        return self.combined_house_df
+
+    def get_combined_rent_df(self):
+        return self.combined_rent_df
+
+    def get_combined_house_and_rent_df(self):
+        return self.combined_house_and_rent_df
+
+    def get_combined_stock_df(self):
+        return self.combined_stock_df
+
+    def get_combined_asset_df(self):
+        return self.combined_asset_df
+
+    def get_combined_analysis_df(self):
+        return self.combined_analysis_df
 
     def initialise_combined_salary_df(self):
         pass

@@ -51,7 +51,7 @@ def display_expense_sidebar(state_manager):
                     value=i
                 )
 
-            if st.session_state.editing_expense_index == i:
+            if state_manager.get_editing_index(key='editing_expense_index') == i:
                 handle_expense_edit(i, expense_data, state_manager)
 
             if st.button("Delete", key=f"delete_expense_{i}"):

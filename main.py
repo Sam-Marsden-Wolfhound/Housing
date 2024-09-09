@@ -1,5 +1,5 @@
 import streamlit as st
-from ui import SalaryUI, ExpensesUI, HousingUI, StockUI, SavingsUI, AnalysisUI, SessionsUI
+from ui import SalaryUI, ExpensesUI, HousingUI, StockUI, AssetUI, AnalysisUI, SessionsUI
 from StateManager import StateManager, initialize_state
 
 
