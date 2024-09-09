@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from data_processing import create_salary_output_df, create_expense_output_df, create_housing_output_df, create_rent_output_df,create_stock_output_df, create_savings_output_df
+from data_processing import create_salary_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
 
 
 def handle_salary_form(state_manager):
@@ -68,33 +68,33 @@ def handle_expense_form(state_manager):
 
     if st.form_submit_button("Add Expense"):
         output_df = create_expense_output_df(monthly_expense, months)
-        st.session_state.expenses_dfs.append({
+        state_manager.add_expense_df({
             'name': name,
             'output_df': output_df,
             'monthly_expense': monthly_expense,
             'months': months
         })
-        st.session_state.next_expense_id += 1
+        state_manager.add_one_to_form_id(key='next_expense_id')
         return True
     return False
 
 
-def handle_expense_edit(index, expense_data, update_combined_df, output_df_handler):
+def handle_expense_edit(index, expense_data, state_manager):
     if st.session_state.editing_expense_index == index:
         new_name = st.text_input("Expense Name", value=expense_data['name'])
         new_monthly_expense = st.number_input("Monthly Expenses", value=expense_data['monthly_expense'])
         new_months = st.number_input("Months", value=expense_data['months'], min_value=1, max_value=120)
 
         if st.button("Save Changes", key=f"save_expense_{index}"):
-            st.session_state.expenses_dfs[index]['name'] = new_name
-            st.session_state.expenses_dfs[index]['monthly_expense'] = new_monthly_expense
-            st.session_state.expenses_dfs[index]['months'] = new_months
+            state_manager.get_expense_dfs()[index]['name'] = new_name
+            state_manager.get_expense_dfs()[index]['monthly_expense'] = new_monthly_expense
+            state_manager.get_expense_dfs()[index]['months'] = new_months
 
             # Recreate the expense output dataframe with the new values
-            new_output_df = output_df_handler(new_monthly_expense, new_months)
-            st.session_state.expenses_dfs[index]['output_df'] = new_output_df
+            new_output_df = create_expense_output_df(new_monthly_expense, new_months)
+            state_manager.get_expense_dfs()[index]['output_df'] = new_output_df
 
-            update_combined_df()  # Update the combined expense dataframe with the new changes
+            state_manager.update_all()  # Update the combined expense dataframe with the new changes
             st.session_state.editing_expense_index = None
 
         if st.button("Cancel", key=f"cancel_edit_expense_{index}"):
@@ -129,7 +129,7 @@ def handle_house_form():
         sale_month = None
 
     if st.form_submit_button("Add House"):
-        output_df = create_housing_output_df(
+        output_df = create_house_output_df(
             name,
             house_value,
             acquisition_month,
@@ -203,7 +203,7 @@ def handle_house_edit(index, house_data, update_combined_df, output_df_handler, 
             st.session_state.housing_dfs[index]['sale_month'] = new_sale_month
 
             # Recreate the housing output dataframe with the new values
-            new_output_df = output_df_handler(
+            new_output_df = create_house_output_df(
                 new_name,
                 new_house_value,
                 new_acquisition_month,
@@ -261,7 +261,7 @@ def handle_rent_edit(index, rent_data, update_combined_df, output_df_handler, up
             st.session_state.rent_dfs[index]['duration'] = new_duration
 
             # Recreate the expense output dataframe with the new values
-            new_output_df = output_df_handler(new_name, new_rent_amount, new_start_month, new_duration)
+            new_output_df = create_rent_output_df(new_name, new_rent_amount, new_start_month, new_duration)
             st.session_state.rent_dfs[index]['output_df'] = new_output_df
 
             update_combined_df()  # Update the combined rent dataframe with the new changes
@@ -326,7 +326,7 @@ def handle_stock_edit(index, stock_data, update_combined_df, output_df_handler):
             st.session_state.stock_dfs[index]['sale_month'] = new_sale_month
 
             # Recreate the expense output dataframe with the new values
-            new_output_df = output_df_handler(new_name, new_appreciation_rate, new_investment_amount, new_acquisition_month, new_months_buying_stock, new_sale, new_sale_month)
+            new_output_df = create_stock_output_df(new_name, new_appreciation_rate, new_investment_amount, new_acquisition_month, new_months_buying_stock, new_sale, new_sale_month)
             st.session_state.stock_dfs[index]['output_df'] = new_output_df
 
             update_combined_df()  # Update the combined expense dataframe with the new changes

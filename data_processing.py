@@ -31,10 +31,11 @@ def update_combined_salary_df(session):
                                'Running Total Pension']
     )
 
-    combined_df = pd.concat([salary['output_df'] for salary in session.salary_dfs], ignore_index=True)
+    if not session.salary_dfs == []:
+        combined_df = pd.concat([salary['output_df'] for salary in session.salary_dfs], ignore_index=True)
 
-    # Replace the rows in salary_df with combined_df where combined_df has values
-    salary_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+        # Replace the rows in salary_df with combined_df where combined_df has values
+        salary_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
     # XXX This needs to be updated
     # # Initialize the running total with compound interest
@@ -56,7 +57,7 @@ def update_combined_salary_df(session):
 def create_expense_output_df(monthly_expense, months):
     return pd.DataFrame({'Monthly Expenses': [monthly_expense] * months})
 
-def create_housing_output_df(name, og_house_value, acquisition_month, appreciation_rate, mortgage, deposit, mortgage_term, interest_rate, sale, sale_month):
+def create_house_output_df(name, og_house_value, acquisition_month, appreciation_rate, mortgage, deposit, mortgage_term, interest_rate, sale, sale_month):
     if sale:
         ownership_months = sale_month - acquisition_month
     else:
@@ -222,7 +223,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
 
     return pd.DataFrame(output_data)
 
-def create_savings_output_df(name, asset_value, acquisition_month):
+def create_asset_output_df(name, asset_value, acquisition_month):
     asset_values = []
     for month in range(acquisition_month):
         asset_values.append(0)
@@ -330,7 +331,7 @@ def update_combined_stock_df():
     st.session_state.combined_stock_df = combined_df
 
 
-def update_combined_savings_df():
+def update_combined_asset_df():
     combined_df = pd.concat([asset['output_df'] for asset in st.session_state.savings_dfs], axis=1)
 
     # Calculate the row sum of "Asset Value" columns

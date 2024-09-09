@@ -28,9 +28,9 @@ def main():
         ui = SalaryUI(state_manager)
         ui.display()
 
-    # with tab[2]:
-    #     ui = ExpensesUI(state_manager)
-    #     ui.display()
+    with tab[2]:
+        ui = ExpensesUI(state_manager)
+        ui.display()
 
 
 

@@ -37,28 +37,34 @@ def display_salary_sidebar(state_manager):
                 break  # Exit loop after deletion to prevent index errors
 
 
-def display_expense_sidebar(output_df_handler, update_combined_df):
+def display_expense_sidebar(state_manager):
     st.sidebar.header("Your Expenses")
 
-    for i, expense_data in enumerate(st.session_state.expenses_dfs):
+    for i, expense_data in enumerate(state_manager.get_expense_dfs()):
         with st.sidebar.expander(expense_data['name'], expanded=False):
             st.write(f"Monthly Expenses: {expense_data['monthly_expense']}")
             st.write(f"Months: {expense_data['months']}")
 
             if st.button("Edit", key=f"edit_expense_{i}"):
-                st.session_state.editing_expense_index = i
+                state_manager.set_editing_index(
+                    key='editing_expense_index',
+                    value=i
+                )
 
             if st.session_state.editing_expense_index == i:
-                handle_expense_edit(i, expense_data, update_combined_df, output_df_handler)
+                handle_expense_edit(i, expense_data, state_manager)
 
             if st.button("Delete", key=f"delete_expense_{i}"):
                 del st.session_state.expenses_dfs[i]
-                update_combined_df()
-                st.session_state.editing_expense_index = None
+                state_manager.update_all()
+                state_manager.set_editing_index(
+                    key='editing_expense_index',
+                    value=None
+                )
                 break  # Exit loop after deletion to prevent index errors
 
 
-def display_housing_sidebar(output_df_handler, update_combined_df, update_joint_combined_df):
+def display_housing_sidebar(state_manager):
     """Displays the housing widgets in the sidebar."""
     st.sidebar.header("Your Houses")
 
@@ -88,7 +94,7 @@ def display_housing_sidebar(output_df_handler, update_combined_df, update_joint_
                 st.session_state.editing_house_index = None
                 break  # Exit loop after deletion to prevent index errors
 
-def display_rent_sidebar(output_df_handler, update_combined_df, update_joint_combined_df):
+def display_rent_sidebar(state_manager):
     """Displays the rent widgets in the sidebar."""
     st.sidebar.header("Your Rents")
 
@@ -111,7 +117,7 @@ def display_rent_sidebar(output_df_handler, update_combined_df, update_joint_com
                 break  # Exit loop after deletion to prevent index errors
 
 
-def display_stock_sidebar(output_df_handler, update_combined_df):
+def display_stock_sidebar(state_manager):
     """Displays the housing widgets in the sidebar."""
     st.sidebar.header("Your Stocks")
 
@@ -138,7 +144,7 @@ def display_stock_sidebar(output_df_handler, update_combined_df):
                 st.session_state.editing_stock_index = None
                 break  # Exit loop after deletion to prevent index errors
 
-def display_asset_sidebar(output_df_handler, update_combined_df):
+def display_asset_sidebar(state_manager):
     """Displays the housing widgets in the sidebar."""
     st.sidebar.header("Your Savings")
 

@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import os
-from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form, create_salary_output_df, create_expense_output_df, create_housing_output_df, create_rent_output_df, create_stock_output_df, create_savings_output_df
+from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form, create_salary_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
 from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
-from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_housing_and_rent_df, update_combined_stock_df, update_combined_savings_df, update_combined_analysis_df
+from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_housing_and_rent_df, update_combined_stock_df, update_combined_asset_df, update_combined_analysis_df
 
 from visualizations import display_graph, display_expenses_graph, display_housing_and_rent_graph, display_stock_graph, display_savings_graph, display_analysis_graph
 
@@ -100,7 +100,7 @@ class ExpensesUI:
         with st.form(key='expense_form'):
             if handle_expense_form(self.state_manager):
                 self.state_manager.update_all()
-        # display_expense_sidebar(self.state_manager)
+        display_expense_sidebar(self.state_manager)
 
         st.subheader("Combined Expense DataFrame")
 

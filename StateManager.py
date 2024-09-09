@@ -3,9 +3,7 @@ import time
 import pickle
 import pandas as pd
 import streamlit as st
-from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_housing_and_rent_df, update_combined_stock_df, update_combined_savings_df, update_combined_analysis_df
-
-
+from data_processing import update_combined_salary_df
 
 class StateManager:
     def __init__(self):
@@ -48,6 +46,21 @@ class StateManager:
 
     def get_salary_dfs(self):
         return self.session.get_salary_dfs()
+
+    def get_expense_dfs(self):
+        return self.session.get_expense_dfs()
+
+    def get_house_dfs(self):
+        return self.session.get_house_dfs()
+
+    def get_rent_dfs(self):
+        return self.session.get_rent_dfs()
+
+    def get_stock_dfs(self):
+        return self.session.get_stock_dfs()
+
+    def get_asset_dfs(self):
+        return self.session.get_asset_dfs()
 
     def get_combined_salary_df(self):
         return self.session.get_combined_salary_df()
