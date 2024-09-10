@@ -7,7 +7,7 @@ from data_processing import update_combined_salary_df, update_combined_expense_d
 
 class StateManager:
     def __init__(self):
-        print("Initialize state manager")
+        # print("Initialize state manager")
 
         if "session" not in st.session_state:
             st.session_state.session = Session()
@@ -116,7 +116,7 @@ class StateManager:
 class Session:
 
     def __init__(self):
-        print("Initialize Session")
+        # print("Initialize Session")
         # Input DFs
         self.salary_dfs = []
         self.pension_dfs = []
@@ -212,7 +212,7 @@ class Session:
 class UiState:
 
     def __init__(self):
-        print("Initialize UiState")
+        # print("Initialize UiState")
         self.form_id_key = [
             'next_salary_id',
             'next_expense_id',
@@ -277,7 +277,7 @@ class UiState:
         # self.ui_update_handlers['combined_analysis_df_update_handler'] = update_combined_analysis_df
 
     def update_all(self, session):
-        print('updating all')
+        # print('updating all')
         for handler_key in self.ui_update_handlers:
             # print(handler_key, self.ui_update_handlers[handler_key])
             self.ui_update_handlers[handler_key](session)

@@ -12,6 +12,8 @@ Stage 2
 
 ## Salary
 
+* Months change payment bug
+
 * Add tax
 * Add NI payments
 * Graph coulers 

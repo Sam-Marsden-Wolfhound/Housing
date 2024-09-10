@@ -333,7 +333,7 @@ def update_combined_stock_df(session):
                             ]
     )
 
-    if not session.salary_dfs == []:
+    if not session.stock_dfs == []:
         # Concatenate all the output_df DataFrames along the columns
         combined_df = pd.concat([stock['output_df'] for stock in session.stock_dfs], axis=1)
         combined_df.fillna(0, inplace=True)
