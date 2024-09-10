@@ -3,7 +3,7 @@ import pandas as pd
 from form_handlers import handle_salary_edit, handle_expense_edit, handle_house_edit, handle_rent_edit, handle_stock_edit, handle_asset_edit
 
 def display_refresh_sidebar_button(state_manager):
-    if st.sidebar.button("Refresh", key="refresh_sidebar_button"):
+    if st.sidebar.button("Refresh Page", key="refresh_sidebar_button"):
         # st.session_state.editing_salary_index = None
         # st.session_state.editing_expense_index = None
         state_manager.update_all()

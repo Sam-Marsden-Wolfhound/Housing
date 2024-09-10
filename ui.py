@@ -31,7 +31,9 @@ class SessionsUI:
         with st.container(border=True):
             st.subheader("Load & Update")
             # Get sessions in directory
-            session_files = [f for f in os.listdir(directory) if f.startswith("Session_") and f.endswith(".pkl")]
+            # session_files = [f for f in os.listdir(directory) if f.startswith("Session_") and f.endswith(".pkl")]
+            session_files = [f for f in os.listdir(directory) if f.endswith(".pkl")]
+
             selected_file = st.selectbox("Select a session to load:", session_files, key="select_session")
 
             col1, col2 = st.columns(2)
@@ -41,6 +43,7 @@ class SessionsUI:
                         print("louding button", selected_file)
                         file_path = os.path.join(directory, selected_file)
                         load_session_state(self.state_manager, file_path)
+                        self.state_manager.update_all()
 
             with col2:
                 if st.button("Update Session", key="update_session"):
@@ -72,14 +75,16 @@ class SalaryUI:
 
         display_salary_sidebar(self.state_manager)
 
-        st.subheader("Combined Salary DataFrame")
-        #
-        # pension_groth = st.number_input("Pension Groth", value=st.session_state.pension_groth)
-        # if st.button("Update Pension Groth", key="update_pension_groth"):
-        #     st.session_state['pension_groth'] = pension_groth
-        #     update_combined_salary_df()
-        #
-        st.dataframe(self.state_manager.get_combined_salary_df())
+        with st.expander("Combined Salary DataFrame", expanded=False):
+            # st.subheader("Combined Salary DataFrame")
+            #
+            # pension_groth = st.number_input("Pension Groth", value=st.session_state.pension_groth)
+            # if st.button("Update Pension Groth", key="update_pension_groth"):
+            #     st.session_state['pension_groth'] = pension_groth
+            #     update_combined_salary_df()
+            #
+            st.dataframe(self.state_manager.get_combined_salary_df())
+
         display_graph(
             title='Salary Graph',
             dataframe=self.state_manager.get_combined_salary_df(),
@@ -100,8 +105,10 @@ class ExpensesUI:
                 self.state_manager.update_all()
         display_expense_sidebar(self.state_manager)
 
-        st.subheader("Combined Expense DataFrame")
-        st.dataframe(self.state_manager.get_combined_expense_df())
+        with st.expander("Combined Expense DataFrame", expanded=False):
+            # st.subheader("Combined Expense DataFrame")
+            st.dataframe(self.state_manager.get_combined_expense_df())
+
         display_graph(
             title='Expenses Graph',
             dataframe=self.state_manager.get_combined_expense_df(),
@@ -123,9 +130,6 @@ class HousingUI:
 
         display_house_sidebar(self.state_manager)
 
-        with st.expander("Combined Housing DataFrame", expanded=False):
-            st.dataframe(self.state_manager.get_combined_house_df())
-
         st.header("Rent Management")
         with st.form(key='rent_form'):
             if handle_rent_form(self.state_manager):
@@ -133,11 +137,15 @@ class HousingUI:
 
         display_rent_sidebar(self.state_manager)
 
+        with st.expander("Combined Housing DataFrame", expanded=False):
+            st.dataframe(self.state_manager.get_combined_house_df())
+
         with st.expander("Combined Rent DataFrame", expanded=False):
             st.dataframe(self.state_manager.get_combined_rent_df())
 
-        st.subheader("Housing & Rent DataFrame")
-        st.dataframe(self.state_manager.get_combined_house_and_rent_df())
+        with st.expander("Housing & Rent DataFrame", expanded=False):
+            # st.subheader("Housing & Rent DataFrame")
+            st.dataframe(self.state_manager.get_combined_house_and_rent_df())
 
         display_graph(
             title='Housing & Rent Graph',
@@ -162,8 +170,10 @@ class StockUI:
 
         display_stock_sidebar(self.state_manager)
 
-        st.subheader("Combined Stock DataFrame")
-        st.dataframe(self.state_manager.get_combined_stock_df())
+        with st.expander("Combined Stock DataFrame", expanded=False):
+            # st.subheader("Combined Stock DataFrame")
+            st.dataframe(self.state_manager.get_combined_stock_df())
+
         display_graph(
             title='Stock Graph',
             dataframe=self.state_manager.get_combined_stock_df(),
@@ -180,15 +190,16 @@ class AssetUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Savings Management")
-        with st.form(key='savings_form'):
+        st.header("Asset Management")
+        with st.form(key='asset_form'):
             if handle_asset_form(self.state_manager):
                 self.state_manager.update_all()
 
         display_asset_sidebar(self.state_manager)
 
-        st.subheader("Combined Savings DataFrame")
-        st.dataframe(self.state_manager.get_combined_asset_df())
+        with st.expander("Combined Asset DataFrame", expanded=False):
+            # st.subheader("Combined Asset DataFrame")
+            st.dataframe(self.state_manager.get_combined_asset_df())
         display_graph(
             title='Asset Graph',
             dataframe=self.state_manager.get_combined_asset_df(),
@@ -203,23 +214,26 @@ class AnalysisUI:
 
     def display(self):
         st.header("Analysis")
-        if st.button("Refresh Page", key="refresh_analysis"):
-            self.state_manager.update_all()
 
-        # with st.form(key='Analysis_form'):
-        #     pass
+        # col1, col2 = st.columns(2)
+        # with col1:
+        #     st.header("Analysis")
+        # with col2:
+        #     if st.button("Refresh Page", key="refresh_analysis"):
+        #         self.state_manager.update_all()
 
-        st.subheader("Analysis_Combined DataFrame")
-        st.dataframe(self.state_manager.get_combined_analysis_df())
+        with st.expander("Analysis_Combined DataFrame", expanded=False):
+            # st.subheader("Analysis_Combined DataFrame")
+            st.dataframe(self.state_manager.get_combined_analysis_df())
 
-        # Add download button to download the combined analysis DataFrame as a CSV
-        csv = self.state_manager.get_combined_analysis_df().to_csv(index=False)
-        st.download_button(
-            label="Download DataFrame",
-            data=csv,
-            file_name='combined_analysis.csv',
-            mime='text/csv'
-        )
+            # Add download button to download the combined analysis DataFrame as a CSV
+            csv = self.state_manager.get_combined_analysis_df().to_csv(index=False)
+            st.download_button(
+                label="Download DataFrame",
+                data=csv,
+                file_name='combined_analysis.csv',
+                mime='text/csv'
+            )
 
         display_graph(
             title='Analysis Graph',

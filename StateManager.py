@@ -25,6 +25,8 @@ class StateManager:
     def load_session_as_current_session(self, loaded_state):
         st.session_state.session = None
         st.session_state.session = loaded_state
+        st.session_state.ui_state = None
+        st.session_state.ui_state = UiState()
         # self.session = None
         # self.session = loaded_state
 
@@ -281,6 +283,15 @@ class UiState:
             # print(handler_key, self.ui_update_handlers[handler_key])
             self.ui_update_handlers[handler_key](session)
 
+        # st.write(
+        #     """
+        #     <script>
+        #     location.reload();
+        #     </script>
+        #     """,
+        #     unsafe_allow_html=True
+        # )
+
 
 #-------------------------------------------------------------------------------------------
 def save_session_state(state_manager, directory, file_name, use_uuid):
@@ -288,7 +299,8 @@ def save_session_state(state_manager, directory, file_name, use_uuid):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    name_prefix = "Session_"
+    # name_prefix = "Session_"
+    name_prefix = ""
     if use_uuid:
         filename = f"{name_prefix}{file_name}_{int(time.time())}.pkl"
     else:
@@ -322,40 +334,6 @@ def load_session_state(state_manager, file_path):
         loaded_state = pickle.load(f)
 
     state_manager.load_session_as_current_session(loaded_state)
-
-    st.success(f"Session loaded from {os.path.basename(file_path)}!")
-
-
-def load_session_state_old(file_path):
-    """Load a session state from a file."""
-    with open(file_path, "rb") as f:
-        loaded_state = pickle.load(f)
-        # time.sleep(0.1)
-
-    # Print out the contents to see what is stored
-    # print(loaded_state)
-
-    if loaded_state:
-        # Merge loaded state into session state
-        # for key, value in loaded_state.items():
-        #     print(key)
-        key_list = [
-            'salary_dfs',
-            'expenses_dfs',
-            'housing_dfs',
-            'rent_dfs',
-            'stock_dfs',
-            'savings_dfs']
-
-        for key in key_list:
-            st.session_state[key] = loaded_state[key]
-    else:
-        st.warning("Loaded state is empty. No changes were made.")
-
-    # Clear the current session state and update it with the loaded state
-    # st.session_state.clear()
-    # time.sleep(0.3)
-    # st.session_state.update(loaded_state)
 
     st.success(f"Session loaded from {os.path.basename(file_path)}!")
 
