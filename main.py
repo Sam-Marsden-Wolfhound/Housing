@@ -44,14 +44,15 @@ def main():
         ui = AssetUI(state_manager)
         ui.display()
 
-
-    # with tab[5]:
-    #     ui = AnalysisUI()
-    #     ui.display()
     # with tab[6]:
     #     st.header("Compare")
     #     # ui = AnalysisUI()
     #     # ui.display()
+
+    with tab[6]:
+        ui = AnalysisUI(state_manager)
+        ui.display()
+
 
 
 

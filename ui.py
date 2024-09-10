@@ -206,25 +206,28 @@ class AnalysisUI:
         if st.button("Refresh Page", key="refresh_analysis"):
             self.state_manager.update_all()
 
-        with st.form(key='Analysis_form'):
-            pass
+        # with st.form(key='Analysis_form'):
+        #     pass
 
         st.subheader("Analysis_Combined DataFrame")
         st.dataframe(self.state_manager.get_combined_analysis_df())
 
         # Add download button to download the combined analysis DataFrame as a CSV
-        csv = st.session_state.combined_analysis_df.to_csv(index=False)
+        csv = self.state_manager.get_combined_analysis_df().to_csv(index=False)
         st.download_button(
             label="Download DataFrame",
             data=csv,
             file_name='combined_analysis.csv',
             mime='text/csv'
         )
+
         display_graph(
-            title='Salary Graph',
+            title='Analysis Graph',
             dataframe=self.state_manager.get_combined_analysis_df(),  # XX
-            default_columns=['Monthly Salary',
-                             'Take Home Pay'
+            default_columns=['Monthly Credit',
+                             'Monthly Investment',
+                             'Monthly Losses',
+                             'Monthly Cash Savings'
                              ]
         )
 

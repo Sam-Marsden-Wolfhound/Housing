@@ -203,8 +203,8 @@ class Session:
     def get_combined_analysis_df(self):
         return self.combined_analysis_df
 
-    def initialise_combined_salary_df(self):
-        pass
+    # def initialise_combined_salary_df(self):
+    #     pass
 
 
 
@@ -260,9 +260,6 @@ class UiState:
     def set_editing_index(self, key, value):
         self.editing_index[key] = value
 
-
-
-
     def add_combined_salary_df_update_handler(self, update_handler):
         self.ui_update_handlers['combined_salary_df_update_handler'] = update_handler
 
@@ -274,7 +271,7 @@ class UiState:
         self.ui_update_handlers['combined_house_and_rent_df_update_handler'] = update_combined_house_and_rent_df
         self.ui_update_handlers['combined_stock_df_update_handler'] = update_combined_stock_df
         self.ui_update_handlers['combined_asset_df_update_handler'] = update_combined_asset_df
-        # self.ui_update_handlers['combined_analysis_df_update_handler'] = update_combined_analysis_df
+        self.ui_update_handlers['combined_analysis_df_update_handler'] = update_combined_analysis_df
 
     def update_all(self, session):
         # print('updating all')
