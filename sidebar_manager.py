@@ -24,6 +24,7 @@ def display_salary_sidebar(state_manager):
                     key='editing_salary_index',
                     value=i
                 )
+
             if state_manager.get_editing_index(key='editing_salary_index') == i:
                 handle_salary_edit(i, salary_data, state_manager)
 
@@ -55,7 +56,7 @@ def display_expense_sidebar(state_manager):
                 handle_expense_edit(i, expense_data, state_manager)
 
             if st.button("Delete", key=f"delete_expense_{i}"):
-                del st.session_state.expenses_dfs[i]
+                del state_manager.get_expense_dfs()[i]
                 state_manager.update_all()
                 state_manager.set_editing_index(
                     key='editing_expense_index',
@@ -64,11 +65,11 @@ def display_expense_sidebar(state_manager):
                 break  # Exit loop after deletion to prevent index errors
 
 
-def display_housing_sidebar(state_manager):
+def display_house_sidebar(state_manager):
     """Displays the housing widgets in the sidebar."""
     st.sidebar.header("Your Houses")
 
-    for i, house_data in enumerate(st.session_state.housing_dfs):
+    for i, house_data in enumerate(state_manager.get_house_dfs()):
         with st.sidebar.expander(f"{house_data['name']}"):
             st.write(f"House Value: ${house_data['house_value']}")
             st.write(f"Month of Acquisition: {house_data['acquisition_month']}")
@@ -82,38 +83,50 @@ def display_housing_sidebar(state_manager):
             if house_data["sale"]:
                 st.write(f"Month of Sale: {house_data['sale_month']}")
 
-            if st.button("Edit", key=f"edit_house_{i}"):
-                st.session_state.editing_house_index = i
+            if st.button("Edit", key=f"edit_house_{i}"): # XX
+                state_manager.set_editing_index(
+                    key='editing_house_index',
+                    value=i
+                )
 
-            if st.session_state.editing_house_index == i:
-                handle_house_edit(i, house_data, update_combined_df, output_df_handler, update_joint_combined_df)
+            if state_manager.get_editing_index(key='editing_house_index') == i:
+                handle_house_edit(i, house_data, state_manager)
 
             if st.button("Delete", key=f"delete_house_{i}"):
-                del st.session_state.housing_dfs[i]
-                update_combined_df()
-                st.session_state.editing_house_index = None
+                del state_manager.get_house_dfs()[i]
+                state_manager.update_all()
+                state_manager.set_editing_index(
+                    key='editing_house_index',
+                    value=None
+                )
                 break  # Exit loop after deletion to prevent index errors
 
 def display_rent_sidebar(state_manager):
     """Displays the rent widgets in the sidebar."""
     st.sidebar.header("Your Rents")
 
-    for i, rent_data in enumerate(st.session_state.rent_dfs):
+    for i, rent_data in enumerate(state_manager.get_rent_dfs()):
         with st.sidebar.expander(f"{rent_data['name']}"):
             st.write(f"Rent Amount: ${rent_data['rent_amount']}")
             st.write(f"Starting Month: {rent_data['start_month']}")
             st.write(f"Duration: {rent_data['duration']}")
 
             if st.button("Edit", key=f"edit_rent_{i}"):
-                st.session_state.editing_rent_index = i
+                state_manager.set_editing_index(
+                    key='editing_rent_index',
+                    value=i
+                )
 
-            if st.session_state.editing_rent_index == i:
-                handle_rent_edit(i, rent_data, update_combined_df, output_df_handler, update_joint_combined_df)
+            if state_manager.get_editing_index(key='editing_rent_index') == i:
+                handle_rent_edit(i, rent_data, state_manager)
 
             if st.button("Delete", key=f"delete_rent_{i}"):
-                del st.session_state.rent_dfs[i]
-                update_combined_df()
-                st.session_state.editing_rent_index = None
+                del state_manager.get_rent_dfs()[i]
+                state_manager.update_all()
+                state_manager.set_editing_index(
+                    key='editing_rent_index',
+                    value=None
+                )
                 break  # Exit loop after deletion to prevent index errors
 
 
@@ -121,7 +134,7 @@ def display_stock_sidebar(state_manager):
     """Displays the housing widgets in the sidebar."""
     st.sidebar.header("Your Stocks")
 
-    for i, stock_data in enumerate(st.session_state.stock_dfs):
+    for i, stock_data in enumerate(state_manager.get_stock_dfs()):
         with st.sidebar.expander(stock_data['name'], expanded=False):
             st.write(f"Acquisition Month: {stock_data['acquisition_month']}")
             st.write(f"Dollar-Cost Averaging Amount (£): {stock_data['investment_amount']}")
@@ -133,36 +146,48 @@ def display_stock_sidebar(state_manager):
                 st.write("Hold Stock")
 
             if st.button("Edit", key=f"edit_stock_{i}"):
-                st.session_state.editing_stock_index = i
+                state_manager.set_editing_index(
+                    key='editing_stock_index',
+                    value=i
+                )
 
-            if st.session_state.editing_stock_index == i:
-                handle_stock_edit(i, stock_data, update_combined_df, output_df_handler)
+            if state_manager.get_editing_index(key='editing_stock_index') == i:
+                handle_stock_edit(i, stock_data, state_manager)
 
             if st.button("Delete", key=f"delete_stock_{i}"):
-                del st.session_state.stock_dfs[i]
-                # update_combined_df()
-                st.session_state.editing_stock_index = None
+                del state_manager.get_stock_dfs()[i]
+                state_manager.update_all()
+                state_manager.set_editing_index(
+                    key='editing_stock_index',
+                    value=None
+                )
                 break  # Exit loop after deletion to prevent index errors
 
 def display_asset_sidebar(state_manager):
     """Displays the housing widgets in the sidebar."""
-    st.sidebar.header("Your Savings")
+    st.sidebar.header("Your Assets")
 
-    for i, savings_data in enumerate(st.session_state.savings_dfs):
+    for i, savings_data in enumerate(state_manager.get_asset_dfs()):
         with st.sidebar.expander(savings_data['name'], expanded=False):
             st.write(f"Asset Value: {savings_data['asset_value']}")
             st.write(f"Acquisition Month: {savings_data['acquisition_month']}")
 
-            if st.button("Edit", key=f"edit_savings_{i}"):
-                st.session_state.editing_savings_index = i
+            if st.button("Edit", key=f"edit_asset_{i}"):
+                state_manager.set_editing_index(
+                    key='editing_asset_index',
+                    value=i
+                )
 
-            if st.session_state.editing_savings_index == i:
-                handle_asset_edit(i, savings_data, update_combined_df, output_df_handler)
+            if state_manager.get_editing_index(key='editing_asset_index') == i:
+                handle_asset_edit(i, savings_data, state_manager)
 
-            if st.button("Delete", key=f"delete_savings_{i}"):
-                del st.session_state.savings_dfs[i]
-                update_combined_df()
-                st.session_state.editing_savings_index = None
+            if st.button("Delete", key=f"delete_asset_{i}"):
+                del state_manager.get_asset_dfs()[i]
+                state_manager.update_all()
+                state_manager.set_editing_index(
+                    key='editing_asset_index',
+                    value=None
+                )
                 break  # Exit loop after deletion to prevent index errors
 
 

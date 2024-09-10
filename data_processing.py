@@ -19,6 +19,7 @@ def create_salary_output_df(annual_income, pension_contrib, company_match, num_m
     }
     return pd.DataFrame(output_data)
 
+
 def update_combined_salary_df(session):
     # Initialize a DataFrame with 1200 rows or 100 years
     salary_df = pd.DataFrame(0,
@@ -53,9 +54,25 @@ def update_combined_salary_df(session):
     session.combined_salary_df = salary_df
 
 
-
 def create_expense_output_df(monthly_expense, months):
     return pd.DataFrame({'Monthly Expenses': [monthly_expense] * months})
+
+
+def update_combined_expense_df(session):
+    # Initialize a DataFrame with 1200 rows or 100 years
+    expense_df = pd.DataFrame(0,
+                             index=range(1200),
+                             columns=['Monthly Expenses']
+    )
+
+    if not session.expense_dfs == []:
+        combined_df = pd.concat([expense['output_df'] for expense in session.expense_dfs], ignore_index=True)
+
+        # Replace the rows in expense_df with combined_df where combined_df has values
+        expense_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+
+    session.combined_expense_df = expense_df
+
 
 def create_house_output_df(name, og_house_value, acquisition_month, appreciation_rate, mortgage, deposit, mortgage_term, interest_rate, sale, sale_month):
     if sale:
@@ -146,8 +163,58 @@ def create_house_output_df(name, og_house_value, acquisition_month, appreciation
     return pd.DataFrame(output_data)
 
 
-def create_rent_output_df(name, rent_amount, start_month, duration):
+def update_combined_house_df(session):
+    # Initialize a DataFrame with 1200 rows or 100 years
+    house_df = pd.DataFrame(0,
+                             index=range(1200),
+                             columns=['Row Total Payment Amount',
+                                      'Row Total Interest Amount',
+                                      'Row Total Principal Payment Amount',
+                                      'Row Total Remaining Balance Amount',
+                                      'Row Total Equity Amount',
+                                      'Row Total Deposit Amount',
+                                      'Row Total Cashout Amount Housing'
+                                      ]
+    )
+    if not session.house_dfs == []:
+        combined_df = pd.concat([house['output_df'] for house in session.house_dfs], axis=1)
+        combined_df.fillna(0, inplace=True)
 
+        # Calculate the row sum of "Payment" columns
+        housing_cashout_columns = [col for col in combined_df.columns if 'Payment for' in col]
+        combined_df['Row Total Payment Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+        # Calculate the row sum of "Interest" columns
+        housing_cashout_columns = [col for col in combined_df.columns if 'Interest Payment for' in col]
+        combined_df['Row Total Interest Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+        # Calculate the row sum of "Principal Payment" columns
+        housing_cashout_columns = [col for col in combined_df.columns if 'Principal Payment for' in col]
+        combined_df['Row Total Principal Payment Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+        # Calculate the row sum of "Remaining Balance" columns
+        housing_cashout_columns = [col for col in combined_df.columns if 'Remaining Balance for' in col]
+        combined_df['Row Total Remaining Balance Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+        # Calculate the row sum of "Equity" columns
+        housing_cashout_columns = [col for col in combined_df.columns if 'Equity for' in col]
+        combined_df['Row Total Equity Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+        # Calculate the row sum of "Deposit" columns
+        housing_deposit_columns = [col for col in combined_df.columns if 'Deposit for' in col]
+        combined_df['Row Total Deposit Amount'] = combined_df[housing_deposit_columns].sum(axis=1)
+
+        # Calculate the row sum of "Cashout Value" columns
+        housing_cashout_columns = [col for col in combined_df.columns if 'Cashout Value for' in col]
+        combined_df['Row Total Cashout Amount Housing'] = combined_df[housing_cashout_columns].sum(axis=1)
+
+        # Replace the rows in house_df with combined_df where combined_df has values
+        house_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+
+    session.combined_house_df = house_df
+
+
+def create_rent_output_df(name, rent_amount, start_month, duration):
     rent_amounts = []
 
     for month in range(start_month):
@@ -162,6 +229,35 @@ def create_rent_output_df(name, rent_amount, start_month, duration):
 
     return pd.DataFrame(output_data)
 
+
+def update_combined_rent_df(session):
+    # Initialize a DataFrame with 1200 rows or 100 years
+    rent_df = pd.DataFrame(0,
+                             index=range(1200),
+                             columns=['Row Total Rent Amount']
+    )
+
+    if not session.rent_dfs == []:
+        # Concatenate all the output_df DataFrames along the columns
+        combined_df = pd.concat([rent['output_df'] for rent in session.rent_dfs], axis=1)
+        combined_df.fillna(0, inplace=True)
+
+        # Calculate the row sum of "Rent Amount" columns
+        rent_amount_columns = [col for col in combined_df.columns if 'Rent for' in col]
+        combined_df['Row Total Rent Amount'] = combined_df[rent_amount_columns].sum(axis=1)
+
+        # Replace the rows in rent_df with combined_df where combined_df has values
+        rent_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+
+    # Store the combined DataFrame in session state
+    session.combined_rent_df = rent_df
+
+
+def update_combined_house_and_rent_df(session):
+    combined_df = pd.concat([session.combined_house_df, session.combined_rent_df], axis=1)
+    combined_df.fillna(0, inplace=True)
+
+    session.combined_house_and_rent_df = combined_df
 
 
 def create_stock_output_df(name, appreciation_rate, investment_amount, acquisition_month, months_buying_stock, sale, sale_month):
@@ -223,6 +319,53 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
 
     return pd.DataFrame(output_data)
 
+
+def update_combined_stock_df(session):
+    # Initialize a DataFrame with 1200 rows or 100 years
+    stock_df = pd.DataFrame(0,
+                             index=range(1200),
+                             columns=['Row Total Investment Amount',
+                                      'Row Total Cashout Amount Stocks',
+                                      'Running Total Investment Amount',
+                                      'Running Total Cash Value',
+                                      'Running Total Cashout Amount Stocks',
+                                      'Delta'
+                            ]
+    )
+
+    if not session.salary_dfs == []:
+        # Concatenate all the output_df DataFrames along the columns
+        combined_df = pd.concat([stock['output_df'] for stock in session.stock_dfs], axis=1)
+        combined_df.fillna(0, inplace=True)
+
+        # Calculate the row sum of "Investment Amount" columns
+        investment_amount_columns = [col for col in combined_df.columns if 'Investment Amount for' in col]
+        combined_df['Row Total Investment Amount'] = combined_df[investment_amount_columns].sum(axis=1)
+
+        # Calculate the row sum of "Cashout Value" columns
+        cashout_value_columns = [col for col in combined_df.columns if 'Cashout Amount for' in col]
+        combined_df['Row Total Cashout Amount Stocks'] = combined_df[cashout_value_columns].sum(axis=1)
+
+        # Calculate the running sum for the "Row Total Investment Amount" column
+        combined_df['Running Total Investment Amount'] = combined_df['Row Total Investment Amount'].cumsum()
+
+        # Calculate the row sum of "Cash Value" columns
+        cash_value_columns = [col for col in combined_df.columns if 'Cash Value for' in col]
+        combined_df['Running Total Cash Value'] = combined_df[cash_value_columns].sum(axis=1)
+
+        # Calculate the running sum for the "Row Total Cashout Value" column
+        combined_df['Running Total Cashout Amount Stocks'] = combined_df['Row Total Cashout Amount Stocks'].cumsum()
+
+        # Calculate the running sum for the Delta column
+        combined_df['Delta'] = combined_df['Running Total Cashout Amount Stocks'] + combined_df['Running Total Cash Value'] - combined_df['Running Total Investment Amount']
+
+        # Replace the rows in salary_df with combined_df where combined_df has values
+        stock_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+
+    # Store the combined DataFrame in session state
+    session.combined_stock_df = stock_df
+
+
 def create_asset_output_df(name, asset_value, acquisition_month):
     asset_values = []
     for month in range(acquisition_month):
@@ -241,113 +384,36 @@ def create_asset_output_df(name, asset_value, acquisition_month):
     return pd.DataFrame(output_data)
 
 
-#------------------------------------------------------------------------------------------------------------------
+def update_combined_asset_df(session):
+    # Initialize a DataFrame with 1200 rows or 100 years
+    asset_df = pd.DataFrame(0,
+                             index=range(1200),
+                             columns=['Row Total Asset Value',
+                            ]
+    )
+
+    if not session.asset_dfs == []:
+        combined_df = pd.concat([asset['output_df'] for asset in session.asset_dfs], axis=1)
+
+        # Calculate the row sum of "Asset Value" columns
+        asset_value_columns = [col for col in combined_df.columns if 'Asset Value for' in col]
+        combined_df['Row Total Asset Value'] = combined_df[asset_value_columns].sum(axis=1)
+        combined_df.fillna(0, inplace=True)
+
+        # Replace the rows in asset_df with combined_df where combined_df has values
+        asset_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+
+    session.combined_asset_df = asset_df
 
 
-
-def update_combined_expenses_df():
-    combined_df = pd.concat([expense['output_df'] for expense in st.session_state.expenses_dfs], ignore_index=True)
-    st.session_state.combined_expenses_df = combined_df
-
-def update_combined_housing_df():
-    combined_df = pd.concat([house['output_df'] for house in st.session_state.housing_dfs], axis=1)
-    combined_df.fillna(0, inplace=True)
-
-    # Calculate the row sum of "Payment" columns
-    housing_cashout_columns = [col for col in combined_df.columns if 'Payment for' in col]
-    combined_df['Row Total Payment Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
-
-    # Calculate the row sum of "Interest" columns
-    housing_cashout_columns = [col for col in combined_df.columns if 'Interest Payment for' in col]
-    combined_df['Row Total Interest Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
-
-    # Calculate the row sum of "Principal Payment" columns
-    housing_cashout_columns = [col for col in combined_df.columns if 'Principal Payment for' in col]
-    combined_df['Row Total Principal Payment Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
-
-    # Calculate the row sum of "Remaining Balance" columns
-    housing_cashout_columns = [col for col in combined_df.columns if 'Remaining Balance for' in col]
-    combined_df['Row Total Remaining Balance Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
-
-    # Calculate the row sum of "Equity" columns
-    housing_cashout_columns = [col for col in combined_df.columns if 'Equity for' in col]
-    combined_df['Row Total Equity Amount'] = combined_df[housing_cashout_columns].sum(axis=1)
-
-    # Calculate the row sum of "Deposit" columns
-    housing_deposit_columns = [col for col in combined_df.columns if 'Deposit for' in col]
-    combined_df['Row Total Deposit Amount'] = combined_df[housing_deposit_columns].sum(axis=1)
-
-    # Calculate the row sum of "Cashout Value" columns
-    housing_cashout_columns = [col for col in combined_df.columns if 'Cashout Value for' in col]
-    combined_df['Row Total Cashout Amount Housing'] = combined_df[housing_cashout_columns].sum(axis=1)
-
-    st.session_state.combined_housing_df = combined_df
-
-
-def update_combined_rent_df():
-    # Concatenate all the output_df DataFrames along the columns
-    combined_df = pd.concat([rent['output_df'] for rent in st.session_state.rent_dfs], axis=1)
-    combined_df.fillna(0, inplace=True)
-
-    # Calculate the row sum of "Rent Amount" columns
-    rent_amount_columns = [col for col in combined_df.columns if 'Rent for' in col]
-    combined_df['Row Total Rent Amount'] = combined_df[rent_amount_columns].sum(axis=1)
-
-    # Store the combined DataFrame in session state
-    st.session_state.combined_rent_df = combined_df
-
-def update_combined_housing_and_rent_df():
-    combined_df = pd.concat([st.session_state.combined_housing_df, st.session_state.combined_rent_df], axis=1)
-    combined_df.fillna(0, inplace=True)
-    st.session_state.combined_housing_and_rent_df = combined_df
-
-def update_combined_stock_df():
-    # Concatenate all the output_df DataFrames along the columns
-    combined_df = pd.concat([stock['output_df'] for stock in st.session_state.stock_dfs], axis=1)
-    combined_df.fillna(0, inplace=True)
-
-    # Calculate the row sum of "Investment Amount" columns
-    investment_amount_columns = [col for col in combined_df.columns if 'Investment Amount for' in col]
-    combined_df['Row Total Investment Amount'] = combined_df[investment_amount_columns].sum(axis=1)
-
-    # Calculate the row sum of "Cashout Value" columns
-    cashout_value_columns = [col for col in combined_df.columns if 'Cashout Amount for' in col]
-    combined_df['Row Total Cashout Amount Stocks'] = combined_df[cashout_value_columns].sum(axis=1)
-
-    # Calculate the running sum for the "Row Total Investment Amount" column
-    combined_df['Running Total Investment Amount'] = combined_df['Row Total Investment Amount'].cumsum()
-
-    # Calculate the row sum of "Cash Value" columns
-    cash_value_columns = [col for col in combined_df.columns if 'Cash Value for' in col]
-    combined_df['Running Total Cash Value'] = combined_df[cash_value_columns].sum(axis=1)
-
-    # Calculate the running sum for the "Row Total Cashout Value" column
-    combined_df['Running Total Cashout Amount Stocks'] = combined_df['Row Total Cashout Amount Stocks'].cumsum()
-
-    # Calculate the running sum for the Delta column
-    combined_df['Delta'] = combined_df['Running Total Cashout Amount Stocks'] + combined_df['Running Total Cash Value'] - combined_df['Running Total Investment Amount']
-
-    # Store the combined DataFrame in session state
-    st.session_state.combined_stock_df = combined_df
-
-
-def update_combined_asset_df():
-    combined_df = pd.concat([asset['output_df'] for asset in st.session_state.savings_dfs], axis=1)
-
-    # Calculate the row sum of "Asset Value" columns
-    asset_value_columns = [col for col in combined_df.columns if 'Asset Value for' in col]
-    combined_df['Row Total Asset Value'] = combined_df[asset_value_columns].sum(axis=1)
-    combined_df.fillna(0, inplace=True)
-    st.session_state.combined_savings_df = combined_df
-
-def update_combined_analysis_df():
+def update_combined_analysis_df(session):
 
     combined_df = pd.concat([
-        st.session_state.combined_salary_df,
-        st.session_state.combined_expenses_df,
-        st.session_state.combined_housing_and_rent_df,
-        st.session_state.combined_stock_df,
-        st.session_state.combined_savings_df
+        session.combined_salary_df,
+        session.combined_expense_df,
+        session.combined_house_and_rent_df,
+        session.combined_stock_df,
+        session.combined_asset_df
         ],
         axis=1,
         ignore_index=False
@@ -367,4 +433,5 @@ def update_combined_analysis_df():
     combined_df['Running Total Cash & Asset'] = combined_df['Running Total Cash Savings'] + combined_df['Running Total Asset Amount']
     combined_df['Running Total Cash & Asset & Pension'] = combined_df['Running Total Cash & Asset'] + combined_df['Running Total Pension']
 
-    st.session_state.combined_analysis_df = combined_df
+    session.combined_analysis_df = combined_df
+

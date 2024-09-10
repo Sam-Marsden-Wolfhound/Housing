@@ -1,6 +1,6 @@
 import streamlit as st
 from ui import SalaryUI, ExpensesUI, HousingUI, StockUI, AssetUI, AnalysisUI, SessionsUI
-from StateManager import StateManager, initialize_state
+from StateManager import StateManager
 
 
 def main():
@@ -16,7 +16,7 @@ def main():
         'Expenses',
         'Housing',
         'Stocks',
-        'Savings',
+        'Assets',
         'Analysis'
     ])
 
@@ -32,25 +32,19 @@ def main():
         ui = ExpensesUI(state_manager)
         ui.display()
 
+    with tab[3]:
+        ui = HousingUI(state_manager)
+        ui.display()
+
+    with tab[4]:
+        ui = StockUI(state_manager)
+        ui.display()
+
+    with tab[5]:
+        ui = AssetUI(state_manager)
+        ui.display()
 
 
-    # tab = st.tabs(["Salary", "Expenses", "Housing", "Stocks", "Savings", "Analysis", "Compare", "Sessions"])
-    #
-    # with tab[0]:
-    #     ui = SalaryUI()
-    #     ui.display()
-    # with tab[1]:
-    #     ui = ExpensesUI()
-    #     ui.display()
-    # with tab[2]:
-    #     ui = HousingUI()
-    #     ui.display()
-    # with tab[3]:
-    #     ui = StockUI()
-    #     ui.display()
-    # with tab[4]:
-    #     ui = SavingsUI()
-    #     ui.display()
     # with tab[5]:
     #     ui = AnalysisUI()
     #     ui.display()
@@ -58,9 +52,7 @@ def main():
     #     st.header("Compare")
     #     # ui = AnalysisUI()
     #     # ui.display()
-    # with tab[7]:
-    #     ui = SessionsUI()
-    #     ui.display()
+
 
 
 if __name__ == "__main__":

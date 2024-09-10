@@ -1,13 +1,11 @@
 import streamlit as st
 import pandas as pd
 import os
+from StateManager import save_session_state, update_session_state, load_session_state
 from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form, create_salary_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
-from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_housing_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
-from data_processing import update_combined_salary_df, update_combined_expenses_df, update_combined_housing_df, update_combined_rent_df, update_combined_housing_and_rent_df, update_combined_stock_df, update_combined_asset_df, update_combined_analysis_df
-
+from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
 from visualizations import display_graph, display_expenses_graph, display_housing_and_rent_graph, display_stock_graph, display_savings_graph, display_analysis_graph
 
-from StateManager import save_session_state, update_session_state, load_session_state
 
 
 class SessionsUI:
@@ -103,7 +101,6 @@ class ExpensesUI:
         display_expense_sidebar(self.state_manager)
 
         st.subheader("Combined Expense DataFrame")
-
         st.dataframe(self.state_manager.get_combined_expense_df())
         display_graph(
             title='Expenses Graph',
@@ -121,22 +118,20 @@ class HousingUI:
     def display(self):
         st.header("Housing Management")
         with st.form(key='housing_form'):
-            if handle_housing_form():
-                update_combined_housing_df()
-                update_combined_housing_and_rent_df()
+            if handle_house_form(self.state_manager):
+                self.state_manager.update_all()
 
-        display_housing_sidebar(create_housing_output_df, update_combined_housing_df, update_combined_housing_and_rent_df)
+        display_house_sidebar(self.state_manager)
 
         with st.expander("Combined Housing DataFrame", expanded=False):
             st.dataframe(self.state_manager.get_combined_house_df())
 
         st.header("Rent Management")
         with st.form(key='rent_form'):
-            if handle_rent_form():
-                update_combined_rent_df()
-                update_combined_housing_and_rent_df()
+            if handle_rent_form(self.state_manager):
+                self.state_manager.update_all()
 
-        display_rent_sidebar(create_rent_output_df, update_combined_rent_df, update_combined_housing_and_rent_df)
+        display_rent_sidebar(self.state_manager)
 
         with st.expander("Combined Rent DataFrame", expanded=False):
             st.dataframe(self.state_manager.get_combined_rent_df())
@@ -145,12 +140,14 @@ class HousingUI:
         st.dataframe(self.state_manager.get_combined_house_and_rent_df())
 
         display_graph(
-            title='Salary Graph',
+            title='Housing & Rent Graph',
             dataframe=self.state_manager.get_combined_house_and_rent_df(),
-            default_columns=['Monthly Salary',
-                             'Take Home Pay'
+            default_columns=['Row Total Payment Amount',
+                             'Row Total Interest Amount',
+                             'Row Total Rent Amount'
                              ]
         )
+
 
 class StockUI:
 
@@ -160,18 +157,20 @@ class StockUI:
     def display(self):
         st.header("Stock Management")
         with st.form(key='stock_form'):
-            if handle_stock_form():
-                update_combined_stock_df()
-                pass
+            if handle_stock_form(self.state_manager):
+                self.state_manager.update_all()
+
+        display_stock_sidebar(self.state_manager)
+
         st.subheader("Combined Stock DataFrame")
-        # cb_housing_df_timeframe = st.number_input("Time Frame", value=40)
-        display_stock_sidebar(create_stock_output_df, update_combined_stock_df)
         st.dataframe(self.state_manager.get_combined_stock_df())
         display_graph(
-            title='Salary Graph',
+            title='Stock Graph',
             dataframe=self.state_manager.get_combined_stock_df(),
-            default_columns=['Monthly Salary',
-                             'Take Home Pay'
+            default_columns=['Running Total Investment Amount',
+                             'Running Total Cash Value',
+                             'Running Total Cashout Amount Stocks',
+                             'Delta',
                              ]
         )
 
@@ -183,17 +182,17 @@ class AssetUI:
     def display(self):
         st.header("Savings Management")
         with st.form(key='savings_form'):
-            if handle_asset_form():
-                update_combined_asset_df()
+            if handle_asset_form(self.state_manager):
+                self.state_manager.update_all()
+
+        display_asset_sidebar(self.state_manager)
 
         st.subheader("Combined Savings DataFrame")
-        display_asset_sidebar(create_savings_output_df, update_combined_savings_df)
         st.dataframe(self.state_manager.get_combined_asset_df())
         display_graph(
-            title='Salary Graph',
+            title='Asset Graph',
             dataframe=self.state_manager.get_combined_asset_df(),
-            default_columns=['Monthly Salary',
-                             'Take Home Pay'
+            default_columns=['Row Total Asset Value',
                              ]
         )
 
@@ -205,7 +204,7 @@ class AnalysisUI:
     def display(self):
         st.header("Analysis")
         if st.button("Refresh Page", key="refresh_analysis"):
-            update_combined_analysis_df()
+            self.state_manager.update_all()
 
         with st.form(key='Analysis_form'):
             pass
@@ -223,7 +222,7 @@ class AnalysisUI:
         )
         display_graph(
             title='Salary Graph',
-            dataframe=self.state_manager.get_combined_analysis_df(),
+            dataframe=self.state_manager.get_combined_analysis_df(),  # XX
             default_columns=['Monthly Salary',
                              'Take Home Pay'
                              ]

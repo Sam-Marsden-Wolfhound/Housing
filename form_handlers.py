@@ -21,6 +21,7 @@ def handle_salary_form(state_manager):
             'company_match': company_match,
             'num_months': num_months
         })
+
         state_manager.add_one_to_form_id(key='next_salary_id')
         return True
     return False
@@ -108,7 +109,7 @@ def handle_expense_edit(index, expense_data, state_manager):
 def handle_house_form(state_manager):
     """Handles the housing input form and returns the data."""
     st.write("Add a new house")
-    default_name = f"House {st.session_state.get('next_housing_id', 1)}"
+    default_name = f"House {state_manager.get_form_id(key='next_house_id')}"
     name = st.text_input("House Name", value=default_name)
     house_value = st.number_input("House Value", value=200000)
     acquisition_month = st.number_input("Month of Acquisition", value=0)
@@ -145,10 +146,10 @@ def handle_house_form(state_manager):
             sale,
             sale_month
         )
-        if 'housing_dfs' not in st.session_state:
-            st.session_state.housing_dfs = []
+        # if 'housing_dfs' not in st.session_state:
+        #     st.session_state.housing_dfs = []
 
-        st.session_state.housing_dfs.append({
+        state_manager.add_house_df({
             'name': name,
             'house_value': house_value,
             'acquisition_month': acquisition_month,
@@ -162,7 +163,7 @@ def handle_house_form(state_manager):
             'output_df': output_df,
         })
 
-        st.session_state.next_housing_id += 1
+        state_manager.add_one_to_form_id(key='next_house_id')
         return True
     return False
 
@@ -194,16 +195,16 @@ def handle_house_edit(index, house_data, state_manager):
         new_sale_month = None
 
     if st.button("Save Changes", key=f"save_expense_{index}"):
-        st.session_state.housing_dfs[index]['name'] = new_name
-        st.session_state.housing_dfs[index]['house_value'] = new_house_value
-        st.session_state.housing_dfs[index]['acquisition_month'] = new_acquisition_month
-        st.session_state.housing_dfs[index]['appreciation_rate'] = new_appreciation_rate
-        st.session_state.housing_dfs[index]['mortgage'] = new_mortgage
-        st.session_state.housing_dfs[index]['deposit'] = new_deposit
-        st.session_state.housing_dfs[index]['mortgage_term'] = new_mortgage_term
-        st.session_state.housing_dfs[index]['interest_rate'] = new_interest_rate
-        st.session_state.housing_dfs[index]['sale'] = new_sale
-        st.session_state.housing_dfs[index]['sale_month'] = new_sale_month
+        state_manager.get_house_dfs()[index]['name'] = new_name
+        state_manager.get_house_dfs()[index]['house_value'] = new_house_value
+        state_manager.get_house_dfs()[index]['acquisition_month'] = new_acquisition_month
+        state_manager.get_house_dfs()[index]['appreciation_rate'] = new_appreciation_rate
+        state_manager.get_house_dfs()[index]['mortgage'] = new_mortgage
+        state_manager.get_house_dfs()[index]['deposit'] = new_deposit
+        state_manager.get_house_dfs()[index]['mortgage_term'] = new_mortgage_term
+        state_manager.get_house_dfs()[index]['interest_rate'] = new_interest_rate
+        state_manager.get_house_dfs()[index]['sale'] = new_sale
+        state_manager.get_house_dfs()[index]['sale_month'] = new_sale_month
 
         # Recreate the housing output dataframe with the new values
         new_output_df = create_house_output_df(
@@ -218,19 +219,23 @@ def handle_house_edit(index, house_data, state_manager):
             new_sale,
             new_sale_month
         )
-        st.session_state.housing_dfs[index]['output_df'] = new_output_df
+        state_manager.get_house_dfs()[index]['output_df'] = new_output_df
 
-        update_combined_df()  # Update the combined housing dataframe with the new changes
-        update_joint_combined_df()
         state_manager.update_all()
-        st.session_state.editing_house_index = None
+        state_manager.set_editing_index(
+            key='editing_house_index',
+            value=None
+        )
 
     if st.button("Cancel", key=f"cancel_edit_expense_{index}"):
-        st.session_state.editing_house_index = None
+        state_manager.set_editing_index(
+            key='editing_house_index',
+            value=None
+        )
 
 
 def handle_rent_form(state_manager):
-    default_name = f"Rent {st.session_state.next_rent_id}"
+    default_name = f"Rent {state_manager.get_form_id(key='next_rent_id')}"
     name = st.text_input("Rent Name", value=default_name)
     rent_amount = st.number_input("Rent Amount", value=2000)
     start_month = st.number_input("Starting Month", value=0)
@@ -239,14 +244,14 @@ def handle_rent_form(state_manager):
     if st.form_submit_button("Add Rent"):
         output_df = create_rent_output_df(name, rent_amount, start_month, duration)
 
-        st.session_state.rent_dfs.append({
+        state_manager.add_rent_df({
             'name': name,
             'rent_amount': rent_amount,
             'start_month': start_month,
             'duration': duration,
             'output_df': output_df,
         })
-        st.session_state.next_rent_id += 1
+        state_manager.add_one_to_form_id(key='next_rent_id')
         return True
     return False
 
@@ -258,26 +263,30 @@ def handle_rent_edit(index, rent_data, state_manager):
     new_duration = st.number_input("Duration", value=rent_data['duration'])
 
     if st.button("Save Changes", key=f"save_rent_{index}"):
-        st.session_state.rent_dfs[index]['name'] = new_name
-        st.session_state.rent_dfs[index]['rent_amount'] = new_rent_amount
-        st.session_state.rent_dfs[index]['start_month'] = new_start_month
-        st.session_state.rent_dfs[index]['duration'] = new_duration
+        state_manager.get_rent_dfs()[index]['name'] = new_name
+        state_manager.get_rent_dfs()[index]['rent_amount'] = new_rent_amount
+        state_manager.get_rent_dfs()[index]['start_month'] = new_start_month
+        state_manager.get_rent_dfs()[index]['duration'] = new_duration
 
         # Recreate the expense output dataframe with the new values
         new_output_df = create_rent_output_df(new_name, new_rent_amount, new_start_month, new_duration)
-        st.session_state.rent_dfs[index]['output_df'] = new_output_df
+        state_manager.get_rent_dfs()[index]['output_df'] = new_output_df
 
-        update_combined_df()  # Update the combined rent dataframe with the new changes
-        update_joint_combined_df()
         state_manager.update_all()
-        st.session_state.editing_rent_index = None
+        state_manager.set_editing_index(
+            key='editing_rent_index',
+            value=None
+        )
 
     if st.button("Cancel", key=f"cancel_edit_rent_{index}"):
-        st.session_state.editing_rent_index = None
+        state_manager.set_editing_index(
+            key='editing_rent_index',
+            value=None
+        )
 
 
 def handle_stock_form(state_manager):
-    default_name = f"Stock {st.session_state.next_stock_id}"
+    default_name = f"Stock {state_manager.get_form_id(key='next_stock_id')}"
     name = st.text_input("Stock Name", value=default_name)
     acquisition_month = st.number_input("Acquisition Month", value=0)
     investment_amount = st.number_input("Dollar-Cost Averaging Amount (£)", value=100, min_value=0)
@@ -292,7 +301,7 @@ def handle_stock_form(state_manager):
     if st.form_submit_button("Add Stock"):
         output_df = create_stock_output_df(name, appreciation_rate, investment_amount, acquisition_month, months_buying_stock, sale, sale_month)
 
-        st.session_state.stock_dfs.append({
+        state_manager.add_stock_df({
             'name': name,
             'acquisition_month': acquisition_month,
             'investment_amount': investment_amount,
@@ -303,7 +312,7 @@ def handle_stock_form(state_manager):
             'output_df': output_df,
         })
 
-        st.session_state.next_stock_id += 1
+        state_manager.add_one_to_form_id(key='next_stock_id')
         return True
     return False
 
@@ -319,40 +328,46 @@ def handle_stock_edit(index, stock_data, state_manager):
                                  min_value=new_acquisition_month + new_months_buying_stock + 1)
 
     if st.button("Save Changes", key=f"save_stock_{index}"):
-        st.session_state.stock_dfs[index]['name'] = new_name
-        st.session_state.stock_dfs[index]['acquisition_month'] = new_acquisition_month
-        st.session_state.stock_dfs[index]['investment_amount'] = new_investment_amount
-        st.session_state.stock_dfs[index]['months_buying_stock'] = new_months_buying_stock
-        st.session_state.stock_dfs[index]['appreciation_rate'] = new_appreciation_rate
-        st.session_state.stock_dfs[index]['sale'] = new_sale
-        st.session_state.stock_dfs[index]['sale_month'] = new_sale_month
+        state_manager.get_stock_dfs()[index]['name'] = new_name
+        state_manager.get_stock_dfs()[index]['acquisition_month'] = new_acquisition_month
+        state_manager.get_stock_dfs()[index]['investment_amount'] = new_investment_amount
+        state_manager.get_stock_dfs()[index]['months_buying_stock'] = new_months_buying_stock
+        state_manager.get_stock_dfs()[index]['appreciation_rate'] = new_appreciation_rate
+        state_manager.get_stock_dfs()[index]['sale'] = new_sale
+        state_manager.get_stock_dfs()[index]['sale_month'] = new_sale_month
 
         # Recreate the expense output dataframe with the new values
         new_output_df = create_stock_output_df(new_name, new_appreciation_rate, new_investment_amount, new_acquisition_month, new_months_buying_stock, new_sale, new_sale_month)
-        st.session_state.stock_dfs[index]['output_df'] = new_output_df
+        state_manager.get_stock_dfs()[index]['output_df'] = new_output_df
 
         state_manager.update_all()  # Update the combined expense dataframe with the new changes
-        st.session_state.editing_stock_index = None
+        state_manager.set_editing_index(
+            key='editing_stock_index',
+            value=None
+        )
 
     if st.button("Cancel", key=f"cancel_edit_stock_{index}"):
-        st.session_state.editing_stock_index = None
+        state_manager.set_editing_index(
+            key='editing_stock_index',
+            value=None
+        )
 
 
 def handle_asset_form(state_manager):
-    default_name = f"Asset {st.session_state.next_savings_id}"
+    default_name = f"Asset {state_manager.get_form_id(key='next_asset_id')}"
     name = st.text_input("Asset Name", value=default_name)
     asset_value = st.number_input("Asset Value", value=1000.00)
     acquisition_month = st.number_input("Acquisition Month", value=0, min_value=0)
 
     if st.form_submit_button("Add Asset"):
         output_df = create_asset_output_df(name, asset_value, acquisition_month)
-        st.session_state.savings_dfs.append({
+        state_manager.add_asset_df({
             'name': name,
             'asset_value': asset_value,
             'acquisition_month': acquisition_month,
             'output_df': output_df,
         })
-        st.session_state.next_savings_id += 1
+        state_manager.add_one_to_form_id(key='next_asset_id')
         return True
     return False
 
@@ -363,17 +378,23 @@ def handle_asset_edit(index, savings_data, state_manager):
     new_acquisition_month = st.number_input("Acquisition Month", value=savings_data['acquisition_month'])
 
     if st.button("Save Changes", key=f"save_asset_{index}"):
-        st.session_state.savings_dfs[index]['name'] = new_name
-        st.session_state.savings_dfs[index]['asset_value'] = new_asset_value
-        st.session_state.savings_dfs[index]['acquisition_month'] = new_acquisition_month
+        state_manager.get_asset_dfs()[index]['name'] = new_name
+        state_manager.get_asset_dfs()[index]['asset_value'] = new_asset_value
+        state_manager.get_asset_dfs()[index]['acquisition_month'] = new_acquisition_month
 
         output_df = create_asset_output_df(new_name, new_asset_value, new_acquisition_month)
-        st.session_state.savings_dfs[index]['output_df'] = output_df
+        state_manager.get_asset_dfs()[index]['output_df'] = output_df
 
         state_manager.update_all()  # Update the combined expense dataframe with the new changes
-        st.session_state.editing_savings_index = None
+        state_manager.set_editing_index(
+            key='editing_asset_index',
+            value=None
+        )
 
-    if st.button("Cancel", key=f"cancel_edit_savings_{index}"):
-        st.session_state.editing_savings_index = None
+    if st.button("Cancel", key=f"cancel_edit_asset_{index}"):
+        state_manager.set_editing_index(
+            key='editing_asset_index',
+            value=None
+        )
 
 
