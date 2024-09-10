@@ -2,14 +2,15 @@ import streamlit as st
 import pandas as pd
 from form_handlers import handle_salary_edit, handle_expense_edit, handle_house_edit, handle_rent_edit, handle_stock_edit, handle_asset_edit
 
-def display_refresh_sidebar_button():
-    if st.sidebar.button("Refresh Sidebar", key="refresh_sidebar_button"):
-        st.session_state.editing_salary_index = None
-        st.session_state.editing_expense_index = None
+def display_refresh_sidebar_button(state_manager):
+    if st.sidebar.button("Refresh", key="refresh_sidebar_button"):
+        # st.session_state.editing_salary_index = None
+        # st.session_state.editing_expense_index = None
+        state_manager.update_all()
 
 
 def display_salary_sidebar(state_manager):
-    display_refresh_sidebar_button()  # Add the Refresh Sidebar button at the top with a unique key
+    display_refresh_sidebar_button(state_manager)  # Add the Refresh Sidebar button at the top with a unique key
     st.sidebar.header("Your Salaries")
 
     for i, salary_data in enumerate(state_manager.get_salary_dfs()):

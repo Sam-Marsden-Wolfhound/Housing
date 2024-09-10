@@ -23,8 +23,10 @@ class StateManager:
         return self.session
 
     def load_session_as_current_session(self, loaded_state):
-        self.session = None
-        self.session = loaded_state
+        st.session_state.session = None
+        st.session_state.session = loaded_state
+        # self.session = None
+        # self.session = loaded_state
 
     def add_salary_df(self, obj):
         self.session.add_salary_df(obj)
