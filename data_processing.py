@@ -4,18 +4,45 @@ import streamlit as st
 
 def create_salary_output_df(annual_income, pension_contrib, company_match, num_months):
     # Need to handel tax
-    monthly_salary = annual_income / num_months
+    monthly_salary = annual_income / 12
     pension_deduction = (pension_contrib / 100) * monthly_salary
     pension_company_match = (company_match / 100) * monthly_salary
     combined_pension_contribution = pension_deduction + pension_company_match
-    take_home_pay = monthly_salary - pension_deduction
+
+    # Taxable income
+    monthly_taxable_income = monthly_salary - pension_deduction
+
+    # Tax calculation (simplified based on UK tax brackets for 2023/24)
+    tax = 0
+    if monthly_taxable_income <= 12570/12:
+        tax = 0
+    elif monthly_taxable_income <= 50270/12:
+        tax = (monthly_taxable_income - 12570/12) * 0.20
+    elif monthly_taxable_income <= 125140/12:
+        tax = (37700/12 * 0.20) + (monthly_taxable_income - 50270/12) * 0.40
+    else:
+        tax = (37700/12 * 0.20) + (74870/12 * 0.40) + (monthly_taxable_income - 125140/12) * 0.45
+
+    # National Insurance calculation (simplified based on UK rates for 2023/24)
+    national_insurance = 0
+    if monthly_taxable_income <= 12570/12:
+        national_insurance = 0
+    elif monthly_taxable_income <= 50270/12:
+        national_insurance = (monthly_taxable_income - 12570/12) * 0.12
+    else:
+        national_insurance = (37700/12 * 0.12) + (monthly_taxable_income - 50270/12) * 0.02
+
+    # Take-home pay
+    monthly_take_home_pay = monthly_salary - pension_deduction - tax - national_insurance
 
     output_data = {
         'Monthly Salary': [monthly_salary] * num_months,
         'Pension Deduction': [pension_deduction] * num_months,
         'Company Contribution': [pension_company_match] * num_months,
         'Combined Pension Contribution': [combined_pension_contribution] * num_months,
-        'Take Home Pay': [take_home_pay] * num_months
+        'National Insurance': [national_insurance] * num_months,
+        'Tax': [tax] * num_months,
+        'Take Home Pay': [monthly_take_home_pay] * num_months
     }
     return pd.DataFrame(output_data)
 
@@ -28,6 +55,8 @@ def update_combined_salary_df(session):
                                'Pension Deduction',
                                'Company Contribution',
                                'Combined Pension Contribution',
+                               'National Insurance',
+                               'Tax',
                                'Take Home Pay',
                                'Running Total Pension']
     )
