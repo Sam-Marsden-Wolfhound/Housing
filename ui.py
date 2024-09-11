@@ -121,7 +121,7 @@ class SalaryUI:
             #
             st.dataframe(self.state_manager.get_combined_salary_df())
 
-        display_graph(
+        display_graph_plotly(
             title='Salary Graph',
             dataframe=self.state_manager.get_combined_salary_df(),
             default_columns=['Monthly Salary',
@@ -149,7 +149,7 @@ class ExpensesUI:
             # st.subheader("Combined Expense DataFrame")
             st.dataframe(self.state_manager.get_combined_expense_df())
 
-        display_graph(
+        display_graph_plotly(
             title='Expenses Graph',
             dataframe=self.state_manager.get_combined_expense_df(),
             default_columns=['Monthly Expenses'
@@ -189,7 +189,7 @@ class HousingUI:
             # st.subheader("Housing & Rent DataFrame")
             st.dataframe(self.state_manager.get_combined_house_and_rent_df())
 
-        display_graph(
+        display_graph_plotly(
             title='Housing & Rent Graph',
             dataframe=self.state_manager.get_combined_house_and_rent_df(),
             default_columns=['Row Total Payment Amount',
@@ -218,7 +218,7 @@ class StockUI:
             # st.subheader("Combined Stock DataFrame")
             st.dataframe(self.state_manager.get_combined_stock_df())
 
-        display_graph(
+        display_graph_plotly(
             title='Stock Graph',
             dataframe=self.state_manager.get_combined_stock_df(),
             default_columns=['Running Total Investment Amount',
@@ -246,7 +246,7 @@ class AssetUI:
         with st.expander("Combined Asset DataFrame", expanded=False):
             # st.subheader("Combined Asset DataFrame")
             st.dataframe(self.state_manager.get_combined_asset_df())
-        display_graph(
+        display_graph_plotly(
             title='Asset Graph',
             dataframe=self.state_manager.get_combined_asset_df(),
             default_columns=['Row Total Asset Value',
@@ -283,7 +283,7 @@ class AnalysisUI:
 
         display_graph_plotly(
             title='Analysis Graph - Monthly Brickdown',
-            dataframe=self.state_manager.get_combined_analysis_df(),  # XX
+            dataframe=self.state_manager.get_combined_analysis_df(),
             default_columns=['Monthly Cash Savings',
                              'Monthly Credit',
                              'Monthly Investment',
@@ -293,7 +293,7 @@ class AnalysisUI:
 
         display_graph_plotly(
             title='Analysis Graph - Running Total',
-            dataframe=self.state_manager.get_combined_analysis_df(),  # XX
+            dataframe=self.state_manager.get_combined_analysis_df(),
             default_columns=['Running Total Cash Savings',
                              'Running Total Asset Amount',
                              'Running Total Cash & Asset',
