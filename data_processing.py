@@ -107,7 +107,7 @@ def create_house_output_df(name, og_house_value, acquisition_month, appreciation
     if sale:
         ownership_months = sale_month - acquisition_month
     else:
-        ownership_months = 1200  # 100 years
+        ownership_months = 1200 - acquisition_month  # 100 years
 
     house_value = og_house_value
     monthly_appreciation_rate = (appreciation_rate / 100) / 12
@@ -293,7 +293,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
     if sale:
         ownership_months = sale_month - acquisition_month
     else:
-        ownership_months = 1200  # 100 years
+        ownership_months = 1200 - acquisition_month  # 100 years
 
     stock_price = 1000
     owned_stock_amount = 0
@@ -422,6 +422,8 @@ def update_combined_asset_df(session):
     )
 
     if not session.asset_dfs == []:
+        [print(len(asset['output_df'])) for asset in session.asset_dfs]
+
         combined_df = pd.concat([asset['output_df'] for asset in session.asset_dfs], axis=1)
 
         # Calculate the row sum of "Asset Value" columns

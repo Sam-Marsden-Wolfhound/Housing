@@ -13,7 +13,7 @@ class StateManager:
             st.session_state.session = Session()
         if "ui_state" not in st.session_state:
             st.session_state.ui_state = UiState()
-            pass
+            # st.session_state.ui_state.update_all(st.session_state.session)
         self.session = st.session_state.session
         self.ui_state = st.session_state.ui_state
 
