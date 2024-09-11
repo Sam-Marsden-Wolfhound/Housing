@@ -318,6 +318,10 @@ def save_session_state(state_manager, directory, file_name, use_uuid):
 def update_session_state(state_manager, directory, file_name):
     filepath = os.path.join(directory, file_name)
 
+    # Check if the file exists and delete it before writing the new one
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
     with open(filepath, "wb") as f:
         pickle.dump(state_manager.get_current_session(), f)
 

@@ -15,7 +15,7 @@ def display_salary_sidebar(state_manager):
 
     for i, salary_data in enumerate(state_manager.get_salary_dfs()):
         with st.sidebar.expander(salary_data['name'], expanded=False):
-            st.write(f"Annual Income: {salary_data['annual_income']}")
+            st.write(f"Annual Income: {'{:,.0f}'.format(salary_data['annual_income'])}")
             st.write(f"Pension Contribution (%): {salary_data['pension_contrib']}")
             st.write(f"Company Match (%): {salary_data['company_match']}")
             # st.write(f"Number of Months: {salary_data['num_months']}")
@@ -45,7 +45,7 @@ def display_expense_sidebar(state_manager):
 
     for i, expense_data in enumerate(state_manager.get_expense_dfs()):
         with st.sidebar.expander(expense_data['name'], expanded=False):
-            st.write(f"Monthly Expenses: {expense_data['monthly_expense']}")
+            st.write(f"Monthly Expenses: {'{:,.0f}'.format(expense_data['monthly_expense'])}")
             # st.write(f"Months: {expense_data['months']}")
             st.write(f"Number of: Years {expense_data['months'] // 12} - Months {expense_data['months'] % 12}")
 
@@ -74,12 +74,12 @@ def display_house_sidebar(state_manager):
 
     for i, house_data in enumerate(state_manager.get_house_dfs()):
         with st.sidebar.expander(f"{house_data['name']}"):
-            st.write(f"House Value: {house_data['house_value']}")
+            st.write(f"House Value: {'{:,.0f}'.format(house_data['house_value'])}")
             # st.write(f"Month of Acquisition: {house_data['acquisition_month']}")
             st.write(f"Acquisition: Years {house_data['acquisition_month'] // 12} - Months {house_data['acquisition_month'] % 12}")
             st.write(f"Appreciation Rate (%): {house_data['appreciation_rate']}%")
             if house_data["mortgage"]:
-                st.write(f"Deposit: {house_data['deposit']}")
+                st.write(f"Deposit: {'{:,.0f}'.format(house_data['deposit'])}")
                 st.write(f"Mortgage Term: {house_data['mortgage_term']} years")
                 st.write(f"Interest Rate: {house_data['interest_rate']}%")
             else:
@@ -112,7 +112,7 @@ def display_rent_sidebar(state_manager):
 
     for i, rent_data in enumerate(state_manager.get_rent_dfs()):
         with st.sidebar.expander(f"{rent_data['name']}"):
-            st.write(f"Rent Amount: {rent_data['rent_amount']}")
+            st.write(f"Rent Amount: {'{:,.0f}'.format(rent_data['rent_amount'])}")
             # st.write(f"Starting Month: {rent_data['start_month']}")
             st.write(f"Starting: Years {rent_data['start_month'] // 12} - Months {rent_data['start_month'] % 12}")
             # st.write(f"Duration: {rent_data['duration']}")
@@ -145,7 +145,7 @@ def display_stock_sidebar(state_manager):
         with st.sidebar.expander(stock_data['name'], expanded=False):
             # st.write(f"Acquisition Month: {stock_data['acquisition_month']}")
             st.write(f"Acquisition: Years {stock_data['acquisition_month'] // 12} - Months {stock_data['acquisition_month'] % 12}")
-            st.write(f"Dollar-Cost Averaging Amount: {stock_data['investment_amount']}")
+            st.write(f"Dollar-Cost Averaging Amount: {'{:,.0f}'.format(stock_data['investment_amount'])}")
             # st.write(f"Dollar-Cost Averaging Months: {stock_data['months_buying_stock']}")
             st.write(f"Dollar-Cost Averaging: Years {stock_data['months_buying_stock'] // 12} - Months {stock_data['months_buying_stock'] % 12}")
 
@@ -182,7 +182,7 @@ def display_asset_sidebar(state_manager):
 
     for i, savings_data in enumerate(state_manager.get_asset_dfs()):
         with st.sidebar.expander(savings_data['name'], expanded=False):
-            st.write(f"Asset Value: {savings_data['asset_value']}")
+            st.write(f"Asset Value: {'{:,.0f}'.format(savings_data['asset_value'])}")
             # st.write(f"Acquisition Month: {savings_data['acquisition_month']}")
             st.write(f"Acquisition: Years {savings_data['acquisition_month'] // 12} - Months {savings_data['acquisition_month'] % 12}")
 
