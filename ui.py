@@ -280,6 +280,7 @@ class AnalysisUI:
                 file_name='combined_analysis.csv',
                 mime='text/csv'
             )
+
         display_graph_plotly(
             title='Analysis Graph - Monthly Brickdown',
             dataframe=self.state_manager.get_combined_analysis_df(),  # XX
@@ -299,6 +300,4 @@ class AnalysisUI:
                              'Running Total Cash & Asset & Pension'
                              ]
         )
-
-
 

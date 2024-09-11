@@ -44,6 +44,7 @@ def create_salary_output_df(annual_income, pension_contrib, company_match, num_m
         'Tax': [tax] * num_months,
         'Take Home Pay': [monthly_take_home_pay] * num_months
     }
+
     return pd.DataFrame(output_data)
 
 
@@ -80,6 +81,13 @@ def update_combined_salary_df(session):
     #
     # combined_df['Running Total Pension'] = running_total_pension
 
+    # Create 'Year' and 'Month' columns based on the index
+    salary_df['Year'] = (salary_df.index // 12) + 1  # 1-based years
+    salary_df['Month'] = (salary_df.index % 12) + 1  # 1-based months
+
+    # Create a new 'Year-Month' column for better x-axis labeling
+    salary_df['Year-Month'] = salary_df['Year'].astype(str) + '-' + salary_df['Month'].astype(str).str.zfill(2)
+
     session.combined_salary_df = salary_df
 
 
@@ -99,6 +107,13 @@ def update_combined_expense_df(session):
 
         # Replace the rows in expense_df with combined_df where combined_df has values
         expense_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+
+    # Create 'Year' and 'Month' columns based on the index
+    expense_df['Year'] = (expense_df.index // 12) + 1  # 1-based years
+    expense_df['Month'] = (expense_df.index % 12) + 1  # 1-based months
+
+    # Create a new 'Year-Month' column for better x-axis labeling
+    expense_df['Year-Month'] = expense_df['Year'].astype(str) + '-' + expense_df['Month'].astype(str).str.zfill(2)
 
     session.combined_expense_df = expense_df
 
@@ -286,6 +301,13 @@ def update_combined_house_and_rent_df(session):
     combined_df = pd.concat([session.combined_house_df, session.combined_rent_df], axis=1)
     combined_df.fillna(0, inplace=True)
 
+    # Create 'Year' and 'Month' columns based on the index
+    combined_df['Year'] = (combined_df.index // 12) + 1  # 1-based years
+    combined_df['Month'] = (combined_df.index % 12) + 1  # 1-based months
+
+    # Create a new 'Year-Month' column for better x-axis labeling
+    combined_df['Year-Month'] = combined_df['Year'].astype(str) + '-' + combined_df['Month'].astype(str).str.zfill(2)
+
     session.combined_house_and_rent_df = combined_df
 
 
@@ -391,6 +413,13 @@ def update_combined_stock_df(session):
         # Replace the rows in salary_df with combined_df where combined_df has values
         stock_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
+    # Create 'Year' and 'Month' columns based on the index
+    stock_df['Year'] = (stock_df.index // 12) + 1  # 1-based years
+    stock_df['Month'] = (stock_df.index % 12) + 1  # 1-based months
+
+    # Create a new 'Year-Month' column for better x-axis labeling
+    stock_df['Year-Month'] = stock_df['Year'].astype(str) + '-' + stock_df['Month'].astype(str).str.zfill(2)
+
     # Store the combined DataFrame in session state
     session.combined_stock_df = stock_df
 
@@ -432,17 +461,27 @@ def update_combined_asset_df(session):
         # Replace the rows in asset_df with combined_df where combined_df has values
         asset_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
+    # Create 'Year' and 'Month' columns based on the index
+    asset_df['Year'] = (asset_df.index // 12) + 1  # 1-based years
+    asset_df['Month'] = (asset_df.index % 12) + 1  # 1-based months
+
+    # Create a new 'Year-Month' column for better x-axis labeling
+    asset_df['Year-Month'] = asset_df['Year'].astype(str) + '-' + asset_df['Month'].astype(str).str.zfill(2)
+
     session.combined_asset_df = asset_df
 
 
 def update_combined_analysis_df(session):
 
+    # Define the columns to exclude
+    exclude_columns = ['Year', 'Month', 'Year-Month']
+
     combined_df = pd.concat([
-        session.combined_salary_df,
-        session.combined_expense_df,
-        session.combined_house_and_rent_df,
-        session.combined_stock_df,
-        session.combined_asset_df
+        session.combined_salary_df.drop(columns=exclude_columns, errors='ignore'),
+        session.combined_expense_df.drop(columns=exclude_columns, errors='ignore'),
+        session.combined_house_and_rent_df.drop(columns=exclude_columns, errors='ignore'),
+        session.combined_stock_df.drop(columns=exclude_columns, errors='ignore'),
+        session.combined_asset_df.drop(columns=exclude_columns, errors='ignore')
         ],
         axis=1,
         ignore_index=False
