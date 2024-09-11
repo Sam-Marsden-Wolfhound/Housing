@@ -2,22 +2,16 @@
 # To do 
 
 ## Overview
-
-* Save data
-* load data 
+* New session 
+* Users Age
 
 Stage 2
 * Tax System
 
 
 ## Salary
-
-* Months change payment bug
-
-* Add tax
-* Add NI payments
-* Graph coulers 
-* Layout Graph over dataframe?
+* Time in years 
+* Info icon and pop up
 
 Stage 2
 * US vs UK tax
