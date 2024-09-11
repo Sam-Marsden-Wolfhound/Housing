@@ -6,7 +6,7 @@ from data_processing import create_salary_output_df, create_expense_output_df, c
 def handle_salary_form(state_manager):
     default_name = f"Salary {state_manager.get_form_id(key='next_salary_id')}"
     name = st.text_input("Salary Name", value=default_name)
-    annual_income = st.number_input("Annual Gross Income", value=60000)
+    annual_income = st.number_input("Annual Gross Income", value=60000, step=1000, format="%d")
     pension_contrib = st.number_input("Pension Contribution (%)", value=3.0)
     company_match = st.number_input("Company Match (%)", value=3.0)
     num_months = st.number_input("Number of Months", value=12, min_value=1)
@@ -29,7 +29,7 @@ def handle_salary_form(state_manager):
 
 def handle_salary_edit(index, salary_data, state_manager):
     new_name = st.text_input("Salary Name", value=salary_data['name'])
-    new_annual_income = st.number_input("Annual Gross Income", value=salary_data['annual_income'])
+    new_annual_income = st.number_input("Annual Gross Income", value=salary_data['annual_income'], format="%d")
     new_pension_contrib = st.number_input("Pension Contribution (%)", value=salary_data['pension_contrib'])
     new_company_match = st.number_input("Company Match (%)", value=salary_data['company_match'])
     new_num_months = st.number_input("Number of Months", value=salary_data['num_months'], min_value=1,
@@ -63,7 +63,7 @@ def handle_salary_edit(index, salary_data, state_manager):
 def handle_expense_form(state_manager):
     default_name = f"Expense {state_manager.get_form_id(key='next_expense_id')}"
     name = st.text_input("Expense Name", value=default_name)
-    monthly_expense = st.number_input("Monthly Expenses", value=1000.00)
+    monthly_expense = st.number_input("Monthly Expenses", value=1000, format="%d")
     months = st.number_input("Months", value=12, min_value=1)
 
     if st.form_submit_button("Add Expense"):
@@ -81,7 +81,7 @@ def handle_expense_form(state_manager):
 
 def handle_expense_edit(index, expense_data, state_manager):
     new_name = st.text_input("Expense Name", value=expense_data['name'])
-    new_monthly_expense = st.number_input("Monthly Expenses", value=expense_data['monthly_expense'])
+    new_monthly_expense = st.number_input("Monthly Expenses", value=expense_data['monthly_expense'], format="%d")
     new_months = st.number_input("Months", value=expense_data['months'], min_value=1, max_value=120)
 
     if st.button("Save Changes", key=f"save_expense_{index}"):
@@ -111,14 +111,14 @@ def handle_house_form(state_manager):
     st.write("Add a new house")
     default_name = f"House {state_manager.get_form_id(key='next_house_id')}"
     name = st.text_input("House Name", value=default_name)
-    house_value = st.number_input("House Value", value=200000)
+    house_value = st.number_input("House Value", value=200000, format="%d")
     acquisition_month = st.number_input("Month of Acquisition", value=0)
     appreciation_rate = st.number_input("House Appreciation Rate (%)", value=1.5)
 
     # Mortgage related inputs
     with st.expander("Mortgage Details", expanded=False):
         mortgage = st.checkbox("Mortgage")
-        deposit = st.number_input("Deposit", value=50000)
+        deposit = st.number_input("Deposit", value=50000, format="%d")
         mortgage_term = st.number_input("Mortgage Term (years)", value=25)
         interest_rate = st.number_input("Interest Rate (%)", value=3.5)
     if not mortgage:
@@ -170,13 +170,13 @@ def handle_house_form(state_manager):
 
 def handle_house_edit(index, house_data, state_manager):
     new_name = st.text_input("House Name", value=house_data['name'])
-    new_house_value = st.number_input("House Value", value=house_data['house_value'])
+    new_house_value = st.number_input("House Value", value=house_data['house_value'], format="%d")
     new_acquisition_month = st.number_input("Month of Acquisition", value=house_data['acquisition_month'])
     new_appreciation_rate = st.number_input("House Appreciation Rate (%)", value=house_data['appreciation_rate'])
 
     # Mortgage related inputs
     new_mortgage = st.checkbox("Mortgage", value=house_data['mortgage'])
-    new_deposit = st.number_input("Deposit", value= house_data['deposit'] if (house_data['deposit'] is not None) else 50000)
+    new_deposit = st.number_input("Deposit", value= house_data['deposit'] if (house_data['deposit'] is not None) else 50000, format="%d")
     new_mortgage_term = st.number_input("Mortgage Term (years)", value=house_data['mortgage_term'] if (house_data['mortgage_term'] is not None) else 25)
     new_interest_rate = st.number_input("Interest Rate (%)", value=house_data['interest_rate'] if (house_data['interest_rate'] is not None) else 3.50)
     if new_mortgage:
@@ -237,7 +237,7 @@ def handle_house_edit(index, house_data, state_manager):
 def handle_rent_form(state_manager):
     default_name = f"Rent {state_manager.get_form_id(key='next_rent_id')}"
     name = st.text_input("Rent Name", value=default_name)
-    rent_amount = st.number_input("Rent Amount", value=2000)
+    rent_amount = st.number_input("Rent Amount", value=2000, format="%d")
     start_month = st.number_input("Starting Month", value=0)
     duration = st.number_input("Duration", value=12, min_value=0)
 
@@ -258,7 +258,7 @@ def handle_rent_form(state_manager):
 
 def handle_rent_edit(index, rent_data, state_manager):
     new_name = st.text_input("Rent Name", value=rent_data['name'])
-    new_rent_amount = st.number_input("Rent Amount", value=rent_data['rent_amount'])
+    new_rent_amount = st.number_input("Rent Amount", value=rent_data['rent_amount'], format="%d")
     new_start_month = st.number_input("Starting Month", value=rent_data['start_month'])
     new_duration = st.number_input("Duration", value=rent_data['duration'])
 
@@ -289,7 +289,7 @@ def handle_stock_form(state_manager):
     default_name = f"Stock {state_manager.get_form_id(key='next_stock_id')}"
     name = st.text_input("Stock Name", value=default_name)
     acquisition_month = st.number_input("Acquisition Month", value=0)
-    investment_amount = st.number_input("Dollar-Cost Averaging Amount (£)", value=100, min_value=0)
+    investment_amount = st.number_input("Dollar-Cost Averaging Amount", value=100, min_value=0, format="%d")
     months_buying_stock = st.number_input("Dollar-Cost Averaging Months", value=60, min_value=0)
     appreciation_rate = st.number_input("Appreciation Rate (%)", value=3)
     with st.expander("Sale Details", expanded=False):
@@ -320,7 +320,7 @@ def handle_stock_form(state_manager):
 def handle_stock_edit(index, stock_data, state_manager):
     new_name = st.text_input("Stock Name", value=stock_data['name'])
     new_acquisition_month = st.number_input("Acquisition Month", value=stock_data['acquisition_month'])
-    new_investment_amount = st.number_input("Dollar-Cost Averaging Amount (£)", value=stock_data['investment_amount'])
+    new_investment_amount = st.number_input("Dollar-Cost Averaging Amount", value=stock_data['investment_amount'], format="%d")
     new_months_buying_stock = st.number_input("Dollar-Cost Averaging Months", value=stock_data['months_buying_stock'])
     new_appreciation_rate = st.number_input("Appreciation Rate (%)", value=stock_data['appreciation_rate'])
     new_sale = st.checkbox("Sell Stock", value=stock_data['sale'])
@@ -356,7 +356,7 @@ def handle_stock_edit(index, stock_data, state_manager):
 def handle_asset_form(state_manager):
     default_name = f"Asset {state_manager.get_form_id(key='next_asset_id')}"
     name = st.text_input("Asset Name", value=default_name)
-    asset_value = st.number_input("Asset Value", value=1000.00)
+    asset_value = st.number_input("Asset Value", value=1000, format="%d")
     acquisition_month = st.number_input("Acquisition Month", value=0, min_value=0)
 
     if st.form_submit_button("Add Asset"):
@@ -374,7 +374,7 @@ def handle_asset_form(state_manager):
 
 def handle_asset_edit(index, savings_data, state_manager):
     new_name = st.text_input("Asset Name", value=savings_data['name'])
-    new_asset_value = st.number_input("Asset Value", value=savings_data['asset_value'])
+    new_asset_value = st.number_input("Asset Value", value=savings_data['asset_value'], format="%d")
     new_acquisition_month = st.number_input("Acquisition Month", value=savings_data['acquisition_month'])
 
     if st.button("Save Changes", key=f"save_asset_{index}"):
