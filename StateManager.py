@@ -37,6 +37,9 @@ class StateManager:
     def add_salary_df(self, obj):
         self.session.add_salary_df(obj)
 
+    def add_pension_growth_df(self, obj):
+        self.session.add_pension_growth_df(obj)
+
     def add_expense_df(self, obj):
         self.session.add_expense_df(obj)
 
@@ -54,6 +57,9 @@ class StateManager:
 
     def get_salary_dfs(self):
         return self.session.get_salary_dfs()
+
+    def get_pension_growth_dfs(self):
+        return self.session.get_pension_growth_dfs()
 
     def get_expense_dfs(self):
         return self.session.get_expense_dfs()
@@ -111,13 +117,8 @@ class StateManager:
     def set_editing_index(self, key, value):
         self.ui_state.set_editing_index(key, value)
 
-
-
     def update_all(self):
         self.ui_state.update_all(self.session)
-
-
-
 
 
 #------------------------------------------------------------------------------------
@@ -128,7 +129,7 @@ class Session:
         self.version = 1
         # Input DFs
         self.salary_dfs = []
-        self.pension_dfs = []
+        self.pension_growth_dfs = []
         self.expense_dfs = []
         self.house_dfs = []
         self.rent_dfs = []
@@ -151,8 +152,8 @@ class Session:
     def add_salary_df(self, obj):
         self.salary_dfs.append(obj)
 
-    def add_pension_df(self, obj):
-        self.pension_dfs.append(obj)
+    def add_pension_growth_df(self, obj):
+        self.pension_growth_dfs.append(obj)
 
     def add_expense_df(self, obj):
         self.expense_dfs.append(obj)
@@ -172,8 +173,8 @@ class Session:
     def get_salary_dfs(self):
         return self.salary_dfs
 
-    def get_pension_dfs(self):
-        return self.pension_dfs
+    def get_pension_growth_dfs(self):
+        return self.pension_growth_dfs
 
     def get_expense_dfs(self):
         return self.expense_dfs
@@ -214,10 +215,6 @@ class Session:
     def get_combined_analysis_df(self):
         return self.combined_analysis_df
 
-    # def initialise_combined_salary_df(self):
-    #     pass
-
-
 
 #-------------------------------------------------------------------------------------------
 class UiState:
@@ -226,6 +223,7 @@ class UiState:
         # print("Initialize UiState")
         self.form_id_key = [
             'next_salary_id',
+            'next_pension_id',
             'next_expense_id',
             'next_house_id',
             'next_rent_id',
@@ -236,6 +234,7 @@ class UiState:
         self.initialise_form_ids()
         self.editing_index_key = [
             'editing_salary_index',
+            'editing_pension_index',
             'editing_expense_index',
             'editing_house_index',
             'editing_rent_index',

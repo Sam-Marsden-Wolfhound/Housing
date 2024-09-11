@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from form_handlers import handle_salary_edit, handle_expense_edit, handle_house_edit, handle_rent_edit, handle_stock_edit, handle_asset_edit
+from form_handlers import handle_salary_edit, handle_pension_growth_edit, handle_expense_edit, handle_house_edit, handle_rent_edit, handle_stock_edit, handle_asset_edit
 
 def display_refresh_sidebar_button(state_manager):
     if st.sidebar.button("Refresh Page", key="refresh_sidebar_button"):
@@ -35,6 +35,34 @@ def display_salary_sidebar(state_manager):
                 state_manager.update_all()
                 state_manager.set_editing_index(
                     key='editing_salary_index',
+                    value=None
+                )
+                break  # Exit loop after deletion to prevent index errors
+
+
+def display_pension_sidebar(state_manager):
+    st.sidebar.header("Your Pension Growth")
+
+    for i, pension_data in enumerate(state_manager.get_pension_growth_dfs()):
+        with st.sidebar.expander(pension_data['name'], expanded=False):
+            st.write(f"Annual Growth Rate (%): {pension_data['annual_growth_rate']}")
+            # st.write(f"Months: {pension_data['months']}")
+            st.write(f"Number of: Years {pension_data['months'] // 12} - Months {pension_data['months'] % 12}")
+
+            if st.button("Edit", key=f"edit_pension_{i}"):
+                state_manager.set_editing_index(
+                    key='editing_pension_index',
+                    value=i
+                )
+
+            if state_manager.get_editing_index(key='editing_pension_index') == i:
+                handle_pension_growth_edit(i, pension_data, state_manager)
+
+            if st.button("Delete", key=f"delete_pension_{i}"):
+                del state_manager.get_pension_growth_dfs()[i]
+                state_manager.update_all()
+                state_manager.set_editing_index(
+                    key='editing_pension_index',
                     value=None
                 )
                 break  # Exit loop after deletion to prevent index errors

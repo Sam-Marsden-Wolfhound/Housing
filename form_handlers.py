@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from data_processing import create_salary_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
+from data_processing import create_salary_output_df, create_pension_growth_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
 
 
 def handle_salary_form(state_manager):
@@ -59,6 +59,52 @@ def handle_salary_edit(index, salary_data, state_manager):
             value=None
         )
 
+def handle_pension_growth_form(state_manager):
+    default_name = f"Pension {state_manager.get_form_id(key='next_pension_id')}"
+    name = st.text_input("Pension Growth Name", value=default_name)
+    annual_growth_rate = st.number_input("Annual Growth Rate (%)", value=3.00)
+    months = st.number_input("Months", value=12, min_value=1)
+
+    if st.form_submit_button("Add Pension Growth"):
+        output_df = create_pension_growth_output_df(annual_growth_rate, months)
+        state_manager.add_pension_growth_df({
+            'name': name,
+            'output_df': output_df,
+            'annual_growth_rate': annual_growth_rate,
+            'months': months
+        })
+        state_manager.add_one_to_form_id(key='next_pension_id')
+        return True
+
+    return False
+
+
+def handle_pension_growth_edit(index, pension_data, state_manager):
+    new_name = st.text_input("Pension Growth Name", value=pension_data['name'])
+    new_annual_growth_rate = st.number_input("Annual Growth Rate (%)", value=pension_data['annual_growth_rate'])
+    new_months = st.number_input("Months", value=pension_data['months'], min_value=1, max_value=1200)
+
+    if st.button("Save Changes", key=f"save_pension_{index}"):
+        state_manager.get_pension_growth_dfs()[index]['name'] = new_name
+        state_manager.get_pension_growth_dfs()[index]['annual_growth_rate'] = new_annual_growth_rate
+        state_manager.get_pension_growth_dfs()[index]['months'] = new_months
+
+        # Recreate the pension growth output dataframe with the new values
+        new_output_df = create_pension_growth_output_df(new_annual_growth_rate, new_months)
+        state_manager.get_pension_growth_dfs()[index]['output_df'] = new_output_df
+
+        state_manager.update_all()  # Update the combined expense dataframe with the new changes
+        state_manager.set_editing_index(
+            key='editing_pension_index',
+            value=None
+        )
+
+    if st.button("Cancel", key=f"cancel_edit_pension_{index}"):
+        state_manager.set_editing_index(
+            key='editing_pension_index',
+            value=None
+        )
+
 
 def handle_expense_form(state_manager):
     default_name = f"Expense {state_manager.get_form_id(key='next_expense_id')}"
@@ -82,7 +128,7 @@ def handle_expense_form(state_manager):
 def handle_expense_edit(index, expense_data, state_manager):
     new_name = st.text_input("Expense Name", value=expense_data['name'])
     new_monthly_expense = st.number_input("Monthly Expenses", value=expense_data['monthly_expense'], format="%d")
-    new_months = st.number_input("Months", value=expense_data['months'], min_value=1, max_value=120)
+    new_months = st.number_input("Months", value=expense_data['months'], min_value=1, max_value=1200)
 
     if st.button("Save Changes", key=f"save_expense_{index}"):
         state_manager.get_expense_dfs()[index]['name'] = new_name

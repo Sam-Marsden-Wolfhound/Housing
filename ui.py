@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 import os
 from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session
-from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form
-from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
+from form_handlers import handle_salary_form, handle_pension_growth_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form
+from sidebar_manager import display_salary_sidebar, display_pension_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
 from visualizations import display_graph, display_graph_plotly
 
 
@@ -109,16 +109,15 @@ class SalaryUI:
                 if handle_salary_form(self.state_manager):
                     self.state_manager.update_all()
 
+            st.header("Pension Growth Management")
+            with st.form(key='pension_growth_form'):
+                if handle_pension_growth_form(self.state_manager):
+                    self.state_manager.update_all()
+
         display_salary_sidebar(self.state_manager)
+        display_pension_sidebar(self.state_manager)
 
         with st.expander("Combined Salary DataFrame", expanded=False):
-            # st.subheader("Combined Salary DataFrame")
-            #
-            # pension_groth = st.number_input("Pension Groth", value=st.session_state.pension_groth)
-            # if st.button("Update Pension Groth", key="update_pension_groth"):
-            #     st.session_state['pension_groth'] = pension_groth
-            #     update_combined_salary_df()
-            #
             st.dataframe(self.state_manager.get_combined_salary_df())
 
         display_graph_plotly(

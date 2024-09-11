@@ -47,6 +47,8 @@ def create_salary_output_df(annual_income, pension_contrib, company_match, num_m
 
     return pd.DataFrame(output_data)
 
+def create_pension_growth_output_df(annual_growth_rate, months):
+    return pd.DataFrame({'Monthly Pension Growth Rate': [annual_growth_rate/12] * months})
 
 def update_combined_salary_df(session):
     # Initialize a DataFrame with 1200 rows or 100 years
@@ -59,6 +61,7 @@ def update_combined_salary_df(session):
                                'National Insurance',
                                'Tax',
                                'Take Home Pay',
+                               'Monthly Pension Growth Rate',
                                'Running Total Pension']
     )
 
@@ -68,18 +71,11 @@ def update_combined_salary_df(session):
         # Replace the rows in salary_df with combined_df where combined_df has values
         salary_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
-    # XXX This needs to be updated
-    # # Initialize the running total with compound interest
-    # running_total_pension = []
-    # current_total = 0
-    #
-    # for index, contribution in combined_df['Combined Pension Contribution'].items():
-    #     current_total += contribution
-    #     # Apply compound interest for the current month
-    #     current_total *= (1 + 3 / 100 / 12) # XXX This needs to be updated
-    #     running_total_pension.append(current_total)
-    #
-    # combined_df['Running Total Pension'] = running_total_pension
+    if not session.pension_growth_dfs == []:
+        combined_df = pd.concat([pension['output_df'] for pension in session.pension_growth_dfs], ignore_index=True)
+
+        # Replace the rows in salary_df with combined_df where combined_df has values
+        salary_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
     # Create 'Year' and 'Month' columns based on the index
     salary_df['Year'] = (salary_df.index // 12) + 1  # 1-based years
@@ -87,6 +83,24 @@ def update_combined_salary_df(session):
 
     # Create a new 'Year-Month' column for better x-axis labeling
     salary_df['Year-Month'] = salary_df['Year'].astype(str) + '-' + salary_df['Month'].astype(str).str.zfill(2)
+
+    # Compute the 'Running Total Pension' with cumulative addition and growth rate application
+    running_total_pension = []
+    current_total = 0
+
+    for i, row in salary_df.iterrows():
+        # Add the combined pension contribution for this month
+        current_total += row['Combined Pension Contribution']
+
+        # Apply the monthly pension growth rate
+        current_total *= (1 + row['Monthly Pension Growth Rate'] / 100)
+
+        # Append the result to the list
+        running_total_pension.append(current_total)
+
+        # Assign the calculated running total to the DataFrame
+    salary_df['Running Total Pension'] = running_total_pension
+
 
     session.combined_salary_df = salary_df
 
