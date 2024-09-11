@@ -50,16 +50,18 @@ class SessionsUI:
                     update_session_state(self.state_manager, directory, selected_file)
 
     def display(self):
-        st.header("Sessions")
-        # Input for directory
-        directory = st.text_input(
-            "Target Session Directory",
-            value="Saved_Sessions",
-            key="directory_save"
-        )
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.header("Sessions")
+            # Input for directory
+            directory = st.text_input(
+                "Target Session Directory",
+                value="Saved_Sessions",
+                key="directory_save"
+            )
 
-        self.display_save_section(directory)
-        self.display_load_section(directory)
+            self.display_save_section(directory)
+            self.display_load_section(directory)
 
 
 class SalaryUI:
@@ -68,10 +70,12 @@ class SalaryUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Salary Management")
-        with st.form(key='salary_form'):
-            if handle_salary_form(self.state_manager):
-                self.state_manager.update_all()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.header("Salary Management")
+            with st.form(key='salary_form'):
+                if handle_salary_form(self.state_manager):
+                    self.state_manager.update_all()
 
         display_salary_sidebar(self.state_manager)
 
@@ -100,10 +104,13 @@ class ExpensesUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Expense Management")
-        with st.form(key='expense_form'):
-            if handle_expense_form(self.state_manager):
-                self.state_manager.update_all()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.header("Expense Management")
+            with st.form(key='expense_form'):
+                if handle_expense_form(self.state_manager):
+                    self.state_manager.update_all()
+
         display_expense_sidebar(self.state_manager)
 
         with st.expander("Combined Expense DataFrame", expanded=False):
@@ -124,17 +131,19 @@ class HousingUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Housing Management")
-        with st.form(key='housing_form'):
-            if handle_house_form(self.state_manager):
-                self.state_manager.update_all()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.header("Housing Management")
+            with st.form(key='housing_form'):
+                if handle_house_form(self.state_manager):
+                    self.state_manager.update_all()
 
-        display_house_sidebar(self.state_manager)
+            display_house_sidebar(self.state_manager)
 
-        st.header("Rent Management")
-        with st.form(key='rent_form'):
-            if handle_rent_form(self.state_manager):
-                self.state_manager.update_all()
+            st.header("Rent Management")
+            with st.form(key='rent_form'):
+                if handle_rent_form(self.state_manager):
+                    self.state_manager.update_all()
 
         display_rent_sidebar(self.state_manager)
 
@@ -164,10 +173,12 @@ class StockUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Stock Management")
-        with st.form(key='stock_form'):
-            if handle_stock_form(self.state_manager):
-                self.state_manager.update_all()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.header("Stock Management")
+            with st.form(key='stock_form'):
+                if handle_stock_form(self.state_manager):
+                    self.state_manager.update_all()
 
         display_stock_sidebar(self.state_manager)
 
@@ -191,10 +202,12 @@ class AssetUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Asset Management")
-        with st.form(key='asset_form'):
-            if handle_asset_form(self.state_manager):
-                self.state_manager.update_all()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.header("Asset Management")
+            with st.form(key='asset_form'):
+                if handle_asset_form(self.state_manager):
+                    self.state_manager.update_all()
 
         display_asset_sidebar(self.state_manager)
 

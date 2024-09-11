@@ -4,8 +4,8 @@ from StateManager import StateManager
 
 
 def main():
-    st.title('Finance Planner')
-    # st.set_page_config(page_title="Personal Finance Planner", layout="wide")
+    # st.title('Finance Planner')
+    st.set_page_config(page_title="Finance Planner", layout="wide")
 
     # Initialize state manager
     state_manager = StateManager()

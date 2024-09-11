@@ -24,7 +24,7 @@ def display_graph(title, dataframe, default_columns=[]):
                 'Select end time',
                 min_value=int(min_index),
                 max_value=int(max_index),
-                value=int(max_index),
+                value=300,
                 key=f'{title}_max'
             )
 
