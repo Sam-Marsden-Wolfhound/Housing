@@ -96,39 +96,40 @@ def display_graph_plotly(title, dataframe, default_columns=[]):
                     min_value = df_filtered[columns_to_plot].min().min()
                     max_value = df_filtered[columns_to_plot].max().max()
 
-                    # Add sliders to allow users to limit the y-axis range
-                    y_min = st.slider(
-                        "Select lower bound of y-axis",
-                        min_value=float(min_value),
-                        max_value=float(max_value),
-                        value=float(min_value),
-                        step=(max_value - min_value) / 100,
-                        key=f'{title}_y_min'
+                    # Use Plotly to create the graph with a specified x-axis column
+                    fig = px.line(
+                        df_filtered,
+                        x='Year-Month',
+                        y=columns_to_plot,
+                        labels={'x': 'Year-Month'}
                     )
 
-                    y_max = st.slider(
-                        "Select upper bound of y-axis",
-                        min_value=float(min_value),
-                        max_value=float(max_value),
-                        value=float(max_value),
-                        step=(max_value - min_value) / 100,
-                        key=f'{title}_y_max'
-                    )
+                    if not min_value == max_value:
+                        # Add sliders to allow users to limit the y-axis range
+                        y_min = st.slider(
+                            "Select lower bound of y-axis",
+                            min_value=float(min_value),
+                            max_value=float(max_value),
+                            value=float(min_value),
+                            step=(max_value - min_value) / 100,
+                            key=f'{title}_y_min'
+                        )
 
-                    if y_min >= y_max:
-                        st.error('Upper bound must be greater than lower bound')
-                        return
+                        y_max = st.slider(
+                            "Select upper bound of y-axis",
+                            min_value=float(min_value),
+                            max_value=float(max_value),
+                            value=float(max_value),
+                            step=(max_value - min_value) / 100,
+                            key=f'{title}_y_max'
+                        )
 
-                # Use Plotly to create the graph with a specified x-axis column
-                fig = px.line(
-                    df_filtered,
-                    x='Year-Month',
-                    y=columns_to_plot,
-                    labels={'x': 'Year-Month'}
-                )
+                        if y_min >= y_max:
+                            st.error('Upper bound must be greater than lower bound')
+                            return
 
-                # Set y-axis limits
-                fig.update_yaxes(range=[y_min, y_max])
+                        # Set y-axis limits
+                        fig.update_yaxes(range=[y_min, y_max])
 
                 # Reduce the number of x-axis labels displayed by controlling the number of ticks (nticks)
                 fig.update_xaxes(

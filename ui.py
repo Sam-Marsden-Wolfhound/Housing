@@ -1,11 +1,10 @@
 import streamlit as st
 import pandas as pd
 import os
-from StateManager import save_session_state, update_session_state, load_session_state
-from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form, create_salary_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
+from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session
+from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form
 from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
 from visualizations import display_graph, display_graph_plotly
-
 
 
 class SessionsUI:
@@ -28,6 +27,27 @@ class SessionsUI:
                     save_session_state(self.state_manager, directory, filename, use_uuid)
 
     def display_load_section(self, directory):
+        # CSS to style the delete button
+        delete_button_css = """
+            <style>
+            .delete-button {
+                background-color: rgba(255, 0, 0, 0.7);
+                color: white;
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+            }
+            .delete-button:hover {
+                background-color: darkred;
+            }
+            </style>
+        """
+
+        # Inject the custom CSS to Streamlit
+        st.markdown(delete_button_css, unsafe_allow_html=True)
+
         with st.container(border=True):
             st.subheader("Load & Update")
             # Get sessions in directory
@@ -36,18 +56,30 @@ class SessionsUI:
 
             selected_file = st.selectbox("Select a session to load:", session_files, key="select_session")
 
-            col1, col2 = st.columns(2)
+            col1, col2, col3, col4 = st.columns([0.9, 1, 0.85, 1])
+            # Create a placeholder for the success message outside the columns
+            message_placeholder = st.empty()
+
             with col1:
                 if st.button("Load Session", key="loud_session"):
                     if selected_file:
-                        print("louding button", selected_file)
-                        file_path = os.path.join(directory, selected_file)
-                        load_session_state(self.state_manager, file_path)
+                        load_session_state(self.state_manager, directory, selected_file, message_placeholder)
                         self.state_manager.update_all()
 
             with col2:
                 if st.button("Update Session", key="update_session"):
-                    update_session_state(self.state_manager, directory, selected_file)
+                    update_session_state(self.state_manager, directory, selected_file, message_placeholder)
+
+            with col3:
+                if st.button("New Session", key="new_session"):
+                    new_session_state(self.state_manager)
+
+            with col4:
+                # Use st.markdown to display the custom-styled button
+                if st.markdown('<button class="delete-button">Delete Session</button>', unsafe_allow_html=True):
+                # if st.button("Delete Session", key="delete_session"):
+                    delete_session(directory, selected_file, message_placeholder)
+
 
     def display(self):
         col1, col2, col3 = st.columns([1, 2, 1])

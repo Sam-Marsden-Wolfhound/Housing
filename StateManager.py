@@ -23,7 +23,6 @@ class StateManager:
         return self.session
         # return st.session_state.session
 
-
     def load_session_as_current_session(self, loaded_state):
         st.session_state.session = None
         st.session_state.session = loaded_state
@@ -31,6 +30,9 @@ class StateManager:
         st.session_state.ui_state = UiState()
         # self.session = None
         # self.session = loaded_state
+
+    def new_session_state(self):
+        st.session_state.session = Session()
 
     def add_salary_df(self, obj):
         self.session.add_salary_df(obj)
@@ -320,7 +322,7 @@ def save_session_state(state_manager, directory, file_name, use_uuid):
     # Need a message System
 
 
-def update_session_state(state_manager, directory, file_name):
+def update_session_state(state_manager, directory, file_name, messager):
     filepath = os.path.join(directory, file_name)
 
     # Check if the file exists and delete it before writing the new one
@@ -330,19 +332,37 @@ def update_session_state(state_manager, directory, file_name):
     with open(filepath, "wb") as f:
         pickle.dump(state_manager.get_current_session(), f)
 
-    st.success(f"Session updated {file_name}")
+    messager.success(f"Session updated {file_name}")
 
 
-def clear_state():
-    st.session_state.clear()
-
-
-def load_session_state(state_manager, file_path):
+def load_session_state(state_manager, directory, selected_file, messager):
+    file_path = os.path.join(directory, selected_file)
     """Load a session state from a file."""
     with open(file_path, "rb") as f:
         loaded_state = pickle.load(f)
 
     state_manager.load_session_as_current_session(loaded_state)
 
-    st.success(f"Session loaded from {os.path.basename(file_path)} \nVersion: {loaded_state.get_version()}")
+    messager.success(f"Session loaded from {os.path.basename(file_path)} \nVersion: {loaded_state.get_version()}")
 
+
+def new_session_state(state_manager):
+    state_manager.new_session_state()
+
+
+def delete_session(directory, selected_file, messager):
+    if not directory == None and not selected_file == None:
+        filepath = os.path.join(directory, selected_file)
+
+        # Check if the file exists and delete it before writing the new one
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            messager.success(f"Deleted Session {selected_file}")
+        pass
+
+    else:
+        messager.error(f"No file to delete")
+
+
+def clear_state():
+    st.session_state.clear()
