@@ -449,6 +449,13 @@ def update_combined_analysis_df(session):
     )
     combined_df.fillna(0, inplace=True)
 
+    # Create 'Year' and 'Month' columns based on the index
+    combined_df['Year'] = (combined_df.index // 12) + 1  # 1-based years
+    combined_df['Month'] = (combined_df.index % 12) + 1  # 1-based months
+
+    # Create a new 'Year-Month' column for better x-axis labeling
+    combined_df['Year-Month'] = combined_df['Year'].astype(str) + '-' + combined_df['Month'].astype(str).str.zfill(2)
+
     combined_df['Monthly Credit'] = combined_df['Take Home Pay'] + combined_df['Row Total Cashout Amount Housing'] + combined_df['Row Total Rent Amount'] + combined_df['Row Total Cashout Amount Stocks'] + combined_df['Row Total Asset Value']
     combined_df['Monthly Investment'] = combined_df['Row Total Principal Payment Amount'] + combined_df['Row Total Investment Amount'] + combined_df['Row Total Deposit Amount']
     combined_df['Monthly Losses'] = combined_df['Monthly Expenses'] + combined_df['Row Total Interest Amount']

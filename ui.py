@@ -4,7 +4,7 @@ import os
 from StateManager import save_session_state, update_session_state, load_session_state
 from form_handlers import handle_salary_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form, create_salary_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
 from sidebar_manager import display_salary_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
-from visualizations import display_graph
+from visualizations import display_graph, display_graph_plotly
 
 
 
@@ -248,7 +248,7 @@ class AnalysisUI:
                 file_name='combined_analysis.csv',
                 mime='text/csv'
             )
-        display_graph(
+        display_graph_plotly(
             title='Analysis Graph - Monthly Brickdown',
             dataframe=self.state_manager.get_combined_analysis_df(),  # XX
             default_columns=['Monthly Cash Savings',
@@ -258,7 +258,7 @@ class AnalysisUI:
                              ]
         )
 
-        display_graph(
+        display_graph_plotly(
             title='Analysis Graph - Running Total',
             dataframe=self.state_manager.get_combined_analysis_df(),  # XX
             default_columns=['Running Total Cash Savings',
