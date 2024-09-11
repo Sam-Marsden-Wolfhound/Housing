@@ -21,6 +21,8 @@ class StateManager:
     # Session -----------------------------------------------------------------
     def get_current_session(self):
         return self.session
+        # return st.session_state.session
+
 
     def load_session_as_current_session(self, loaded_state):
         st.session_state.session = None
@@ -121,6 +123,7 @@ class Session:
 
     def __init__(self):
         # print("Initialize Session")
+        self.version = 1
         # Input DFs
         self.salary_dfs = []
         self.pension_dfs = []
@@ -140,6 +143,8 @@ class Session:
         self.combined_asset_df = pd.DataFrame()
         self.combined_analysis_df = pd.DataFrame()
 
+    def get_version(self):
+        return self.version
 
     def add_salary_df(self, obj):
         self.salary_dfs.append(obj)
@@ -339,5 +344,5 @@ def load_session_state(state_manager, file_path):
 
     state_manager.load_session_as_current_session(loaded_state)
 
-    st.success(f"Session loaded from {os.path.basename(file_path)}!")
+    st.success(f"Session loaded from {os.path.basename(file_path)} \nVersion: {loaded_state.get_version()}")
 
