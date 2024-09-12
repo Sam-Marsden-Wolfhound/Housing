@@ -16,7 +16,10 @@ class SessionsUI:
         with st.container(border=True):
             st.subheader("New Save")
             filename = st.text_input("File Name", value="Finances", key="filename_save")
-            col1, col2 = st.columns(2)
+
+            col1, col2 = st.columns([1, 1])
+            message_placeholder = st.empty()
+
             with col2:
                 # Add UUID to file name
                 use_uuid = st.checkbox("Add Session UUID", value=True, key="check_box_uuid")
@@ -24,7 +27,7 @@ class SessionsUI:
             with col1:
                 # Save Session
                 if st.button("Save Session", key="save_session"):
-                    save_session_state(self.state_manager, directory, filename, use_uuid)
+                    save_session_state(self.state_manager, directory, filename, use_uuid, message_placeholder)
 
     def display_load_section(self, directory):
         # CSS to style the delete button
@@ -76,8 +79,8 @@ class SessionsUI:
 
             with col4:
                 # Use st.markdown to display the custom-styled button
-                if st.markdown('<button class="delete-button">Delete Session</button>', unsafe_allow_html=True):
-                # if st.button("Delete Session", key="delete_session"):
+                # if st.markdown('<button class="delete-button">Delete Session</button>', unsafe_allow_html=True):
+                if st.button("Delete Session", key="delete_session"):
                     delete_session(directory, selected_file, message_placeholder)
 
 
@@ -127,6 +130,13 @@ class SalaryUI:
                              'Take Home Pay',
                              'Combined Pension Contribution'
             ]
+        )
+
+        display_graph_plotly(
+            title='Pension Graph',
+            dataframe=self.state_manager.get_combined_salary_df(),
+            default_columns=['Running Total Pension',
+                             ]
         )
 
 class ExpensesUI:
@@ -189,11 +199,19 @@ class HousingUI:
             st.dataframe(self.state_manager.get_combined_house_and_rent_df())
 
         display_graph_plotly(
-            title='Housing & Rent Graph',
+            title='Payments & Rent Graph',
             dataframe=self.state_manager.get_combined_house_and_rent_df(),
             default_columns=['Row Total Payment Amount',
                              'Row Total Interest Amount',
                              'Row Total Rent Amount'
+                             ]
+        )
+
+        display_graph_plotly(
+            title='Housing Equity Graph',
+            dataframe=self.state_manager.get_combined_house_and_rent_df(),
+            default_columns=['Row Total Remaining Balance Amount',
+                             'Row Total Equity Amount',
                              ]
         )
 
@@ -249,6 +267,7 @@ class AssetUI:
             title='Asset Graph',
             dataframe=self.state_manager.get_combined_asset_df(),
             default_columns=['Row Total Asset Value',
+                             'Running Total Asset Value',
                              ]
         )
 
@@ -286,6 +305,7 @@ class AnalysisUI:
             default_columns=['Monthly Cash Savings',
                              'Monthly Credit',
                              'Monthly Investment',
+                             'Monthly Expenses',
                              'Monthly Losses'
                              ]
         )

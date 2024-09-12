@@ -461,6 +461,7 @@ def update_combined_asset_df(session):
     asset_df = pd.DataFrame(0,
                              index=range(1200),
                              columns=['Row Total Asset Value',
+                                      'Running Total Asset Value',
                             ]
     )
 
@@ -470,6 +471,8 @@ def update_combined_asset_df(session):
         # Calculate the row sum of "Asset Value" columns
         asset_value_columns = [col for col in combined_df.columns if 'Asset Value for' in col]
         combined_df['Row Total Asset Value'] = combined_df[asset_value_columns].sum(axis=1)
+        combined_df['Running Total Asset Value'] = combined_df['Row Total Asset Value'].cumsum()
+
         combined_df.fillna(0, inplace=True)
 
         # Replace the rows in asset_df with combined_df where combined_df has values

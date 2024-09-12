@@ -300,7 +300,7 @@ class UiState:
 
 
 #-------------------------------------------------------------------------------------------
-def save_session_state(state_manager, directory, file_name, use_uuid):
+def save_session_state(state_manager, directory, file_name, use_uuid, message):
     """Save the current session state to a file."""
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -317,32 +317,34 @@ def save_session_state(state_manager, directory, file_name, use_uuid):
     with open(filepath, "wb") as f:
         pickle.dump(state_manager.get_current_session(), f)
 
-    st.success(f"Session saved as {filename}")
+    message.success(f"Session saved as {filename}")
     # Need a message System
 
 
-def update_session_state(state_manager, directory, file_name, messager):
-    filepath = os.path.join(directory, file_name)
+def update_session_state(state_manager, directory, selected_file, messager):
+    if not directory == None and not selected_file == None:
+        filepath = os.path.join(directory, selected_file)
 
-    # Check if the file exists and delete it before writing the new one
-    if os.path.exists(filepath):
-        os.remove(filepath)
+        # Check if the file exists and delete it before writing the new one
+        if os.path.exists(filepath):
+            os.remove(filepath)
 
-    with open(filepath, "wb") as f:
-        pickle.dump(state_manager.get_current_session(), f)
+        with open(filepath, "wb") as f:
+            pickle.dump(state_manager.get_current_session(), f)
 
-    messager.success(f"Session updated {file_name}")
+        messager.success(f"Session updated {selected_file}")
 
 
 def load_session_state(state_manager, directory, selected_file, messager):
-    file_path = os.path.join(directory, selected_file)
-    """Load a session state from a file."""
-    with open(file_path, "rb") as f:
-        loaded_state = pickle.load(f)
+    if not directory == None and not selected_file == None:
+        file_path = os.path.join(directory, selected_file)
+        """Load a session state from a file."""
+        with open(file_path, "rb") as f:
+            loaded_state = pickle.load(f)
 
-    state_manager.load_session_as_current_session(loaded_state)
+        state_manager.load_session_as_current_session(loaded_state)
 
-    messager.success(f"Session loaded from {os.path.basename(file_path)} \nVersion: {loaded_state.get_version()}")
+        messager.success(f"Session loaded from {os.path.basename(file_path)} \nVersion: {loaded_state.get_version()}")
 
 
 def new_session_state(state_manager):

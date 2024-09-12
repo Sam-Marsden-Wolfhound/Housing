@@ -109,18 +109,18 @@ def display_graph_plotly(title, dataframe, default_columns=[]):
                         y_min = st.slider(
                             "Select lower bound of y-axis",
                             min_value=float(min_value),
-                            max_value=float(max_value),
+                            max_value=0.01,
                             value=float(min_value),
-                            step=(max_value - min_value) / 100,
+                            step=(0.01 - min_value) / 100,
                             key=f'{title}_y_min'
                         )
 
                         y_max = st.slider(
                             "Select upper bound of y-axis",
-                            min_value=float(min_value),
+                            min_value=0.01,
                             max_value=float(max_value),
                             value=float(max_value),
-                            step=(max_value - min_value) / 100,
+                            step=(max_value - 0.01) / 100,
                             key=f'{title}_y_max'
                         )
 
