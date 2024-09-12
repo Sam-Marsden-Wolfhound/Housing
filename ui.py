@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session
+from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session, get_session_from_file
 from form_handlers import handle_user_form, handle_salary_form, handle_pension_growth_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form
 from sidebar_manager import display_salary_sidebar, display_pension_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
 from visualizations import display_graph_plotly
@@ -30,25 +30,25 @@ class SessionsUI:
 
     def display_load_section(self, directory):
         # CSS to style the delete button
-        delete_button_css = """
-            <style>
-            .delete-button {
-                background-color: rgba(255, 0, 0, 0.7);
-                color: white;
-                padding: 0.5rem 1rem;
-                font-size: 1rem;
-                border-radius: 5px;
-                border: none;
-                cursor: pointer;
-            }
-            .delete-button:hover {
-                background-color: darkred;
-            }
-            </style>
-        """
+        # delete_button_css = """
+        #     <style>
+        #     .delete-button {
+        #         background-color: rgba(255, 0, 0, 0.7);
+        #         color: white;
+        #         padding: 0.5rem 1rem;
+        #         font-size: 1rem;
+        #         border-radius: 5px;
+        #         border: none;
+        #         cursor: pointer;
+        #     }
+        #     .delete-button:hover {
+        #         background-color: darkred;
+        #     }
+        #     </style>
+        # """
 
         # Inject the custom CSS to Streamlit
-        st.markdown(delete_button_css, unsafe_allow_html=True)
+        # st.markdown(delete_button_css, unsafe_allow_html=True)
 
         with st.container(border=True):
             st.subheader("Load & Update")
@@ -327,4 +327,95 @@ class AnalysisUI:
                              'Running Total Cash & Asset & Pension'
                              ]
         )
+
+
+class CompareSessionsUI:
+
+    def __init__(self, state_manager):
+        self.state_manager = state_manager
+
+    def display(self):
+        st.header("Compare Sessions")
+        # Input for directory
+
+        directory = st.text_input(
+            "Target Session Directory",
+            value="Saved_Sessions",
+            key="directory_compare_session"
+        )
+
+        # Get sessions in directory
+        session_files = [f for f in os.listdir(directory) if f.endswith(".pkl")]
+
+        col1, col2 = st.columns([1, 1])
+        # message_placeholder = st.empty()
+
+        with col1:
+            with st.container(border=True):
+                st.subheader("Sessions 1")
+                selected_file_1 = st.selectbox("Select a session to load:", session_files, key="select_session_1")
+
+                if st.button("Load Session 1", key="loud_session_1"):
+                    if selected_file_1:
+                        session_1 = get_session_from_file(directory, selected_file_1)
+                        self.state_manager.set_session_1(session_1)
+                        self.state_manager.update_all()
+
+            with st.expander("Sessions 1 DataFrame", expanded=False):  # key="expander_sessions_1"
+                st.dataframe(self.state_manager.get_session_1_dataframe())
+
+                # Add download button to download the combined analysis DataFrame as a CSV
+                csv = self.state_manager.get_session_1_dataframe().to_csv(index=False)
+                st.download_button(
+                    label="Download DataFrame",
+                    data=csv,
+                    file_name='sessions_1.csv',
+                    mime='text/csv',
+                    key="download_sessions_1"
+                )
+
+            display_graph_plotly(
+                title='Sessions 1 Graph',
+                dataframe=self.state_manager.get_session_1_dataframe(),
+                default_columns=['Running Total Cash Savings',
+                                 'Running Total Asset Amount',
+                                 'Running Total Cash & Asset',
+                                 'Running Total Cash & Asset & Pension',
+                                 ]
+            )
+
+        with col2:
+            with st.container(border=True):
+                st.subheader("Sessions 2")
+                selected_file_2 = st.selectbox("Select a session to load:", session_files, key="select_session_2")
+
+                if st.button("Load Session 2", key="loud_session_2"):
+                    if selected_file_2:
+                        session_2 = get_session_from_file(directory, selected_file_2)
+                        self.state_manager.set_session_2(session_2)
+                        self.state_manager.update_all()
+
+            with st.expander("Sessions 2 DataFrame", expanded=False):  # key="expander_sessions_2"
+                st.dataframe(self.state_manager.get_session_2_dataframe())
+
+                # Add download button to download the combined analysis DataFrame as a CSV
+                csv = self.state_manager.get_session_2_dataframe().to_csv(index=False)
+                st.download_button(
+                    label="Download DataFrame",
+                    data=csv,
+                    file_name='sessions_2.csv',
+                    mime='text/csv',
+                    key="download_sessions_2"
+                )
+
+            display_graph_plotly(
+                title='Sessions 2 Graph',
+                dataframe=self.state_manager.get_session_2_dataframe(),
+                default_columns=['Running Total Cash Savings',
+                                 'Running Total Asset Amount',
+                                 'Running Total Cash & Asset',
+                                 'Running Total Cash & Asset & Pension',
+                                 ]
+            )
+
 

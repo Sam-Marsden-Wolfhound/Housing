@@ -49,7 +49,7 @@ def display_graph(title, dataframe, default_columns=[]):
 
 
 def display_graph_plotly(title, dataframe, default_columns=[]):
-    with st.container(border=True):
+    with st.container(border=True):  #  key=f'graph_plotly_{title}'
         st.subheader(title)
         if not dataframe.empty:
             df = dataframe.copy()
@@ -61,7 +61,8 @@ def display_graph_plotly(title, dataframe, default_columns=[]):
             columns_to_plot = st.multiselect(
                 "Select columns to plot",
                 df.columns.tolist(),
-                default=default_columns
+                default=default_columns,
+                key=f'graph_plotly_{title}'
             )
 
             if columns_to_plot:

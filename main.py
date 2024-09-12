@@ -1,5 +1,5 @@
 import streamlit as st
-from ui import SalaryUI, ExpensesUI, HousingUI, StockUI, AssetUI, AnalysisUI, SessionsUI
+from ui import SalaryUI, ExpensesUI, HousingUI, StockUI, AssetUI, AnalysisUI, SessionsUI, CompareSessionsUI
 from StateManager import StateManager
 
 
@@ -17,7 +17,8 @@ def main():
         'Housing',
         'Stocks',
         'Assets',
-        'Analysis'
+        'Analysis',
+        'Compare_Sessions',
     ])
 
     with tab[0]:
@@ -51,6 +52,10 @@ def main():
 
     with tab[6]:
         ui = AnalysisUI(state_manager)
+        ui.display()
+
+    with tab[7]:
+        ui = CompareSessionsUI(state_manager)
         ui.display()
 
 

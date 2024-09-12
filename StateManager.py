@@ -13,9 +13,15 @@ class StateManager:
             st.session_state.session = Session()
         if "ui_state" not in st.session_state:
             st.session_state.ui_state = UiState()
-            # st.session_state.ui_state.update_all(st.session_state.session)
+        if "comp_session_1" not in st.session_state:
+            st.session_state.comp_session_1 = Session()
+        if "comp_session_2" not in st.session_state:
+            st.session_state.comp_session_2 = Session()
+        # Set Refs
         self.session = st.session_state.session
         self.ui_state = st.session_state.ui_state
+        self.comp_session_1 = st.session_state.comp_session_1
+        self.comp_session_2 = st.session_state.comp_session_2
 
 
     # Session -----------------------------------------------------------------
@@ -105,6 +111,22 @@ class StateManager:
 
     def get_combined_analysis_df(self):
         return self.session.get_combined_analysis_df()
+
+    # Compare Sessions
+    def set_session_1(self, session):
+        st.session_state.comp_session_1 = session
+        self.comp_session_1 = st.session_state.comp_session_1
+
+    def set_session_2(self, session):
+        st.session_state.comp_session_2 = session
+        self.comp_session_2 = st.session_state.comp_session_2
+
+    def get_session_1_dataframe(self):
+        return self.comp_session_1.get_combined_analysis_df()
+
+    def get_session_2_dataframe(self):
+        return self.comp_session_2.get_combined_analysis_df()
+
 
 
     # UI State ----------------------------------------------------------------
@@ -354,6 +376,7 @@ def update_session_state(state_manager, directory, selected_file, messager):
 def load_session_state(state_manager, directory, selected_file, messager):
     if not directory == None and not selected_file == None:
         file_path = os.path.join(directory, selected_file)
+
         """Load a session state from a file."""
         with open(file_path, "rb") as f:
             loaded_state = pickle.load(f)
@@ -361,6 +384,17 @@ def load_session_state(state_manager, directory, selected_file, messager):
         state_manager.load_session_as_current_session(loaded_state)
 
         messager.success(f"Session loaded from {os.path.basename(file_path)} \nVersion: {loaded_state.get_version()}")
+
+def get_session_from_file(directory, selected_file):
+    if not directory == None and not selected_file == None:
+        file_path = os.path.join(directory, selected_file)
+
+        """Load a session state from a file."""
+        with open(file_path, "rb") as f:
+            loaded_state = pickle.load(f)
+
+        return loaded_state
+    return None
 
 
 def new_session_state(state_manager):
