@@ -3,8 +3,6 @@ from form_handlers import handle_salary_edit, handle_pension_growth_edit, handle
 
 def display_refresh_sidebar_button(state_manager):
     if st.sidebar.button("Refresh Page", key="refresh_sidebar_button"):
-        # st.session_state.editing_salary_index = None
-        # st.session_state.editing_expense_index = None
         state_manager.update_all()
 
 

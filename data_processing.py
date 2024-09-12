@@ -78,7 +78,7 @@ def update_combined_salary_df(session):
         salary_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
     # Create 'Year' and 'Month' columns based on the index
-    salary_df['Year'] = (salary_df.index // 12) + 1 + session.get_user_age() # 1-based years
+    salary_df['Year'] = (salary_df.index // 12) + 1 + session.get_user_age()  # 1-based years
     salary_df['Month'] = (salary_df.index % 12) + 1  # 1-based months
 
     # Create a new 'Year-Month' column for better x-axis labeling
@@ -326,10 +326,12 @@ def update_combined_house_and_rent_df(session):
 
 
 def create_stock_output_df(name, appreciation_rate, investment_amount, acquisition_month, months_buying_stock, sale, sale_month):
-    if sale:
-        ownership_months = sale_month - acquisition_month
-    else:
-        ownership_months = 1200 - acquisition_month  # 100 years
+    # if sale:
+    #     ownership_months = sale_month - acquisition_month
+    # else:
+    #     ownership_months = 1200 - acquisition_month  # 100 years
+
+    ownership_months = 1200 - acquisition_month  # 100 years
 
     stock_price = 1000
     owned_stock_amount = 0
@@ -382,7 +384,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
         f'Cashout Amount for {name}': cashout_values,
     }
 
-    return pd.DataFrame(output_data)
+    return pd.DataFrame(output_data).loc[0:1199, :]
 
 
 def update_combined_stock_df(session):

@@ -168,14 +168,14 @@ def handle_house_form(state_manager):
     name = st.text_input("House Name", value=default_name)
     house_value = st.number_input("House Value", value=200000, format="%d")
     acquisition_month = st.number_input("Month of Acquisition", value=0)
-    appreciation_rate = st.number_input("House Appreciation Rate (%)", value=1.5)
+    appreciation_rate = st.number_input("House Appreciation Rate (%)", value=1.50)
 
     # Mortgage related inputs
     with st.expander("Mortgage Details", expanded=False):
         mortgage = st.checkbox("Mortgage")
         deposit = st.number_input("Deposit", value=50000, format="%d")
         mortgage_term = st.number_input("Mortgage Term (years)", value=25)
-        interest_rate = st.number_input("Interest Rate (%)", value=3.5)
+        interest_rate = st.number_input("Interest Rate (%)", value=3.50)
     if not mortgage:
         deposit = None
         mortgage_term = None
@@ -346,7 +346,7 @@ def handle_stock_form(state_manager):
     acquisition_month = st.number_input("Acquisition Month", value=0)
     investment_amount = st.number_input("Dollar-Cost Averaging Amount", value=100, min_value=0, format="%d")
     months_buying_stock = st.number_input("Dollar-Cost Averaging Months", value=60, min_value=0)
-    appreciation_rate = st.number_input("Appreciation Rate (%)", value=3)
+    appreciation_rate = st.number_input("Appreciation Rate (%)", value=3.50)
     with st.expander("Sale Details", expanded=False):
         sale = st.checkbox("Sell Stock")
         sale_month = st.number_input("Month of Sale", value=acquisition_month + months_buying_stock + 1, min_value=acquisition_month + months_buying_stock + 1)
