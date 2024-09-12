@@ -308,7 +308,7 @@ def update_combined_rent_df(session):
     )
 
     if not session.rent_dfs == []:
-        [print(len(rent['output_df'])) for rent in session.rent_dfs]
+        # [print(len(rent['output_df'])) for rent in session.rent_dfs]
         # Concatenate all the output_df DataFrames along the columns
         combined_df = pd.concat([rent['output_df'] for rent in session.rent_dfs], axis=1)
         combined_df.fillna(0, inplace=True)
@@ -317,7 +317,7 @@ def update_combined_rent_df(session):
         rent_amount_columns = [col for col in combined_df.columns if 'Rent for' in col]
         combined_df['Row Total Rent Amount'] = combined_df[rent_amount_columns].sum(axis=1)
 
-        print('combined_df len', len(combined_df))
+        # print('combined_df len', len(combined_df))
         # Replace the rows in rent_df with combined_df where combined_df has values
         rent_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
@@ -580,7 +580,7 @@ def update_compare_sessions_analysis_df(state_manager, session1, session2):  # X
         for column in columns_to_copy:
             compare_sessions_df[f'S1 {column}'] = df1[column]
             compare_sessions_df[f'S2 {column}'] = df2[column]
-            compare_sessions_df[f'Delta {column}'] = df1[column] - df2[column]
+            compare_sessions_df[f'Delta {column}'] = df2[column] - df1[column]
 
     state_manager.set_compare_sessions_df(compare_sessions_df)
 
