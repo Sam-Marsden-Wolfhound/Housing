@@ -79,7 +79,7 @@ def display_graph_plotly(title, dataframe, default_columns=[]):
                         'Select end time',
                         min_value=min_index,
                         max_value=max_index,
-                        value=min(max_index, 300),  # Limit default to 300 if max_index is larger
+                        value=min(max_index, 400),  # Limit default to 300 if max_index is larger
                         key=f'{title}_max'
                     )
 

@@ -78,7 +78,7 @@ def update_combined_salary_df(session):
         salary_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
     # Create 'Year' and 'Month' columns based on the index
-    salary_df['Year'] = (salary_df.index // 12) + 1  # 1-based years
+    salary_df['Year'] = (salary_df.index // 12) + 1 + session.get_user_age() # 1-based years
     salary_df['Month'] = (salary_df.index % 12) + 1  # 1-based months
 
     # Create a new 'Year-Month' column for better x-axis labeling
@@ -123,7 +123,7 @@ def update_combined_expense_df(session):
         expense_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
     # Create 'Year' and 'Month' columns based on the index
-    expense_df['Year'] = (expense_df.index // 12) + 1  # 1-based years
+    expense_df['Year'] = (expense_df.index // 12) + 1 + session.get_user_age()  # 1-based years
     expense_df['Month'] = (expense_df.index % 12) + 1  # 1-based months
 
     # Create a new 'Year-Month' column for better x-axis labeling
@@ -316,7 +316,7 @@ def update_combined_house_and_rent_df(session):
     combined_df.fillna(0, inplace=True)
 
     # Create 'Year' and 'Month' columns based on the index
-    combined_df['Year'] = (combined_df.index // 12) + 1  # 1-based years
+    combined_df['Year'] = (combined_df.index // 12) + 1 + session.get_user_age()  # 1-based years
     combined_df['Month'] = (combined_df.index % 12) + 1  # 1-based months
 
     # Create a new 'Year-Month' column for better x-axis labeling
@@ -428,7 +428,7 @@ def update_combined_stock_df(session):
         stock_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
     # Create 'Year' and 'Month' columns based on the index
-    stock_df['Year'] = (stock_df.index // 12) + 1  # 1-based years
+    stock_df['Year'] = (stock_df.index // 12) + 1 + session.get_user_age()  # 1-based years
     stock_df['Month'] = (stock_df.index % 12) + 1  # 1-based months
 
     # Create a new 'Year-Month' column for better x-axis labeling
@@ -479,7 +479,7 @@ def update_combined_asset_df(session):
         asset_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
     # Create 'Year' and 'Month' columns based on the index
-    asset_df['Year'] = (asset_df.index // 12) + 1  # 1-based years
+    asset_df['Year'] = (asset_df.index // 12) + 1 + session.get_user_age()  # 1-based years
     asset_df['Month'] = (asset_df.index % 12) + 1  # 1-based months
 
     # Create a new 'Year-Month' column for better x-axis labeling
@@ -506,7 +506,7 @@ def update_combined_analysis_df(session):
     combined_df.fillna(0, inplace=True)
 
     # Create 'Year' and 'Month' columns based on the index
-    combined_df['Year'] = (combined_df.index // 12) + 1  # 1-based years
+    combined_df['Year'] = (combined_df.index // 12) + 1 + session.get_user_age()  # 1-based years
     combined_df['Month'] = (combined_df.index % 12) + 1  # 1-based months
 
     # Create a new 'Year-Month' column for better x-axis labeling

@@ -3,6 +3,17 @@ import streamlit as st
 from data_processing import create_salary_output_df, create_pension_growth_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
 
 
+def handle_user_form(state_manager):
+    user_age = st.number_input("Age", value=state_manager.get_user_age(), step=1)
+
+    if st.form_submit_button("Update User Info"):
+        state_manager.set_user_age(user_age)
+
+        return True
+    return False
+
+
+
 def handle_salary_form(state_manager):
     default_name = f"Salary {state_manager.get_form_id(key='next_salary_id')}"
     name = st.text_input("Salary Name", value=default_name)

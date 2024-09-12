@@ -34,6 +34,12 @@ class StateManager:
     def new_session_state(self):
         st.session_state.session = Session()
 
+    def set_user_age(self, age):
+        self.session.set_user_age(age)
+
+    def get_user_age(self):
+        return self.session.get_user_age()
+
     def add_salary_df(self, obj):
         self.session.add_salary_df(obj)
 
@@ -127,6 +133,10 @@ class Session:
     def __init__(self):
         # print("Initialize Session")
         self.version = 1
+
+        # User Inputes
+        self.user_age = 0
+
         # Input DFs
         self.salary_dfs = []
         self.pension_growth_dfs = []
@@ -148,6 +158,12 @@ class Session:
 
     def get_version(self):
         return self.version
+
+    def set_user_age(self, age):
+        self.user_age = age
+
+    def get_user_age(self):
+        return self.user_age
 
     def add_salary_df(self, obj):
         self.salary_dfs.append(obj)
