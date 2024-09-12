@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from form_handlers import handle_salary_edit, handle_pension_growth_edit, handle_expense_edit, handle_house_edit, handle_rent_edit, handle_stock_edit, handle_asset_edit
 
 def display_refresh_sidebar_button(state_manager):

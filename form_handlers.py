@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 from data_processing import create_salary_output_df, create_pension_growth_output_df, create_expense_output_df, create_house_output_df, create_rent_output_df, create_stock_output_df, create_asset_output_df
 
@@ -11,7 +10,6 @@ def handle_user_form(state_manager):
 
         return True
     return False
-
 
 
 def handle_salary_form(state_manager):

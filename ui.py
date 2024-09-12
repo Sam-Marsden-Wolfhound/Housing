@@ -1,10 +1,9 @@
 import streamlit as st
-import pandas as pd
 import os
 from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session
 from form_handlers import handle_user_form, handle_salary_form, handle_pension_growth_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form
 from sidebar_manager import display_salary_sidebar, display_pension_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
-from visualizations import display_graph, display_graph_plotly
+from visualizations import display_graph_plotly
 
 
 class SessionsUI:
