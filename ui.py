@@ -417,6 +417,7 @@ class CompareSessionsUI:
                                  'Running Total Cash & Asset & Pension',
                                  ]
             )
+
         display_graph_plotly(
             title='Compare Sessions Monthly',
             dataframe=self.state_manager.get_compare_sessions_df(),
