@@ -45,7 +45,7 @@ def create_salary_output_df(annual_income, pension_contrib, company_match, num_m
         'Take Home Pay': [monthly_take_home_pay] * num_months
     }
 
-    return pd.DataFrame(output_data)
+    return pd.DataFrame(output_data).loc[0:1199, :]
 
 def create_pension_growth_output_df(annual_growth_rate, months):
     return pd.DataFrame({'Monthly Pension Growth Rate': [annual_growth_rate/12] * months})
@@ -73,6 +73,7 @@ def update_combined_salary_df(session):
 
     if not session.pension_growth_dfs == []:
         combined_df = pd.concat([pension['output_df'] for pension in session.pension_growth_dfs], ignore_index=True)
+        combined_df = combined_df.loc[0:1199, :]
 
         # Replace the rows in salary_df with combined_df where combined_df has values
         salary_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
@@ -118,6 +119,7 @@ def update_combined_expense_df(session):
 
     if not session.expense_dfs == []:
         combined_df = pd.concat([expense['output_df'] for expense in session.expense_dfs], ignore_index=True)
+        combined_df = combined_df.loc[0:1199, :]
 
         # Replace the rows in expense_df with combined_df where combined_df has values
         expense_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
@@ -265,6 +267,7 @@ def update_combined_house_df(session):
         # Calculate the row sum of "Cashout Value" columns
         housing_cashout_columns = [col for col in combined_df.columns if 'Cashout Value for' in col]
         combined_df['Row Total Cashout Amount Housing'] = combined_df[housing_cashout_columns].sum(axis=1)
+        combined_df = combined_df.loc[0:1199, :]
 
         # Replace the rows in house_df with combined_df where combined_df has values
         house_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
@@ -273,6 +276,11 @@ def update_combined_house_df(session):
 
 
 def create_rent_output_df(name, rent_amount, start_month, duration):
+    rent_df = pd.DataFrame(0,
+                           index=range(1200),
+                           columns=[f'Rent for {name}']
+    )
+
     rent_amounts = []
 
     for month in range(start_month):
@@ -284,8 +292,12 @@ def create_rent_output_df(name, rent_amount, start_month, duration):
     output_data = {
         f'Rent for {name}': rent_amounts,
     }
+    df = pd.DataFrame(output_data)
 
-    return pd.DataFrame(output_data)
+    # Replace the rows in rent_df with combined_df where combined_df has values
+    rent_df.loc[0:len(df) - 1, df.columns] = df.values
+
+    return rent_df
 
 
 def update_combined_rent_df(session):
@@ -296,6 +308,7 @@ def update_combined_rent_df(session):
     )
 
     if not session.rent_dfs == []:
+        [print(len(rent['output_df'])) for rent in session.rent_dfs]
         # Concatenate all the output_df DataFrames along the columns
         combined_df = pd.concat([rent['output_df'] for rent in session.rent_dfs], axis=1)
         combined_df.fillna(0, inplace=True)
@@ -304,6 +317,7 @@ def update_combined_rent_df(session):
         rent_amount_columns = [col for col in combined_df.columns if 'Rent for' in col]
         combined_df['Row Total Rent Amount'] = combined_df[rent_amount_columns].sum(axis=1)
 
+        print('combined_df len', len(combined_df))
         # Replace the rows in rent_df with combined_df where combined_df has values
         rent_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
@@ -384,7 +398,7 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
         f'Cashout Amount for {name}': cashout_values,
     }
 
-    return pd.DataFrame(output_data).loc[0:1199, :]
+    return pd.DataFrame(output_data)
 
 
 def update_combined_stock_df(session):
@@ -425,6 +439,7 @@ def update_combined_stock_df(session):
 
         # Calculate the running sum for the Delta column
         combined_df['Delta'] = combined_df['Running Total Cashout Amount Stocks'] + combined_df['Running Total Cash Value'] - combined_df['Running Total Investment Amount']
+        combined_df = combined_df.loc[0:1199, :]
 
         # Replace the rows in salary_df with combined_df where combined_df has values
         stock_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
@@ -476,6 +491,7 @@ def update_combined_asset_df(session):
         combined_df['Running Total Asset Value'] = combined_df['Row Total Asset Value'].cumsum()
 
         combined_df.fillna(0, inplace=True)
+        combined_df = combined_df.loc[0:1199, :]
 
         # Replace the rows in asset_df with combined_df where combined_df has values
         asset_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
