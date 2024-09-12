@@ -418,4 +418,10 @@ class CompareSessionsUI:
                                  ]
             )
 
+        display_graph_plotly(
+            title='Compare Sessions Analysis',
+            dataframe=self.state_manager.get_compare_sessions_df(),
+            default_columns=[]
+        )
+
 

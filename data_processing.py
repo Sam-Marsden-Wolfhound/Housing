@@ -527,3 +527,42 @@ def update_combined_analysis_df(session):
 
     session.combined_analysis_df = combined_df
 
+def update_compare_sessions_analysis_df(state_manager, session1, session2):  # XXX
+    df1 = session1.get_combined_analysis_df()
+    df2 = session2.get_combined_analysis_df()
+
+    # Initialize a DataFrame with 1200 rows or 100 years
+    compare_sessions_df = pd.DataFrame(0,
+                                       index=range(1200),
+                                       columns=['Year',
+                                                ]
+    )
+
+    # Create 'Year' and 'Month' columns based on the index
+    compare_sessions_df['Year'] = (compare_sessions_df.index // 12) + 1 + state_manager.get_user_age()  # 1-based years
+    compare_sessions_df['Month'] = (compare_sessions_df.index % 12) + 1  # 1-based months
+
+    # Create a new 'Year-Month' column for better x-axis labeling
+    compare_sessions_df['Year-Month'] = compare_sessions_df['Year'].astype(str) + '-' + compare_sessions_df['Month'].astype(str).str.zfill(2)
+
+    if not df1.empty and not df2.empty:
+        columns_to_copy = [
+            'Monthly Credit',
+            'Monthly Investment',
+            'Monthly Losses',
+            'Monthly Cash Savings',
+            'Running Total Monthly Credit',
+            'Running Total Monthly Investment',
+            'Running Total Monthly Losses',
+            'Running Total Cash Savings',
+            'Running Total Asset Amount',
+            'Running Total Cash & Asset',
+            'Running Total Cash & Asset & Pension'
+        ]
+        for column in columns_to_copy:
+            compare_sessions_df[f'S1 {column}'] = df1[column]
+            compare_sessions_df[f'S2 {column}'] = df2[column]
+            compare_sessions_df[f'Delta {column}'] = df1[column] - df2[column]
+
+    state_manager.set_compare_sessions_df(compare_sessions_df)
+

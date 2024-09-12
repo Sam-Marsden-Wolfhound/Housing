@@ -3,7 +3,7 @@ import time
 import pickle
 import pandas as pd
 import streamlit as st
-from data_processing import update_combined_salary_df, update_combined_expense_df, update_combined_house_df, update_combined_rent_df, update_combined_house_and_rent_df, update_combined_stock_df, update_combined_asset_df, update_combined_analysis_df
+from data_processing import update_combined_salary_df, update_combined_expense_df, update_combined_house_df, update_combined_rent_df, update_combined_house_and_rent_df, update_combined_stock_df, update_combined_asset_df, update_combined_analysis_df, update_compare_sessions_analysis_df
 
 class StateManager:
     def __init__(self):
@@ -17,11 +17,15 @@ class StateManager:
             st.session_state.comp_session_1 = Session()
         if "comp_session_2" not in st.session_state:
             st.session_state.comp_session_2 = Session()
+        if "compare_sessions_df" not in st.session_state:
+            st.session_state.compare_sessions_df = pd.DataFrame()
+
         # Set Refs
         self.session = st.session_state.session
         self.ui_state = st.session_state.ui_state
         self.comp_session_1 = st.session_state.comp_session_1
         self.comp_session_2 = st.session_state.comp_session_2
+        self.compare_sessions_df = st.session_state.compare_sessions_df
 
 
     # Session -----------------------------------------------------------------
@@ -127,6 +131,11 @@ class StateManager:
     def get_session_2_dataframe(self):
         return self.comp_session_2.get_combined_analysis_df()
 
+    def set_compare_sessions_df(self, dataframe):
+        st.session_state.compare_sessions_df = dataframe
+
+    def get_compare_sessions_df(self):
+        return self.compare_sessions_df
 
 
     # UI State ----------------------------------------------------------------
@@ -147,6 +156,7 @@ class StateManager:
 
     def update_all(self):
         self.ui_state.update_all(self.session)
+        self.ui_state.update_all_compare_data(self, self.comp_session_1, self.comp_session_2)
 
 
 #------------------------------------------------------------------------------------
@@ -335,6 +345,9 @@ class UiState:
         #     """,
         #     unsafe_allow_html=True
         # )
+
+    def update_all_compare_data(self, state_manager, session1, session2):
+        update_compare_sessions_analysis_df(state_manager, session1, session2)
 
 
 #-------------------------------------------------------------------------------------------
