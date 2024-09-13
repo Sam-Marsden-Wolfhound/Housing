@@ -1,6 +1,6 @@
 import streamlit as st
 import plotly.express as px
-import matplotlib.pyplot as plt
+import math
 
 
 def display_graph(title, dataframe, default_columns=[]):
@@ -100,7 +100,7 @@ def display_graph_overview(title, dataframe, default_columns=[], x1=0, x2=None, 
 
 
 def display_graph_plotly(title, dataframe, default_columns=[], x1=None, x2=None, y1=None, y2=None):
-    with st.container(border=True):  #  key=f'graph_plotly_{title}'
+    with st.container(border=True):
         st.subheader(title)
         if not dataframe.empty:
             df = dataframe.copy()
@@ -158,21 +158,26 @@ def display_graph_plotly(title, dataframe, default_columns=[], x1=None, x2=None,
 
                     if not min_value == max_value:
                         # Add sliders to allow users to limit the y-axis range
+
+                        step_value = (max_value) / 100
+                        # Find the smallest power of 10 factor that divides step_value
+                        step = 10 ** math.floor(math.log10(step_value))
+
                         y_min = st.slider(
                             "Select lower bound of y-axis",
-                            min_value=float(min_value),
-                            max_value=0.01,
-                            value=float(min_value),
-                            step=(0.01 - min_value) / 100,
+                            min_value=float(round(min_value, 0)),
+                            max_value=0.0,
+                            value=float(min_value) if y1 == None else float(y1),
+                            step=float(step),
                             key=f'{title}_y_min'
                         )
 
                         y_max = st.slider(
                             "Select upper bound of y-axis",
-                            min_value=0.01,
-                            max_value=float(max_value),
-                            value=float(max_value),
-                            step=(max_value - 0.01) / 100,
+                            min_value=0.0,
+                            max_value=float(round(max_value, 0)),
+                            value=float(max_value) if y2 == None else float(y2),
+                            step=float(step),
                             key=f'{title}_y_max'
                         )
 

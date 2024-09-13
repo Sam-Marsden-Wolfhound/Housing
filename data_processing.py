@@ -563,24 +563,32 @@ def update_compare_sessions_analysis_df(state_manager, session1, session2):  # X
     # Create a new 'Year-Month' column for better x-axis labeling
     compare_sessions_df['Year-Month'] = compare_sessions_df['Year'].astype(str) + '-' + compare_sessions_df['Month'].astype(str).str.zfill(2)
 
+    columns_to_copy = [
+        'Monthly Credit',
+        'Monthly Investment',
+        'Monthly Losses',
+        'Monthly Cash Savings',
+        'Running Total Monthly Credit',
+        'Running Total Monthly Investment',
+        'Running Total Monthly Losses',
+        'Running Total Cash Savings',
+        'Running Total Asset Amount',
+        'Running Total Cash & Asset',
+        'Running Total Cash & Asset & Pension'
+    ]
+
     if not df1.empty and not df2.empty:
-        columns_to_copy = [
-            'Monthly Credit',
-            'Monthly Investment',
-            'Monthly Losses',
-            'Monthly Cash Savings',
-            'Running Total Monthly Credit',
-            'Running Total Monthly Investment',
-            'Running Total Monthly Losses',
-            'Running Total Cash Savings',
-            'Running Total Asset Amount',
-            'Running Total Cash & Asset',
-            'Running Total Cash & Asset & Pension'
-        ]
         for column in columns_to_copy:
             compare_sessions_df[f'S1 {column}'] = df1[column]
             compare_sessions_df[f'S2 {column}'] = df2[column]
-            compare_sessions_df[f'Delta {column}'] = df2[column] - df1[column]
+            compare_sessions_df[f'Delta {column}'] = df1[column] - df2[column]
+
+    else:
+        for column in columns_to_copy:
+            val = pd.DataFrame(0, index=range(1200), columns=[column])[column]
+            compare_sessions_df[f'S1 {column}'] = val
+            compare_sessions_df[f'S2 {column}'] = val
+            compare_sessions_df[f'Delta {column}'] = val
 
     state_manager.set_compare_sessions_df(compare_sessions_df)
 

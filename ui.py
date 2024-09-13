@@ -434,7 +434,9 @@ class CompareSessionsUI:
             default_columns=['S1 Monthly Cash Savings',
                              'S2 Monthly Cash Savings',
                              'Delta Monthly Cash Savings',
-                             ]
+                             ],
+            y1=-5000,
+            y2=10000
         )
 
         display_graph_plotly(
@@ -448,7 +450,7 @@ class CompareSessionsUI:
         )
 
         display_graph_plotly(
-            title='Compare Sessions Delta (S2 - S1)',
+            title='Compare Sessions Delta (S1 - S2)',
             dataframe=self.state_manager.get_compare_sessions_df(),
             default_columns=['Delta Running Total Cash Savings',
                              'Delta Running Total Asset Amount',
