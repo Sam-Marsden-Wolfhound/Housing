@@ -41,14 +41,65 @@ def display_graph(title, dataframe, default_columns=[]):
                                              df_filtered.columns.tolist(),
                                              default=default_columns
             )
+
             if columns_to_plot:
                 st.line_chart(df_filtered[columns_to_plot])
 
+def display_graph_overview(title, dataframe, default_columns=[], x1=0, x2=None, y1=0, y2=None, expanded=False):
+    with st.expander(f'{title}', expanded=expanded):
+        if not dataframe.empty:
+            df = dataframe.copy()
+
+            min_index = 0
+            max_index = len(df) - 1
+
+            # Let the user select columns to plot
+            columns_to_plot = st.multiselect(
+                "Select columns to plot",
+                df.columns.tolist(),
+                default=default_columns,
+                key=f'graph_plotly_{title}'
+            )
+
+            if columns_to_plot:
+                # Filter the DataFrame based on the selected start and end times
+                df_filtered = df.iloc[x1:x2]
+
+                # Use Plotly to create the graph with a specified x-axis column
+                fig = px.line(
+                    df_filtered,
+                    x='Year-Month',
+                    y=columns_to_plot,
+                    labels={'x': 'Year-Month'}
+                )
+
+                fig.update_yaxes(range=[y1, y2])
+
+                # Reduce the number of x-axis labels displayed by controlling the number of ticks (nticks)
+                fig.update_xaxes(
+                    type='category',
+                    nticks=25,  # Adjust the number of x-axis ticks (fewer labels)
+                    tickangle=45,  # Rotate labels by 45 degrees
+                    tickmode='auto',
+                    tickfont=dict(size=14),  # Adjust font size for better readability
+                )
+
+                # Move the legend below the graph
+                fig.update_layout(
+                    legend=dict(
+                        orientation="h",  # Horizontal legend
+                        yanchor="bottom",  # Anchor to the bottom
+                        y=-0.5,  # Position below the chart
+                        xanchor="center",  # Center horizontally
+                        x=0.4  # Center of the x-axis
+                    )
+                )
+
+                st.plotly_chart(fig)
 
 
 
-
-def display_graph_plotly(title, dataframe, default_columns=[]):
+def display_graph_plotly(title, dataframe, default_columns=[], x1=None, x2=None, y1=None, y2=None):
     with st.container(border=True):  #  key=f'graph_plotly_{title}'
         st.subheader(title)
         if not dataframe.empty:
@@ -141,11 +192,16 @@ def display_graph_plotly(title, dataframe, default_columns=[]):
                     tickfont=dict(size=14),  # Adjust font size for better readability
                 )
 
-                # Increase space between x-axis labels by padding
-                # fig.update_layout(
-                #     xaxis_tickformat='%Y-%m',
-                #     margin=dict(l=40, r=40, t=40, b=120)  # Add padding to the bottom for label space
-                # )
+                # Move the legend below the graph
+                fig.update_layout(
+                    legend=dict(
+                        orientation="h",  # Horizontal legend
+                        yanchor="bottom",  # Anchor to the bottom
+                        y=-0.5,  # Position below the chart
+                        xanchor="center",  # Center horizontally
+                        x=0.4  # Center of the x-axis
+                    )
+                )
 
                 st.plotly_chart(fig)
 

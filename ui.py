@@ -3,7 +3,7 @@ import os
 from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session, get_session_from_file
 from form_handlers import handle_user_form, handle_salary_form, handle_pension_growth_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form
 from sidebar_manager import display_salary_sidebar, display_pension_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
-from visualizations import display_graph_plotly
+from visualizations import display_graph_plotly, display_graph_overview
 
 
 class SessionsUI:
@@ -374,14 +374,19 @@ class CompareSessionsUI:
                     key="download_sessions_1"
                 )
 
-            display_graph_plotly(
+            display_graph_overview(
                 title='Sessions 1 Graph',
                 dataframe=self.state_manager.get_session_1_dataframe(),
                 default_columns=['Running Total Cash Savings',
                                  'Running Total Asset Amount',
                                  'Running Total Cash & Asset',
                                  'Running Total Cash & Asset & Pension',
-                                 ]
+                                 ],
+                x1=0,
+                x2=400,
+                y1=0,
+                y2=None,
+                expanded=False
             )
 
         with col2:
@@ -408,14 +413,19 @@ class CompareSessionsUI:
                     key="download_sessions_2"
                 )
 
-            display_graph_plotly(
+            display_graph_overview(
                 title='Sessions 2 Graph',
                 dataframe=self.state_manager.get_session_2_dataframe(),
                 default_columns=['Running Total Cash Savings',
                                  'Running Total Asset Amount',
                                  'Running Total Cash & Asset',
                                  'Running Total Cash & Asset & Pension',
-                                 ]
+                                 ],
+                x1=0,
+                x2=400,
+                y1=0,
+                y2=None,
+                expanded=False
             )
 
         display_graph_plotly(
