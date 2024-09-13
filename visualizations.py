@@ -166,7 +166,7 @@ def display_graph_plotly(title, dataframe, default_columns=[], x1=None, x2=None,
                         y_min = st.slider(
                             "Select lower bound of y-axis",
                             min_value=float(round(min_value, 0)),
-                            max_value=0.0,
+                            max_value=0.01,
                             value=float(min_value) if y1 == None else float(y1),
                             step=float(step),
                             key=f'{title}_y_min'
@@ -174,7 +174,7 @@ def display_graph_plotly(title, dataframe, default_columns=[], x1=None, x2=None,
 
                         y_max = st.slider(
                             "Select upper bound of y-axis",
-                            min_value=0.0,
+                            min_value=0.01,
                             max_value=float(round(max_value, 0)),
                             value=float(max_value) if y2 == None else float(y2),
                             step=float(step),

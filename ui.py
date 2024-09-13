@@ -315,7 +315,9 @@ class AnalysisUI:
                              'Monthly Investment',
                              'Monthly Expenses',
                              'Monthly Losses'
-                             ]
+                             ],
+            y1=-5000,
+            y2=10000
         )
 
         display_graph_plotly(
