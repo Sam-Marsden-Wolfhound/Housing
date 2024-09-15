@@ -1,5 +1,6 @@
 import os
 import time
+import json
 import pickle
 import pandas as pd
 import streamlit as st
@@ -31,7 +32,16 @@ class StateManager:
     # Session -----------------------------------------------------------------
     def get_current_session(self):
         return self.session
-        # return st.session_state.session
+
+    def get_current_session_json(self):
+        return self.session.get_session_json()
+
+    def load_json_session_as_current_session(self, json_obj):
+        st.session_state.session = None
+        st.session_state.session = Session()
+        st.session_state.session.load_json_session(json_obj)
+        st.session_state.ui_state = None
+        st.session_state.ui_state = UiState()
 
     def load_session_as_current_session(self, loaded_state):
         st.session_state.session = None
@@ -117,12 +127,14 @@ class StateManager:
         return self.session.get_combined_analysis_df()
 
     # Compare Sessions
-    def set_session_1(self, session):
-        st.session_state.comp_session_1 = session
+    def set_session_1(self, session_json):
+        st.session_state.comp_session_1 = Session()
+        st.session_state.comp_session_1.load_json_session(session_json)
         self.comp_session_1 = st.session_state.comp_session_1
 
-    def set_session_2(self, session):
-        st.session_state.comp_session_2 = session
+    def set_session_2(self, session_json):
+        st.session_state.comp_session_2 = Session()
+        st.session_state.comp_session_2.load_json_session(session_json)
         self.comp_session_2 = st.session_state.comp_session_2
 
     def get_session_1_dataframe(self):
@@ -156,6 +168,37 @@ class StateManager:
 
     def update_all(self):
         self.ui_state.update_all(self.session)
+        self.ui_state.update_all(self.comp_session_1)
+        self.ui_state.update_all(self.comp_session_2)
+        self.ui_state.update_all_compare_data(self, self.comp_session_1, self.comp_session_2)
+
+    def update_salary_df(self):
+        self.ui_state.update_salary_df(self.session)
+
+    def update_expense_df(self):
+        self.ui_state.update_expense_df(self.session)
+
+    def update_house_df(self):
+        self.ui_state.update_house_df(self.session)
+
+    def update_rent_df(self):
+        self.ui_state.update_rent_df(self.session)
+
+    def update_house_and_rent_df(self):
+        self.ui_state.update_house_and_rent_df(self.session)
+
+    def update_stock_df(self):
+        self.ui_state.update_stock_df(self.session)
+
+    def update_asset_df(self):
+        self.ui_state.update_asset_df(self.session)
+
+    def update_analysis_df(self):
+        self.ui_state.update_analysis_df(self.session)
+
+    def update_compare_sessions(self):
+        self.ui_state.update_all(self.comp_session_1)
+        self.ui_state.update_all(self.comp_session_2)
         self.ui_state.update_all_compare_data(self, self.comp_session_1, self.comp_session_2)
 
 
@@ -190,6 +233,46 @@ class Session:
 
     def get_version(self):
         return self.version
+
+    def dfs_to_list_dict(self, dfs: list):
+        new_list = []
+        for obj in dfs:
+            json_obj = obj.copy()
+            json_obj['output_df'] = obj['output_df'].to_dict()
+            new_list .append(json_obj)
+
+        return new_list
+
+    def list_dict_to_dfs(self, list_dict: list):
+        new_list = []
+        for obj in list_dict:
+            json_obj = obj.copy()
+            json_obj['output_df'] = pd.DataFrame(obj['output_df'])
+            new_list .append(json_obj)
+
+        return new_list
+
+    def get_session_json(self):
+        return {
+            'version': self.get_version(),
+            'salary_dfs': self.dfs_to_list_dict(self.get_salary_dfs()),
+            'pension_growth_dfs': self.dfs_to_list_dict(self.get_pension_growth_dfs()),
+            'expense_dfs': self.dfs_to_list_dict(self.get_expense_dfs()),
+            'house_dfs': self.dfs_to_list_dict(self.get_house_dfs()),
+            'rent_dfs': self.dfs_to_list_dict(self.get_rent_dfs()),
+            'stock_dfs': self.dfs_to_list_dict(self.get_stock_dfs()),
+            'asset_dfs': self.dfs_to_list_dict(self.get_asset_dfs()),
+        }
+
+    def load_json_session(self, json_obj):
+        self.salary_dfs = self.list_dict_to_dfs(json_obj['salary_dfs'])
+        self.pension_growth_dfs = self.list_dict_to_dfs(json_obj['pension_growth_dfs'])
+        self.expense_dfs = self.list_dict_to_dfs(json_obj['expense_dfs'])
+        self.house_dfs = self.list_dict_to_dfs(json_obj['house_dfs'])
+        self.rent_dfs = self.list_dict_to_dfs(json_obj['rent_dfs'])
+        self.stock_dfs = self.list_dict_to_dfs(json_obj['stock_dfs'])
+        self.asset_dfs = self.list_dict_to_dfs(json_obj['asset_dfs'])
+
 
     def set_user_age(self, age):
         self.user_age = age
@@ -332,6 +415,7 @@ class UiState:
         self.ui_update_handlers['combined_analysis_df_update_handler'] = update_combined_analysis_df
 
     def update_all(self, session):
+
         # print('updating all')
         for handler_key in self.ui_update_handlers:
             # print(handler_key, self.ui_update_handlers[handler_key])
@@ -346,6 +430,30 @@ class UiState:
         #     unsafe_allow_html=True
         # )
 
+    def update_salary_df(self, session):
+        update_combined_salary_df(session)
+
+    def update_expense_df(self, session):
+        update_combined_expense_df(session)
+
+    def update_house_df(self, session):
+        update_combined_house_df(session)
+
+    def update_rent_df(self, session):
+        update_combined_rent_df(session)
+
+    def update_house_and_rent_df(self, session):
+        update_combined_house_and_rent_df(session)
+
+    def update_stock_df(self, session):
+        update_combined_stock_df(session)
+
+    def update_asset_df(self, session):
+        update_combined_asset_df(session)
+
+    def update_analysis_df(self, session):
+        update_combined_analysis_df(session)
+
     def update_all_compare_data(self, state_manager, session1, session2):
         update_compare_sessions_analysis_df(state_manager, session1, session2)
 
@@ -357,18 +465,20 @@ def save_session_state(state_manager, directory, file_name, use_uuid, message):
         os.makedirs(directory)
 
     # name_prefix = "Session_"
-    name_prefix = ""
+    name_prefix = ''
     if use_uuid:
-        filename = f"{name_prefix}{file_name}_{int(time.time())}.pkl"
+        filename = f'{name_prefix}{file_name}_{int(time.time())}.json'
     else:
-        filename = f"{name_prefix}{file_name}.pkl"
+        filename = f'{name_prefix}{file_name}.json'
 
     filepath = os.path.join(directory, filename)
 
-    with open(filepath, "wb") as f:
-        pickle.dump(state_manager.get_current_session(), f)
+    # Write to JSON file
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(state_manager.get_current_session_json(), f, ensure_ascii=False, indent=4)
+        f.close()
 
-    message.success(f"Session saved as {filename}")
+    message.success(f'Session saved as {filename}')
     # Need a message System
 
 
@@ -380,8 +490,10 @@ def update_session_state(state_manager, directory, selected_file, messager):
         if os.path.exists(filepath):
             os.remove(filepath)
 
-        with open(filepath, "wb") as f:
-            pickle.dump(state_manager.get_current_session(), f)
+        # Write to JSON file
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(state_manager.get_current_session_json(), f, ensure_ascii=False, indent=4)
+            f.close()
 
         messager.success(f"Session updated {selected_file}")
 
@@ -391,22 +503,24 @@ def load_session_state(state_manager, directory, selected_file, messager):
         file_path = os.path.join(directory, selected_file)
 
         """Load a session state from a file."""
-        with open(file_path, "rb") as f:
-            loaded_state = pickle.load(f)
+        with open(file_path, "r") as f:
+            json_obj = json.load(f)
+            f.close()
 
-        state_manager.load_session_as_current_session(loaded_state)
+        state_manager.load_json_session_as_current_session(json_obj)
 
-        messager.success(f"Session loaded from {os.path.basename(file_path)} \nVersion: {loaded_state.get_version()}")
+        messager.success(f'Session loaded from {os.path.basename(file_path)}')
 
-def get_session_from_file(directory, selected_file):
+def get_session_json_from_file(directory, selected_file):
     if not directory == None and not selected_file == None:
         file_path = os.path.join(directory, selected_file)
 
         """Load a session state from a file."""
-        with open(file_path, "rb") as f:
-            loaded_state = pickle.load(f)
+        with open(file_path, "r") as f:
+            json_obj = json.load(f)
+            f.close()
 
-        return loaded_state
+        return json_obj
     return None
 
 

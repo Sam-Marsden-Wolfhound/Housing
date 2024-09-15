@@ -1,10 +1,10 @@
 import streamlit as st
 import os
-from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session, get_session_from_file
+from StateManager import save_session_state, update_session_state, load_session_state, new_session_state, delete_session, get_session_json_from_file
 from form_handlers import handle_user_form, handle_salary_form, handle_pension_growth_form, handle_rent_form, handle_expense_form, handle_house_form, handle_stock_form, handle_asset_form
 from sidebar_manager import display_salary_sidebar, display_pension_sidebar, display_expense_sidebar, display_house_sidebar, display_rent_sidebar, display_stock_sidebar, display_asset_sidebar
 from visualizations import display_graph_plotly, display_graph_overview
-
+from util import clean_directory_list, get_index_of_value_in_list
 
 class SessionsUI:
 
@@ -54,7 +54,7 @@ class SessionsUI:
             st.subheader("Load & Update")
             # Get sessions in directory
             # session_files = [f for f in os.listdir(directory) if f.startswith("Session_") and f.endswith(".pkl")]
-            session_files = [f for f in os.listdir(directory) if f.endswith(".pkl")]
+            session_files = [f for f in os.listdir(directory) if f.endswith(".json")]
 
             selected_file = st.selectbox("Select a session to load:", session_files, key="select_session")
 
@@ -95,16 +95,23 @@ class SessionsUI:
         with col2:
             self.diplay_user_section()
 
-            st.header("Sessions")
-            # Input for directory
-            directory = st.text_input(
-                "Target Session Directory",
-                value="Saved_Sessions",
-                key="directory_save"
-            )
+            st.header('Sessions')
+            # Check if the file exists and delete it before writing the new one
+            if not os.path.exists('saved_sessions'):
+                os.makedirs('saved_sessions')
+            # # Input for directory
+            # directory = st.text_input(
+            #     "Target Session Directory",
+            #     value="Saved_Sessions",
+            #     key="directory_save"
+            # )
+            directorys = [f for f in os.listdir() if os.path.isdir(f)]
+            directorys = clean_directory_list(directorys)
+            default_index = get_index_of_value_in_list(directorys, 'saved_sessions')
+            selected_directory = st.selectbox('Select a directory to load from:', directorys, key='select_directory', index=default_index)
 
-            self.display_save_section(directory)
-            self.display_load_section(directory)
+            self.display_save_section(selected_directory)
+            self.display_load_section(selected_directory)
 
 
 class SalaryUI:
@@ -340,14 +347,17 @@ class CompareSessionsUI:
         st.header("Compare Sessions")
         # Input for directory
 
-        directory = st.text_input(
-            "Target Session Directory",
-            value="Saved_Sessions",
-            key="directory_compare_session"
+        directorys = [f for f in os.listdir() if os.path.isdir(f)]
+        directorys = clean_directory_list(directorys)
+        default_index = get_index_of_value_in_list(directorys, 'saved_sessions')
+        selected_directory = st.selectbox('Select a directory to load from:',
+                                          directorys,
+                                          key='select_directory_compare',
+                                          index=default_index
         )
 
         # Get sessions in directory
-        session_files = [f for f in os.listdir(directory) if f.endswith(".pkl")]
+        session_files = [f for f in os.listdir(selected_directory) if f.endswith(".json")]
 
         col1, col2 = st.columns([1, 1])
         # message_placeholder = st.empty()
@@ -359,9 +369,9 @@ class CompareSessionsUI:
 
                 if st.button("Load Session 1", key="loud_session_1"):
                     if selected_file_1:
-                        session_1 = get_session_from_file(directory, selected_file_1)
-                        self.state_manager.set_session_1(session_1)
-                        self.state_manager.update_all()
+                        session_json_1 = get_session_json_from_file(selected_directory, selected_file_1)
+                        self.state_manager.set_session_1(session_json_1)
+                        self.state_manager.update_compare_sessions()
 
             with st.expander("Sessions 1 DataFrame", expanded=False):  # key="expander_sessions_1"
                 st.dataframe(self.state_manager.get_session_1_dataframe())
@@ -398,9 +408,9 @@ class CompareSessionsUI:
 
                 if st.button("Load Session 2", key="loud_session_2"):
                     if selected_file_2:
-                        session_2 = get_session_from_file(directory, selected_file_2)
+                        session_2 = get_session_json_from_file(selected_directory, selected_file_2)
                         self.state_manager.set_session_2(session_2)
-                        self.state_manager.update_all()
+                        self.state_manager.update_compare_sessions()
 
             with st.expander("Sessions 2 DataFrame", expanded=False):  # key="expander_sessions_2"
                 st.dataframe(self.state_manager.get_session_2_dataframe())
