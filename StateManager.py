@@ -12,8 +12,11 @@ class StateManager:
 
         if "session" not in st.session_state:
             st.session_state.session = Session()
+            self.session = st.session_state.session
         if "ui_state" not in st.session_state:
             st.session_state.ui_state = UiState()
+            self.ui_state = st.session_state.ui_state
+            self.update_build_session()
         if "comp_session_1" not in st.session_state:
             st.session_state.comp_session_1 = Session()
         if "comp_session_2" not in st.session_state:

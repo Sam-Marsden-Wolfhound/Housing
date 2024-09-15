@@ -16,6 +16,17 @@ def set_header_and_refresh_button(header, update_handlers):
             for update_handler in update_handlers:
                 update_handler()
 
+
+def refresh_sidebar(state_manager):
+    display_salary_sidebar(state_manager)
+    display_pension_sidebar(state_manager)
+    display_expense_sidebar(state_manager)
+    display_house_sidebar(state_manager)
+    display_rent_sidebar(state_manager)
+    display_stock_sidebar(state_manager)
+    display_asset_sidebar(state_manager)
+
+
 class SessionsUI:
 
     def __init__(self, state_manager):
@@ -76,7 +87,7 @@ class SessionsUI:
                 if st.button("Load Session", key="loud_session"):
                     if selected_file:
                         load_session_state(self.state_manager, directory, selected_file, message_placeholder)
-                        self.state_manager.update_all()
+                        self.state_manager.update_build_session()
 
             with col2:
                 if st.button("Update Session", key="update_session"):
@@ -97,7 +108,7 @@ class SessionsUI:
         st.header("User")
         with st.form(key='user_form'):
             if handle_user_form(self.state_manager):
-                self.state_manager.update_all()
+                self.state_manager.update_build_session()
 
 
     def display(self):
@@ -143,7 +154,7 @@ class SalaryUI:
                 if handle_salary_form(self.state_manager):
                     self.state_manager.update_salary_df()
                     self.state_manager.update_analysis_df()
-                    # self.state_manager.update_all()
+
 
             st.header("Pension Growth Management")
             with st.form(key='pension_growth_form'):
@@ -170,6 +181,7 @@ class SalaryUI:
             title='Pension Graph',
             dataframe=self.state_manager.get_combined_salary_df(),
             default_columns=['Running Total Pension',
+                             'Monthly Pension Growth Rate',
                              ]
         )
 
@@ -357,7 +369,7 @@ class AnalysisUI:
         #     st.header("Analysis")
         # with col2:
         #     if st.button("Refresh Page", key="refresh_analysis"):
-        #         self.state_manager.update_all()
+
 
         with st.expander("Analysis_Combined DataFrame", expanded=False):
             # st.subheader("Analysis_Combined DataFrame")

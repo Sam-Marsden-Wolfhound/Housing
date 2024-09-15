@@ -13,8 +13,8 @@ def handle_user_form(state_manager):
 
 
 def handle_salary_form(state_manager):
-    default_name = f"Salary {state_manager.get_form_id(key='next_salary_id')}"
-    name = st.text_input("Salary Name", value=default_name)
+    # default_name = f"Salary {state_manager.get_form_id(key='next_salary_id')}"
+    name = st.text_input("Salary Name", value='Salary')
     annual_income = st.number_input("Annual Gross Income", value=60000, step=1000, format="%d")
     pension_contrib = st.number_input("Pension Contribution (%)", value=3.0)
     company_match = st.number_input("Company Match (%)", value=3.0)
@@ -56,7 +56,7 @@ def handle_salary_edit(index, salary_data, state_manager):
                                                 new_num_months)
         state_manager.get_salary_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.salary_df()  # Update the combined salary dataframe with the new changes
+        state_manager.update_salary_df()  # Update the combined salary dataframe with the new changes
         state_manager.update_analysis_df()
 
         state_manager.set_editing_index(
@@ -71,8 +71,8 @@ def handle_salary_edit(index, salary_data, state_manager):
         )
 
 def handle_pension_growth_form(state_manager):
-    default_name = f"Pension {state_manager.get_form_id(key='next_pension_id')}"
-    name = st.text_input("Pension Growth Name", value=default_name)
+    # default_name = f"Pension {state_manager.get_form_id(key='next_pension_id')}"
+    name = st.text_input("Pension Growth Name", value='Pension')
     annual_growth_rate = st.number_input("Annual Growth Rate (%)", value=3.00)
     months = st.number_input("Months", value=12, min_value=1)
 
@@ -104,7 +104,7 @@ def handle_pension_growth_edit(index, pension_data, state_manager):
         new_output_df = create_pension_growth_output_df(new_annual_growth_rate, new_months)
         state_manager.get_pension_growth_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.salary_df()
+        state_manager.update_salary_df()
         state_manager.update_analysis_df()
 
         state_manager.set_editing_index(
@@ -120,8 +120,8 @@ def handle_pension_growth_edit(index, pension_data, state_manager):
 
 
 def handle_expense_form(state_manager):
-    default_name = f"Expense {state_manager.get_form_id(key='next_expense_id')}"
-    name = st.text_input("Expense Name", value=default_name)
+    # default_name = f"Expense {state_manager.get_form_id(key='next_expense_id')}"
+    name = st.text_input("Expense Name", value='Expense')
     monthly_expense = st.number_input("Monthly Expenses", value=1000, format="%d")
     months = st.number_input("Months", value=12, min_value=1)
 
@@ -152,7 +152,7 @@ def handle_expense_edit(index, expense_data, state_manager):
         new_output_df = create_expense_output_df(new_monthly_expense, new_months)
         state_manager.get_expense_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.expense_df()
+        state_manager.update_expense_df()
         state_manager.update_analysis_df()
 
         state_manager.set_editing_index(
@@ -170,8 +170,8 @@ def handle_expense_edit(index, expense_data, state_manager):
 def handle_house_form(state_manager):
     """Handles the housing input form and returns the data."""
     st.write("Add a new house")
-    default_name = f"House {state_manager.get_form_id(key='next_house_id')}"
-    name = st.text_input("House Name", value=default_name)
+    # default_name = f"House {state_manager.get_form_id(key='next_house_id')}"
+    name = st.text_input("House Name", value='House')
     house_value = st.number_input("House Value", value=200000, format="%d")
     acquisition_month = st.number_input("Month of Acquisition", value=0)
     appreciation_rate = st.number_input("House Appreciation Rate (%)", value=1.50)
@@ -300,8 +300,8 @@ def handle_house_edit(index, house_data, state_manager):
 
 
 def handle_rent_form(state_manager):
-    default_name = f"Rent {state_manager.get_form_id(key='next_rent_id')}"
-    name = st.text_input("Rent Name", value=default_name)
+    # default_name = f"Rent {state_manager.get_form_id(key='next_rent_id')}"
+    name = st.text_input("Rent Name", value='Rent')
     rent_amount = st.number_input("Rent Amount", value=2000, format="%d")
     start_month = st.number_input("Starting Month", value=0)
     duration = st.number_input("Duration", value=12, min_value=0)
@@ -354,8 +354,8 @@ def handle_rent_edit(index, rent_data, state_manager):
 
 
 def handle_stock_form(state_manager):
-    default_name = f"Stock {state_manager.get_form_id(key='next_stock_id')}"
-    name = st.text_input("Stock Name", value=default_name)
+    # default_name = f"Stock {state_manager.get_form_id(key='next_stock_id')}"
+    name = st.text_input("Stock Name", value='Stock')
     acquisition_month = st.number_input("Acquisition Month", value=0)
     investment_amount = st.number_input("Dollar-Cost Averaging Amount", value=100, min_value=0, format="%d")
     months_buying_stock = st.number_input("Dollar-Cost Averaging Months", value=60, min_value=0)
@@ -424,8 +424,8 @@ def handle_stock_edit(index, stock_data, state_manager):
 
 
 def handle_asset_form(state_manager):
-    default_name = f"Asset {state_manager.get_form_id(key='next_asset_id')}"
-    name = st.text_input("Asset Name", value=default_name)
+    # default_name = f"Asset {state_manager.get_form_id(key='next_asset_id')}"
+    name = st.text_input("Asset Name", value='Asset')
     asset_value = st.number_input("Asset Value", value=1000, format="%d")
     acquisition_month = st.number_input("Acquisition Month", value=0, min_value=0)
 
@@ -457,7 +457,7 @@ def handle_asset_edit(index, savings_data, state_manager):
 
         state_manager.update_asset_df()
         state_manager.update_analysis_df()
-        
+
         state_manager.set_editing_index(
             key='editing_asset_index',
             value=None

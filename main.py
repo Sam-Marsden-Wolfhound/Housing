@@ -1,6 +1,7 @@
 import streamlit as st
 from ui import SalaryUI, ExpensesUI, HousingUI, StockUI, AssetUI, AnalysisUI, SessionsUI, CompareSessionsUI
 from StateManager import StateManager
+from sidebar_manager import display_refresh_sidebar_button
 
 
 def main():
@@ -20,6 +21,8 @@ def main():
         'Analysis',
         'Compare_Sessions',
     ])
+    display_refresh_sidebar_button(state_manager)  # Add the Refresh Sidebar button at the top with a unique key
+    # refresh_sidebar(self.state_manager)
 
     with tab[0]:
         ui = SessionsUI(state_manager)

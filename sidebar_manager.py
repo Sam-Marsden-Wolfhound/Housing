@@ -7,7 +7,6 @@ def display_refresh_sidebar_button(state_manager):
 
 
 def display_salary_sidebar(state_manager):
-    display_refresh_sidebar_button(state_manager)  # Add the Refresh Sidebar button at the top with a unique key
     st.sidebar.header("Your Salaries")
 
     for i, salary_data in enumerate(state_manager.get_salary_dfs()):
@@ -29,7 +28,7 @@ def display_salary_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_salary_{i}"):
                 del state_manager.get_salary_dfs()[i]
-                state_manager.update_all() # XXX
+                state_manager.update_build_session() # XXX
                 state_manager.set_editing_index(
                     key='editing_salary_index',
                     value=None
@@ -57,7 +56,7 @@ def display_pension_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_pension_{i}"):
                 del state_manager.get_pension_growth_dfs()[i]
-                state_manager.update_all()
+                state_manager.update_build_session()
                 state_manager.set_editing_index(
                     key='editing_pension_index',
                     value=None
@@ -85,7 +84,7 @@ def display_expense_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_expense_{i}"):
                 del state_manager.get_expense_dfs()[i]
-                state_manager.update_all()
+                state_manager.update_build_session()
                 state_manager.set_editing_index(
                     key='editing_expense_index',
                     value=None
@@ -124,7 +123,7 @@ def display_house_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_house_{i}"):
                 del state_manager.get_house_dfs()[i]
-                state_manager.update_all()
+                state_manager.update_build_session()
                 state_manager.set_editing_index(
                     key='editing_house_index',
                     value=None
@@ -154,7 +153,7 @@ def display_rent_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_rent_{i}"):
                 del state_manager.get_rent_dfs()[i]
-                state_manager.update_all()
+                state_manager.update_build_session()
                 state_manager.set_editing_index(
                     key='editing_rent_index',
                     value=None
@@ -194,7 +193,7 @@ def display_stock_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_stock_{i}"):
                 del state_manager.get_stock_dfs()[i]
-                state_manager.update_all()
+                state_manager.update_build_session()
                 state_manager.set_editing_index(
                     key='editing_stock_index',
                     value=None
@@ -222,7 +221,7 @@ def display_asset_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_asset_{i}"):
                 del state_manager.get_asset_dfs()[i]
-                state_manager.update_all()
+                state_manager.update_build_session()
                 state_manager.set_editing_index(
                     key='editing_asset_index',
                     value=None
