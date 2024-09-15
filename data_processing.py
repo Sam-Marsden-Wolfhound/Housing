@@ -308,7 +308,6 @@ def update_combined_rent_df(session):
     )
 
     if not session.rent_dfs == []:
-        # [print(len(rent['output_df'])) for rent in session.rent_dfs]
         # Concatenate all the output_df DataFrames along the columns
         combined_df = pd.concat([rent['output_df'] for rent in session.rent_dfs], axis=1)
         combined_df.fillna(0, inplace=True)
@@ -317,7 +316,6 @@ def update_combined_rent_df(session):
         rent_amount_columns = [col for col in combined_df.columns if 'Rent for' in col]
         combined_df['Row Total Rent Amount'] = combined_df[rent_amount_columns].sum(axis=1)
 
-        # print('combined_df len', len(combined_df))
         # Replace the rows in rent_df with combined_df where combined_df has values
         rent_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
 
@@ -494,7 +492,7 @@ def update_combined_asset_df(session):
         combined_df = combined_df.iloc[0:1199, :]
 
         # Replace the rows in asset_df with combined_df where combined_df has values
-        asset_df.loc[0:len(combined_df) - 1, combined_df.columns] = combined_df.values
+        asset_df.loc[0:len(combined_df) -1, combined_df.columns] = combined_df.values
 
     # Create 'Year' and 'Month' columns based on the index
     asset_df['Year'] = (asset_df.index // 12) + 1 + session.get_user_age()  # 1-based years

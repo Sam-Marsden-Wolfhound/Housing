@@ -1,6 +1,9 @@
 
 # To do 
 
+## Bugs 
+* When names are the same will through an error!
+
 ## Overview
 * New session 
 * Users Age

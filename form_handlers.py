@@ -14,6 +14,7 @@ def handle_user_form(state_manager):
 
 def handle_salary_form(state_manager):
     # default_name = f"Salary {state_manager.get_form_id(key='next_salary_id')}"
+    # Add name check in here, same name will breck Concatenati.
     name = st.text_input("Salary Name", value='Salary')
     annual_income = st.number_input("Annual Gross Income", value=60000, step=1000, format="%d")
     pension_contrib = st.number_input("Pension Contribution (%)", value=3.0)

@@ -243,7 +243,7 @@ class Session:
         new_list = []
         for obj in dfs:
             json_obj = obj.copy()
-            json_obj['output_df'] = obj['output_df'].to_dict()
+            json_obj['output_df'] = obj['output_df'].to_dict(orient='index')
             new_list .append(json_obj)
 
         return new_list
@@ -251,9 +251,9 @@ class Session:
     def list_dict_to_dfs(self, list_dict: list):
         new_list = []
         for obj in list_dict:
-            json_obj = obj.copy()
-            json_obj['output_df'] = pd.DataFrame(obj['output_df'])
-            new_list .append(json_obj)
+            df_obj = obj.copy()
+            df_obj['output_df'] = pd.DataFrame.from_dict(obj['output_df'], orient='index').sort_index()
+            new_list .append(df_obj)
 
         return new_list
 
