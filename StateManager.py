@@ -243,7 +243,8 @@ class Session:
         new_list = []
         for obj in dfs:
             json_obj = obj.copy()
-            json_obj['output_df'] = obj['output_df'].to_dict(orient='index')
+            # json_obj['output_df'] = obj['output_df'].to_dict(orient='dict')
+            json_obj['output_df'] = obj['output_df'].to_json(orient='records')
             new_list .append(json_obj)
 
         return new_list
@@ -253,8 +254,10 @@ class Session:
         for obj in list_dict:
             df_obj = obj.copy()
             #print('dict', df_obj['output_df'])  # This is in order
-            df_obj['output_df'] = pd.DataFrame.from_dict(df_obj['output_df'], orient='index').sort_index()
-            print('pd', df_obj['output_df'])
+            # df_obj['output_df'] = pd.DataFrame.from_dict(df_obj['output_df']).sort_index()  # orient='index'
+            df_obj['output_df'] = pd.read_json(df_obj['output_df'], orient='records')  # orient='index'
+
+            print('pd', df_obj['output_df'].head(12))
             new_list .append(df_obj)
 
         return new_list
