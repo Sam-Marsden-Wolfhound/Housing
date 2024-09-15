@@ -149,21 +149,19 @@ class SalaryUI:
                                  self.state_manager.update_analysis_df
                 ]
             )
+            display_salary_sidebar(self.state_manager)
+            display_pension_sidebar(self.state_manager)
 
             with st.form(key='salary_form'):
                 if handle_salary_form(self.state_manager):
                     self.state_manager.update_salary_df()
                     self.state_manager.update_analysis_df()
 
-
             st.header("Pension Growth Management")
             with st.form(key='pension_growth_form'):
                 if handle_pension_growth_form(self.state_manager):
                     self.state_manager.update_salary_df()
                     self.state_manager.update_analysis_df()
-
-        display_salary_sidebar(self.state_manager)
-        display_pension_sidebar(self.state_manager)
 
         with st.expander("Combined Salary DataFrame", expanded=False):
             st.dataframe(self.state_manager.get_combined_salary_df())
@@ -200,12 +198,12 @@ class ExpensesUI:
                                  ]
             )
 
+            display_expense_sidebar(self.state_manager)
+
             with st.form(key='expense_form'):
                 if handle_expense_form(self.state_manager):
                     self.state_manager.update_expense_df()
                     self.state_manager.update_analysis_df()
-
-        display_expense_sidebar(self.state_manager)
 
         with st.expander("Combined Expense DataFrame", expanded=False):
             # st.subheader("Combined Expense DataFrame")
@@ -236,14 +234,15 @@ class HousingUI:
                                  ]
             )
 
+            display_house_sidebar(self.state_manager)
+            display_rent_sidebar(self.state_manager)
+
             with st.form(key='housing_form'):
                 if handle_house_form(self.state_manager):
                     self.state_manager.update_house_df()
                     self.state_manager.update_rent_df()
                     self.state_manager.update_house_and_rent_df()
                     self.state_manager.update_analysis_df()
-
-            display_house_sidebar(self.state_manager)
 
             st.header("Rent Management")
             with st.form(key='rent_form'):
@@ -252,8 +251,6 @@ class HousingUI:
                     self.state_manager.update_rent_df()
                     self.state_manager.update_house_and_rent_df()
                     self.state_manager.update_analysis_df()
-
-        display_rent_sidebar(self.state_manager)
 
         with st.expander("Combined Housing DataFrame", expanded=False):
             st.dataframe(self.state_manager.get_combined_house_df())
@@ -298,16 +295,23 @@ class StockUI:
                                  ]
             )
 
+            display_stock_sidebar(self.state_manager)
+
             with st.form(key='stock_form'):
                 if handle_stock_form(self.state_manager):
                     self.state_manager.update_stock_df()
                     self.state_manager.update_analysis_df()
 
-        display_stock_sidebar(self.state_manager)
-
         with st.expander("Combined Stock DataFrame", expanded=False):
             # st.subheader("Combined Stock DataFrame")
             st.dataframe(self.state_manager.get_combined_stock_df())
+
+        display_graph_plotly(
+            title='Stock Monthly',
+            dataframe=self.state_manager.get_combined_stock_df(),
+            default_columns=['Row Total Investment Amount',
+                             ]
+        )
 
         display_graph_plotly(
             title='Stock Graph',
@@ -334,12 +338,12 @@ class AssetUI:
                                  ]
             )
 
+            display_asset_sidebar(self.state_manager)
+
             with st.form(key='asset_form'):
                 if handle_asset_form(self.state_manager):
                     self.state_manager.update_asset_df()
                     self.state_manager.update_analysis_df()
-
-        display_asset_sidebar(self.state_manager)
 
         with st.expander("Combined Asset DataFrame", expanded=False):
             # st.subheader("Combined Asset DataFrame")
@@ -363,13 +367,6 @@ class AnalysisUI:
             update_handlers=[self.state_manager.update_analysis_df
                              ]
         )
-
-        # col1, col2 = st.columns(2)
-        # with col1:
-        #     st.header("Analysis")
-        # with col2:
-        #     if st.button("Refresh Page", key="refresh_analysis"):
-
 
         with st.expander("Analysis_Combined DataFrame", expanded=False):
             # st.subheader("Analysis_Combined DataFrame")
@@ -419,8 +416,8 @@ class CompareSessionsUI:
             update_handlers=[self.state_manager.update_compare_session,
                              ]
         )
-        # Input for directory
 
+        # Input for directory
         directorys = [f for f in os.listdir() if os.path.isdir(f)]
         directorys = clean_directory_list(directorys)
         default_index = get_index_of_value_in_list(directorys, 'saved_sessions')

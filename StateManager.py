@@ -1,7 +1,7 @@
 import os
 import time
 import json
-import pickle
+from collections import OrderedDict
 import pandas as pd
 import streamlit as st
 from data_processing import update_combined_salary_df, update_combined_expense_df, update_combined_house_df, update_combined_rent_df, update_combined_house_and_rent_df, update_combined_stock_df, update_combined_asset_df, update_combined_analysis_df, update_compare_sessions_analysis_df
@@ -252,7 +252,9 @@ class Session:
         new_list = []
         for obj in list_dict:
             df_obj = obj.copy()
-            df_obj['output_df'] = pd.DataFrame.from_dict(obj['output_df'], orient='index').sort_index()
+            #print('dict', df_obj['output_df'])  # This is in order
+            df_obj['output_df'] = pd.DataFrame.from_dict(df_obj['output_df'], orient='index').sort_index()
+            print('pd', df_obj['output_df'])
             new_list .append(df_obj)
 
         return new_list
@@ -482,7 +484,7 @@ def save_session_state(state_manager, directory, file_name, use_uuid, message):
 
     # Write to JSON file
     with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(state_manager.get_current_session_json(), f, ensure_ascii=False, indent=4)
+        json.dump(state_manager.get_current_session_json(), f, ensure_ascii=False, indent=4, sort_keys=True)  #
         f.close()
 
     message.success(f'Session saved as {filename}')
@@ -512,6 +514,7 @@ def load_session_state(state_manager, directory, selected_file, messager):
         """Load a session state from a file."""
         with open(file_path, "r") as f:
             json_obj = json.load(f)
+            # json_obj = json.load(f, object_pairs_hook=OrderedDict)
             f.close()
 
         state_manager.load_json_session_as_current_session(json_obj)

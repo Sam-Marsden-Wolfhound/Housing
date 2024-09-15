@@ -481,6 +481,9 @@ def update_combined_asset_df(session):
     )
 
     if not session.asset_dfs == []:
+        [print(asset['name'], type(asset['output_df']), len(asset['output_df'])) for asset in session.asset_dfs]
+        #[print(asset['output_df'].head()) for asset in session.asset_dfs]
+
         combined_df = pd.concat([asset['output_df'] for asset in session.asset_dfs], axis=1)
 
         # Calculate the row sum of "Asset Value" columns
