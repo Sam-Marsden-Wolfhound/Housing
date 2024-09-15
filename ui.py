@@ -6,6 +6,16 @@ from sidebar_manager import display_salary_sidebar, display_pension_sidebar, dis
 from visualizations import display_graph_plotly, display_graph_overview
 from util import clean_directory_list, get_index_of_value_in_list
 
+def set_header_and_refresh_button(header, update_handlers):
+    col1, col2 = st.columns([3.9, 1])
+    with col1:
+        st.header(header)
+    with col2:
+        key = header.split(' ')[0]
+        if st.button("Refresh Page", key=f'refresh_{key}_button'):
+            for update_handler in update_handlers:
+                update_handler()
+
 class SessionsUI:
 
     def __init__(self, state_manager):
@@ -122,15 +132,24 @@ class SalaryUI:
     def display(self):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.header("Salary Management")
+            set_header_and_refresh_button(
+                header='Salary Management',
+                update_handlers=[self.state_manager.update_salary_df,
+                                 self.state_manager.update_analysis_df
+                ]
+            )
+
             with st.form(key='salary_form'):
                 if handle_salary_form(self.state_manager):
-                    self.state_manager.update_all()
+                    self.state_manager.update_salary_df()
+                    self.state_manager.update_analysis_df()
+                    # self.state_manager.update_all()
 
             st.header("Pension Growth Management")
             with st.form(key='pension_growth_form'):
                 if handle_pension_growth_form(self.state_manager):
-                    self.state_manager.update_all()
+                    self.state_manager.update_salary_df()
+                    self.state_manager.update_analysis_df()
 
         display_salary_sidebar(self.state_manager)
         display_pension_sidebar(self.state_manager)
@@ -162,10 +181,17 @@ class ExpensesUI:
     def display(self):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.header("Expense Management")
+            set_header_and_refresh_button(
+                header='Expense Management',
+                update_handlers=[self.state_manager.update_expense_df,
+                                 self.state_manager.update_analysis_df
+                                 ]
+            )
+
             with st.form(key='expense_form'):
                 if handle_expense_form(self.state_manager):
-                    self.state_manager.update_all()
+                    self.state_manager.update_expense_df()
+                    self.state_manager.update_analysis_df()
 
         display_expense_sidebar(self.state_manager)
 
@@ -189,17 +215,31 @@ class HousingUI:
     def display(self):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.header("Housing Management")
+            set_header_and_refresh_button(
+                header='Housing Management',
+                update_handlers=[self.state_manager.update_house_df,
+                                 self.state_manager.update_rent_df,
+                                 self.state_manager.update_house_and_rent_df,
+                                 self.state_manager.update_analysis_df
+                                 ]
+            )
+
             with st.form(key='housing_form'):
                 if handle_house_form(self.state_manager):
-                    self.state_manager.update_all()
+                    self.state_manager.update_house_df()
+                    self.state_manager.update_rent_df()
+                    self.state_manager.update_house_and_rent_df()
+                    self.state_manager.update_analysis_df()
 
             display_house_sidebar(self.state_manager)
 
             st.header("Rent Management")
             with st.form(key='rent_form'):
                 if handle_rent_form(self.state_manager):
-                    self.state_manager.update_all()
+                    self.state_manager.update_house_df()
+                    self.state_manager.update_rent_df()
+                    self.state_manager.update_house_and_rent_df()
+                    self.state_manager.update_analysis_df()
 
         display_rent_sidebar(self.state_manager)
 
@@ -239,10 +279,17 @@ class StockUI:
     def display(self):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.header("Stock Management")
+            set_header_and_refresh_button(
+                header='Stock Management',
+                update_handlers=[self.state_manager.update_stock_df,
+                                 self.state_manager.update_analysis_df
+                                 ]
+            )
+
             with st.form(key='stock_form'):
                 if handle_stock_form(self.state_manager):
-                    self.state_manager.update_all()
+                    self.state_manager.update_stock_df()
+                    self.state_manager.update_analysis_df()
 
         display_stock_sidebar(self.state_manager)
 
@@ -268,10 +315,17 @@ class AssetUI:
     def display(self):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.header("Asset Management")
+            set_header_and_refresh_button(
+                header='Asset Management',
+                update_handlers=[self.state_manager.update_asset_df,
+                                 self.state_manager.update_analysis_df
+                                 ]
+            )
+
             with st.form(key='asset_form'):
                 if handle_asset_form(self.state_manager):
-                    self.state_manager.update_all()
+                    self.state_manager.update_asset_df()
+                    self.state_manager.update_analysis_df()
 
         display_asset_sidebar(self.state_manager)
 
@@ -292,7 +346,11 @@ class AnalysisUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Analysis")
+        set_header_and_refresh_button(
+            header='Analysis',
+            update_handlers=[self.state_manager.update_analysis_df
+                             ]
+        )
 
         # col1, col2 = st.columns(2)
         # with col1:
