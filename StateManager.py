@@ -260,6 +260,7 @@ class Session:
     def get_session_json(self):
         return {
             'version': self.get_version(),
+            'user_age': self.get_user_age(),
             'salary_dfs': self.dfs_to_list_dict(self.get_salary_dfs()),
             'pension_growth_dfs': self.dfs_to_list_dict(self.get_pension_growth_dfs()),
             'expense_dfs': self.dfs_to_list_dict(self.get_expense_dfs()),
@@ -270,6 +271,7 @@ class Session:
         }
 
     def load_json_session(self, json_obj):
+        self.user_age = json_obj['user_age']
         self.salary_dfs = self.list_dict_to_dfs(json_obj['salary_dfs'])
         self.pension_growth_dfs = self.list_dict_to_dfs(json_obj['pension_growth_dfs'])
         self.expense_dfs = self.list_dict_to_dfs(json_obj['expense_dfs'])

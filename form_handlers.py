@@ -31,6 +31,7 @@ def handle_salary_form(state_manager):
             'num_months': num_months
         })
 
+        st.success('Salary Added')
         state_manager.add_one_to_form_id(key='next_salary_id')
         return True
     return False
@@ -84,6 +85,8 @@ def handle_pension_growth_form(state_manager):
             'annual_growth_rate': annual_growth_rate,
             'months': months
         })
+
+        st.success('Pension Added')
         state_manager.add_one_to_form_id(key='next_pension_id')
         return True
 
@@ -133,6 +136,8 @@ def handle_expense_form(state_manager):
             'monthly_expense': monthly_expense,
             'months': months
         })
+
+        st.success('Expense Added')
         state_manager.add_one_to_form_id(key='next_expense_id')
         return True
     return False
@@ -225,6 +230,7 @@ def handle_house_form(state_manager):
             'output_df': output_df,
         })
 
+        st.success('House Added')
         state_manager.add_one_to_form_id(key='next_house_id')
         return True
     return False
@@ -316,6 +322,8 @@ def handle_rent_form(state_manager):
             'duration': duration,
             'output_df': output_df,
         })
+
+        st.success('Rent Added')
         state_manager.add_one_to_form_id(key='next_rent_id')
         return True
     return False
@@ -380,6 +388,7 @@ def handle_stock_form(state_manager):
             'output_df': output_df,
         })
 
+        st.success('Stock Added')
         state_manager.add_one_to_form_id(key='next_stock_id')
         return True
     return False
@@ -437,6 +446,8 @@ def handle_asset_form(state_manager):
             'acquisition_month': acquisition_month,
             'output_df': output_df,
         })
+
+        st.success('Asset Added')
         state_manager.add_one_to_form_id(key='next_asset_id')
         return True
     return False
