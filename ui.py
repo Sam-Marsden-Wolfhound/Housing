@@ -402,7 +402,11 @@ class CompareSessionsUI:
         self.state_manager = state_manager
 
     def display(self):
-        st.header("Compare Sessions")
+        set_header_and_refresh_button(
+            header='Compare Sessions',
+            update_handlers=[self.state_manager.update_compare_session,
+                             ]
+        )
         # Input for directory
 
         directorys = [f for f in os.listdir() if os.path.isdir(f)]

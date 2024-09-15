@@ -166,8 +166,10 @@ class StateManager:
     def set_editing_index(self, key, value):
         self.ui_state.set_editing_index(key, value)
 
-    def update_all(self):
+    def update_build_session(self):
         self.ui_state.update_all(self.session)
+
+    def update_compare_session(self):
         self.ui_state.update_all(self.comp_session_1)
         self.ui_state.update_all(self.comp_session_2)
         self.ui_state.update_all_compare_data(self, self.comp_session_1, self.comp_session_2)

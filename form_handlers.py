@@ -56,7 +56,9 @@ def handle_salary_edit(index, salary_data, state_manager):
                                                 new_num_months)
         state_manager.get_salary_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.update_all()  # Update the combined salary dataframe with the new changes
+        state_manager.salary_df()  # Update the combined salary dataframe with the new changes
+        state_manager.update_analysis_df()
+
         state_manager.set_editing_index(
             key='editing_salary_index',
             value=None
@@ -102,7 +104,9 @@ def handle_pension_growth_edit(index, pension_data, state_manager):
         new_output_df = create_pension_growth_output_df(new_annual_growth_rate, new_months)
         state_manager.get_pension_growth_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.update_all()  # Update the combined expense dataframe with the new changes
+        state_manager.salary_df()
+        state_manager.update_analysis_df()
+
         state_manager.set_editing_index(
             key='editing_pension_index',
             value=None
@@ -148,7 +152,9 @@ def handle_expense_edit(index, expense_data, state_manager):
         new_output_df = create_expense_output_df(new_monthly_expense, new_months)
         state_manager.get_expense_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.update_all()  # Update the combined expense dataframe with the new changes
+        state_manager.expense_df()
+        state_manager.update_analysis_df()
+
         state_manager.set_editing_index(
             key='editing_expense_index',
             value=None
@@ -176,6 +182,7 @@ def handle_house_form(state_manager):
         deposit = st.number_input("Deposit", value=50000, format="%d")
         mortgage_term = st.number_input("Mortgage Term (years)", value=25)
         interest_rate = st.number_input("Interest Rate (%)", value=3.50)
+
     if not mortgage:
         deposit = None
         mortgage_term = None
@@ -276,7 +283,10 @@ def handle_house_edit(index, house_data, state_manager):
         )
         state_manager.get_house_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.update_all()
+        state_manager.update_house_df()
+        state_manager.update_house_and_rent_df()
+        state_manager.update_analysis_df()
+
         state_manager.set_editing_index(
             key='editing_house_index',
             value=None
@@ -327,7 +337,10 @@ def handle_rent_edit(index, rent_data, state_manager):
         new_output_df = create_rent_output_df(new_name, new_rent_amount, new_start_month, new_duration)
         state_manager.get_rent_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.update_all()
+        state_manager.update_rent_df()
+        state_manager.update_house_and_rent_df()
+        state_manager.update_analysis_df()
+
         state_manager.set_editing_index(
             key='editing_rent_index',
             value=None
@@ -395,7 +408,9 @@ def handle_stock_edit(index, stock_data, state_manager):
         new_output_df = create_stock_output_df(new_name, new_appreciation_rate, new_investment_amount, new_acquisition_month, new_months_buying_stock, new_sale, new_sale_month)
         state_manager.get_stock_dfs()[index]['output_df'] = new_output_df
 
-        state_manager.update_all()  # Update the combined expense dataframe with the new changes
+        state_manager.update_stock_df()
+        state_manager.update_analysis_df()
+
         state_manager.set_editing_index(
             key='editing_stock_index',
             value=None
@@ -440,7 +455,9 @@ def handle_asset_edit(index, savings_data, state_manager):
         output_df = create_asset_output_df(new_name, new_asset_value, new_acquisition_month)
         state_manager.get_asset_dfs()[index]['output_df'] = output_df
 
-        state_manager.update_all()  # Update the combined expense dataframe with the new changes
+        state_manager.update_asset_df()
+        state_manager.update_analysis_df()
+        
         state_manager.set_editing_index(
             key='editing_asset_index',
             value=None

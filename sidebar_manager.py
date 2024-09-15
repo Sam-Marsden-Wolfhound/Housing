@@ -3,7 +3,7 @@ from form_handlers import handle_salary_edit, handle_pension_growth_edit, handle
 
 def display_refresh_sidebar_button(state_manager):
     if st.sidebar.button("Refresh Page", key="refresh_sidebar_button"):
-        state_manager.update_all()
+        state_manager.update_build_session()
 
 
 def display_salary_sidebar(state_manager):
@@ -29,7 +29,7 @@ def display_salary_sidebar(state_manager):
 
             if st.button("Delete", key=f"delete_salary_{i}"):
                 del state_manager.get_salary_dfs()[i]
-                state_manager.update_all()
+                state_manager.update_all() # XXX
                 state_manager.set_editing_index(
                     key='editing_salary_index',
                     value=None
