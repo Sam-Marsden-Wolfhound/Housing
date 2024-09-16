@@ -256,8 +256,6 @@ class Session:
             #print('dict', df_obj['output_df'])  # This is in order
             # df_obj['output_df'] = pd.DataFrame.from_dict(df_obj['output_df']).sort_index()  # orient='index'
             df_obj['output_df'] = pd.read_json(df_obj['output_df'], orient='records')  # orient='index'
-
-            print('pd', df_obj['output_df'].head(12))
             new_list .append(df_obj)
 
         return new_list

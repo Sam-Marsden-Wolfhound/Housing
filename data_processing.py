@@ -338,12 +338,7 @@ def update_combined_house_and_rent_df(session):
 
 
 def create_stock_output_df(name, appreciation_rate, investment_amount, acquisition_month, months_buying_stock, sale, sale_month):
-    # if sale:
-    #     ownership_months = sale_month - acquisition_month
-    # else:
-    #     ownership_months = 1200 - acquisition_month  # 100 years
-
-    ownership_months = 1200 - acquisition_month  # 100 years
+    ownership_months = 1200  # 100 years
 
     stock_price = 1000
     owned_stock_amount = 0
@@ -353,39 +348,51 @@ def create_stock_output_df(name, appreciation_rate, investment_amount, acquisiti
     owned_stock_amounts = []
     monthly_investment_amounts = []
     monthly_action = []
-    stock_values = []
     cashout_values = []
-
-    for month in range(acquisition_month):
-        stock_prices.append(0)
-        owned_stock_amounts.append(0)
-        monthly_investment_amounts.append(0)
-        monthly_action.append(0)
-        stock_values.append(0)
-        cashout_values.append(0)
+    stock_values = []
 
     for month in range(ownership_months):
         stock_prices.append(stock_price)
-        if month < months_buying_stock:
+
+        # Don't buy yet
+        if month < acquisition_month:
+            owned_stock_amounts.append(0)
+            monthly_investment_amounts.append(0)
+            monthly_action.append(0)
+            cashout_values.append(0)
+            stock_values.append(0)
+
+        # Buy
+        elif month < acquisition_month + months_buying_stock:
             owned_stock_amount += investment_amount/stock_price
             owned_stock_amounts.append(owned_stock_amount)
             monthly_investment_amounts.append(investment_amount)
             monthly_action.append(1)
             cashout_values.append(0)
-        elif month == ownership_months - 1:
+
+            stock_values.append(owned_stock_amount * stock_price)
+            stock_price += stock_price * monthly_appreciation_rate
+
+        # Cash out
+        elif month == sale_month and sale:
             cashout_values.append(owned_stock_amount * stock_price)
             owned_stock_amount = 0
             owned_stock_amounts.append(owned_stock_amount)
             monthly_investment_amounts.append(0)
             monthly_action.append(-1)
+
+            stock_values.append(owned_stock_amount * stock_price)
+            stock_price += stock_price * monthly_appreciation_rate
+
+        # Hold
         else:
             owned_stock_amounts.append(owned_stock_amount)
             monthly_investment_amounts.append(0)
             monthly_action.append(0)
             cashout_values.append(0)
 
-        stock_values.append(owned_stock_amount * stock_price)
-        stock_price += stock_price * monthly_appreciation_rate
+            stock_values.append(owned_stock_amount * stock_price)
+            stock_price += stock_price * monthly_appreciation_rate
 
     output_data = {
         f'Stock Price for {name}': stock_prices,
@@ -481,9 +488,6 @@ def update_combined_asset_df(session):
     )
 
     if not session.asset_dfs == []:
-        #[print(asset['name'], type(asset['output_df']), len(asset['output_df'])) for asset in session.asset_dfs]
-        #[print(asset['output_df'].head()) for asset in session.asset_dfs]
-
         combined_df = pd.concat([asset['output_df'] for asset in session.asset_dfs], axis=1)
 
         # Calculate the row sum of "Asset Value" columns

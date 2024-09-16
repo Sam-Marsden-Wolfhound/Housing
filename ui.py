@@ -400,7 +400,8 @@ class AnalysisUI:
             default_columns=['Running Total Cash Savings',
                              'Running Total Asset Amount',
                              'Running Total Cash & Asset',
-                             'Running Total Cash & Asset & Pension'
+                             'Running Total Cash & Asset & Pension',
+                             'Running Total Pension',
                              ]
         )
 
